@@ -1,0 +1,33 @@
+{
+  "scripts": {
+    "build:css": "tailwindcss -i app/assets/stylesheets/application.tailwind.css -o app/assets/builds/application.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.13",
+    "daisyui": "^5.1.13",
+    "tailwindcss": "^4.1.13"
+  },
+  "name": "betest",
+  "description": "This README would normally document whatever steps are necessary to get the application up and running.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "dependencies": {
+    "camelcase-css": "^2.0.1",
+    "css-selector-tokenizer": "^0.8.0",
+    "cssesc": "^3.0.0",
+    "culori": "^3.3.0",
+    "fastparse": "^1.1.2",
+    "nanoid": "^3.3.11",
+    "picocolors": "^1.1.1",
+    "postcss": "^8.5.6",
+    "postcss-js": "^4.1.0",
+    "source-map-js": "^1.2.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "==> bundle"
+bundle install
+
+echo "==> db:prepare"
+bin/rails db:prepare
+
+echo "==> db:seed"
+bin/rails db:seed
+
+echo "==> done"

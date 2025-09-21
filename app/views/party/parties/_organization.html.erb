@@ -1,0 +1,19 @@
+<% o = party.organization %>
+<% if o.present? %>
+  <div class="grid md:grid-cols-3 gap-4">
+    <div>
+      <div class="label"><span class="label-text">Legal name</span></div>
+      <div><%= o.legal_name %></div>
+    </div>
+    <div>
+      <div class="label"><span class="label-text">Type</span></div>
+      <div><%= o.organization_type_code %></div>
+    </div>
+    <div>
+      <div class="label"><span class="label-text">Formation date</span></div>
+      <div><%= o.formation_date %></div>
+    </div>
+  </div>
+<% else %>
+  <div class="text-sm opacity-70">No organization profile.</div>
+<% end %>

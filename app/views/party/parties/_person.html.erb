@@ -1,0 +1,19 @@
+<% p = party.person %>
+<% if p.present? %>
+  <div class="grid md:grid-cols-3 gap-4">
+    <div>
+      <div class="label"><span class="label-text">First name</span></div>
+      <div><%= p.first_name %></div>
+    </div>
+    <div>
+      <div class="label"><span class="label-text">Last name</span></div>
+      <div><%= p.last_name %></div>
+    </div>
+    <div>
+      <div class="label"><span class="label-text">Date of birth</span></div>
+      <div><%= p.date_of_birth %></div>
+    </div>
+  </div>
+<% else %>
+  <div class="text-sm opacity-70">No person profile.</div>
+<% end %>

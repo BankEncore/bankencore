@@ -1,0 +1,66 @@
+<!-- app/views/party/parties/_address_fields.html.erb -->
+<div class="border rounded p-4 space-y-3" data-address-wrapper>
+  <%= f.hidden_field :_destroy, value: "0" %>
+
+  <!-- One controller wrapping BOTH country + region -->
+  <div
+    data-controller="dependent-select"
+    data-dependent-select-url-value="<%= ref_regions_path %>"
+  >
+    <!-- country_code -->
+    <label class="label"><span class="label-text">Country</span></label>
+    <%= f.collection_select :country_code, @countries, :code, :name,
+          { include_blank: "Select country" },
+          class: "select select-bordered w-full",
+          data: { "dependent-select-target": "country",
+                  action: "change->dependent-select#refresh" } %>
+
+    <!-- lines -->
+    <div class="grid md:grid-cols-2 gap-3 mt-3">
+      <div>
+    <label class="label"><span class="label-text">Address type</span></label>
+      <%= f.collection_select :address_type_code,
+            @address_types, :code, :name,
+            { include_blank: "Select type" },
+            class: "select select-bordered w-full" %>
+    </div>
+      <div>
+        <label class="label"><span class="label-text">Line 1</span></label>
+        <%= f.text_field :line1, class: "input input-bordered w-full" %>
+      </div>
+      <div>
+        <label class="label"><span class="label-text">Line 2</span></label>
+        <%= f.text_field :line2, class: "input input-bordered w-full" %>
+      </div>
+    </div>
+
+    <!-- locality / region / postal -->
+    <div class="grid md:grid-cols-3 gap-3 mt-3">
+      <div>
+        <label class="label"><span class="label-text">City / Locality</span></label>
+        <%= f.text_field :locality, class: "input input-bordered w-full" %>
+      </div>
+
+      <div>
+        <label class="label"><span class="label-text">Region / State</span></label>
+        <%= f.select :region_code, [],
+              { include_blank: "Select region" },
+              class: "select select-bordered w-full",
+              data: { "dependent-select-target": "region" },
+              "data-current": (f.object.respond_to?(:region_code) ? f.object.region_code : nil) %>
+      </div>
+
+      <div>
+        <label class="label"><span class="label-text">Postal code</span></label>
+        <%= f.text_field :postal_code, class: "input input-bordered w-full" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between mt-3">
+    <label class="cursor-pointer label">
+      <span class="label-text mr-2">Primary</span>
+      <%= f.check_box :is_primary, class: "toggle" %>
+    </label>
+  </div>
+</div>

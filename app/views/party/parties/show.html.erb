@@ -1,0 +1,123 @@
+<%# Header %>
+<div class="p-6">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-2xl font-bold">Party</h1>
+    <div class="space-x-2">
+      <%= link_to "Edit", edit_party_party_path(@party.public_id), class: "btn btn-secondary btn-sm" %>
+      <%= link_to "Delete", party_party_path(@party.public_id),
+            data: { turbo_method: :delete, turbo_confirm: "Delete this party?" },
+            class: "btn btn-error btn-sm" %>
+      <%= link_to "Back", party_parties_path, class: "btn btn-ghost btn-sm" %>
+    </div>
+  </div>
+  <h1 class="text-2xl font-bold"><%= @party.display_name %></h1>
+  <%# Core card %>
+  <div class="card bg-base-100 shadow">
+    <div class="card-body grid md:grid-cols-2 gap-4">
+      <div>
+        <div class="label"><span class="label-text">Customer #</span></div>
+        <div class="font-mono"><%= @party.customer_number %></div>
+      </div>
+      <div>
+        <div class="label"><span class="label-text">Public ID</span></div>
+        <div class="font-mono"><%= @party.public_id %></div>
+      </div>
+      <div>
+        <div class="label"><span class="label-text">Type</span></div>
+        <div><%= @party.party_type %></div>
+      </div>
+
+      <%# Masked Tax ID with Reveal %>
+      <div>
+        <div class="label"><span class="label-text">Tax ID</span></div>
+        <div
+          data-controller="reveal"
+          data-reveal-url-value="<%= reveal_tax_id_party_party_path(@party.public_id) %>"
+          class="flex items-center gap-2"
+        >
+          <span data-reveal-target="text" class="font-mono"><%= mask_tax_id(@party.tax_id) %></span>
+          <button class="btn btn-ghost btn-xs" data-reveal-target="button" data-action="reveal#reveal">Reveal</button>
+          <span class="loading loading-spinner loading-xs hidden" data-reveal-target="spinner"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Subprofile card %>
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="card-title">Profile</h2>
+      <% if @party.party_type == "person" %>
+        <%= render "party/parties/person", party: @party %>
+      <% elsif @party.party_type == "organization" %>
+        <%= render "party/parties/organization", party: @party %>
+      <% else %>
+        <div class="text-sm opacity-70">No subprofile for type: <%= @party.party_type %></div>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Emails list (masked, with per-row reveal) %>
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="card-title">Emails</h2>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Email</th>
+              <th>Primary</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @party.emails.order(created_at: :desc).each do |e| %>
+              <tr>
+                <td><%= e.email_type_code %></td>
+                <td>
+                  <div data-controller="reveal"
+                       data-reveal-url-value="<%= reveal_party_party_email_path(@party.public_id, e) %>"
+                       class="flex items-center gap-2">
+                    <span data-reveal-target="text" class="font-mono"><%= mask_email(e.email) %></span>
+                    <button class="btn btn-ghost btn-xs" data-reveal-target="button" data-action="reveal#reveal">Reveal</button>
+                    <span class="loading loading-spinner loading-xs hidden" data-reveal-target="spinner"></span>
+                  </div>
+                </td>
+                <td><%= e.is_primary ? "Yes" : "No" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <%# Phones (no reveal needed) %>
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="card-title">Phones</h2>
+      <ul class="list-disc pl-6">
+        <% @party.phones.order(created_at: :desc).each do |ph| %>
+          <li><span class="font-mono"><%= ph.phone_e164 %></span> (<%= ph.phone_type_code %>)</li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+
+  <%# Addresses %>
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="card-title">Addresses</h2>
+      <ul class="space-y-2">
+        <% @party.addresses.order(created_at: :desc).each do |a| %>
+          <li>
+            <div class="font-semibold"><%= a.address_type_code %></div>
+            <div><%= [a.line1, a.line2, a.line3].compact_blank.join(", ") %></div>
+            <div><%= [a.locality, a.region_code, a.postal_code, a.country_code].compact_blank.join(" ") %></div>
+            <% if a.is_primary %><span class="badge badge-primary">Primary</span><% end %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</div>
