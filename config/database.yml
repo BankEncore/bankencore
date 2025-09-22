@@ -1,21 +1,22 @@
 default: &default
   adapter: mysql2
   encoding: utf8mb4
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  username: bankencore
-  password: Katikoan123
-  host: localhost
+  host: <%= ENV.fetch("DB_HOST", "127.0.0.1") %>
+  port: <%= ENV.fetch("DB_PORT", 3306) %>
+  username: <%= ENV.fetch("DB_USER", "bankencorre") %>
+  password: <%= ENV.fetch("DB_PASSWORD", "") %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
 
 development:
   <<: *default
-  database: betest2_development
+  database: <%= ENV.fetch("DB_NAME", "bankencorre_development") %>
 
 test:
   <<: *default
-  database: bestest2_test
+  database: <%= ENV.fetch("DB_NAME_TEST", "bankencorre_test") %>
 
 production:
   <<: *default
-  database: betest2_production
-  username: myapp
-  password: <%= ENV['MYAPP_DATABASE_PASSWORD'] %>
+  database: <%= ENV["DB_NAME_PROD"] || ENV["DB_NAME"] || "bankencorre_production" %>
+  username: <%= ENV["DB_USER_PROD"] || ENV["DB_USER"] || "bankencorre" %>
+  password: <%= ENV["DB_PASSWORD_PROD"] || ENV["DB_PASSWORD"] %>

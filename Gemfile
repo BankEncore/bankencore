@@ -63,6 +63,7 @@ group :development do
   gem "rubocop-rails-omakase", require: false
   gem "pry-rails"             # An enhanced Rails console for debugging
   gem "letter_opener_web"     # Allows you to preview emails in the browser
+  gem "dotenv-rails"
 end
 
 # == Test Group ==

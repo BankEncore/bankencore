@@ -1,3 +1,4 @@
+# app/controllers/party/parties_controller.rb
 module Party
   class PartiesController < ApplicationController
     before_action :set_party, only: [:show, :edit, :update, :destroy, :reveal_tax_id]
@@ -5,38 +6,35 @@ module Party
     rescue_from ActionController::ParameterMissing, with: :handle_bad_params
 
     def index
-      @parties = ::Party::Party
-        .includes(:person, :organization)
-        .order(created_at: :desc)
+      @parties = ::Party::Party.includes(:person, :organization).order(created_at: :desc)
     end
+
+    def show; end
 
     def new
       @party = ::Party::Party.new(party_type: "person")
       @party.build_person
-      @party.build_organization           # <-- add
+      @party.build_organization
       @party.addresses.build(country_code: "US")
-      load_ref_options
     end
 
     def edit
       @party.build_person       unless @party.person
-      @party.build_organization unless @party.organization   # <-- ensure both exist
+      @party.build_organization unless @party.organization
       @party.addresses.build if @party.addresses.empty?
-      load_ref_options
     end
 
     def create
       attrs = party_params.dup
-      @party = ::Party::Party.new(party_params)
       attrs.delete(:tax_id) if attrs[:tax_id].blank?
+      @party = ::Party::Party.new(attrs)
+
       if @party.save
         redirect_to party_party_path(@party.public_id), notice: "Party created"
       else
         render :new, status: :unprocessable_entity
       end
     end
-
-    def show; end
 
     def update
       attrs = party_params.dup
@@ -45,11 +43,9 @@ module Party
       if @party.update(attrs)
         redirect_to party_party_path(@party.public_id), notice: "Party updated"
       else
-        # ensure nested & selects render after failed validation
         @party.build_person       unless @party.person
         @party.build_organization unless @party.organization
         @party.addresses.build if @party.addresses.empty?
-        load_ref_options
         render :edit, status: :unprocessable_entity
       end
     end
@@ -59,8 +55,9 @@ module Party
       redirect_to party_parties_path, notice: "Party deleted"
     end
 
+    # JSON: { value: "<decrypted tax_id>" }
     def reveal_tax_id
-      # authorize @party if defined?(Pundit)
+      # authorize @party if using Pundit
       render json: { value: @party.tax_id }
     end
 
@@ -76,19 +73,16 @@ module Party
         person_attributes: [:id, :first_name, :last_name, :date_of_birth, :_destroy],
         organization_attributes: [:id, :legal_name, :organization_type_code, :formation_date, :_destroy],
         addresses_attributes: [:id, :address_type_code, :line1, :line2, :line3, :locality,
-                              :region_code, :postal_code, :country_code, :is_primary, :_destroy]
+                               :region_code, :postal_code, :country_code, :is_primary, :_destroy]
       )
-    end
-        raise ActionController::ParameterMissing, :party
-      end
     end
 
     def load_ref_options
       @address_types = RefAddressType.order(:name)
       @countries     = RefCountry.order(:name)
-      @org_types     = RefOrganizationType.order(:name)   # ⬅️ add this
+      @org_types     = RefOrganizationType.order(:name)
     end
-    
+
     def handle_bad_params(_ex)
       @party ||= ::Party::Party.new
       flash.now[:alert] = "Invalid form submission."

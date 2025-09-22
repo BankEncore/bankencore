@@ -1,4 +1,3 @@
-# config/initializers/active_record_encryption.rb
 cfg = Rails.application.config.active_record.encryption
 cfg.primary_key         = ENV["ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY"]
 cfg.deterministic_key   = ENV["ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY"]

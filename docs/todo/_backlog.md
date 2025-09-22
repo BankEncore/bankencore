@@ -84,3 +84,8 @@
 * `prio:high` → Encryption/BIDX, dynamic forms, regions FK
 * `area:models`, `area:views`, `area:migrations`, `area:security`, `area:stimulus`, `area:seeds`
 * `good first issue` → docs, scripts, small tests
+
+---
+
+* [ ] **Extend _Person_ profiles:** Add middle name, courtesy title, and suffix
+* [ ] **Extend _Organization_ profiles:** Add operating_name
