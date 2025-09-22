@@ -1,0 +1,47 @@
+<!-- app/views/party/parties/_email_fields.html.erb -->
+<div class="grid grid-cols-12 gap-3 items-end border p-3 rounded" data-nested-form-target="item">
+  <% if f.object.persisted? %>
+    <%= f.hidden_field :id %>
+    <div class="col-span-6">
+      <div class="label"><span class="label-text">Email</span></div>
+      <div class="font-mono"><%= f.object.masked %></div>
+    </div>
+  <% else %>
+    <div class="col-span-6">
+      <%= f.label :email %>
+      <%= f.email_field :email, class: "input input-bordered w-full", autocomplete: "off", autocapitalize: "off" %>
+    </div>
+  <% end %>
+
+  <div class="col-span-3">
+    <%= f.label :email_type_code, "Type" %>
+    <%= f.select :email_type_code,
+          email_types.map { |t| [t.name, t.code] },
+          { include_blank: "Select" },
+          class: "select select-bordered w-full" %>
+  </div>
+
+  <div class="col-span-2">
+    <label class="label cursor-pointer">
+      <span class="label-text">Primary</span>
+      <%= f.check_box :is_primary, class: "toggle" %>
+    </label>
+  </div>
+
+  <div class="col-span-1 text-right">
+    <% if f.object.persisted? %>
+      <%= f.check_box :_destroy %>
+      <%= f.label :_destroy, "Remove", class: "text-sm" %>
+    <% else %>
+      <button type="button" class="btn btn-ghost btn-sm" data-action="nested-form#remove">Remove</button>
+    <% end %>
+  </div>
+
+  <% if f.object.errors.any? %>
+    <div class="col-span-12 text-error text-sm">
+      <ul class="list-disc list-inside">
+        <% f.object.errors.full_messages.each { |m| %><li><%= m %></li><% } %>
+      </ul>
+    </div>
+  <% end %>
+</div>

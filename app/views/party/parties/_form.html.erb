@@ -1,17 +1,21 @@
-<%= form_with model: [:party, party],
-              scope: :party,
-              url: party.persisted? ? party_party_path(party.public_id) : party_parties_path,
-              class: "space-y-6" do |f| %>
-  
-  <% if party.errors.any? %>
-  <div class="alert alert-error">
-    <b><%= pluralize(party.errors.count, "error") %> prevented saving:</b>
-    <ul class="mt-2 list-disc list-inside">
-      <% party.errors.full_messages.each do |m| %>
-        <li><%= m %></li>
-      <% end %>
-    </ul>
-  </div>
+<%= form_with model: @party,
+              scope: :party_party,
+              url: (@party.persisted? ? party_party_path(@party.public_id) : party_parties_path),
+              data: { turbo: false }, local: true, novalidate: true, class: "space-y-6" do |f| %>
+
+  <% if @party.errors.any? || @party.person&.errors&.any? || @party.addresses.any? { |a| a.errors.any? } || @party.emails.any? { |e| e.errors.any? } %>
+    <div class="alert alert-error">
+      <b>There were problems:</b>
+      <ul class="mt-2 list-disc list-inside">
+        <% @party.errors.full_messages.each { |m| %><li><%= m %></li><% } %>
+        <% if @party.person %>
+          <% @party.person.errors.full_messages.each { |m| %><li>Person: <%= m %></li><% } %>
+        <% end %>
+        <% @party.addresses.each_with_index do |a, i| %>
+          <% a.errors.full_messages.each { |m| %><li>Address <%= i+1 %>: <%= m %></li><% } %>
+        <% end %>
+      </ul>
+    </div>
   <% end %>
 
   <!-- Core -->
@@ -23,36 +27,41 @@
               {}, class: "select select-bordered w-full",
               data: { "party-type-target": "select", action: "change->party-type#change" } %>
       </div>
+
       <div>
         <label class="label"><span class="label-text">Tax ID</span></label>
         <p class="text-sm opacity-70 mb-2">Current: <%= @party.tax_id_masked || "[not set]" %></p>
         <%= f.password_field :tax_id,
               placeholder: "Enter to change (leave blank to keep)",
               class: "input input-bordered w-full",
-              value: nil,
-              autocomplete: "off",
-              autocapitalize: "off",
-              pattern: "\\d*",
-              data: { action: "focus->toggle-input#enable", "toggle-input-target": "field" },
-              spellcheck: "false" %>
+              value: nil, autocomplete: "off", autocapitalize: "off", inputmode: "numeric" %>
       </div>
-    </div>
 
-    <!-- Subprofiles -->
-    <div class="card-body grid md:grid-cols-2 gap-6">
       <!-- Person -->
-      <div data-party-type-target="personSection">
+      <div data-party-type-target="personSection" class="md:col-span-2">
         <h2 class="card-title mb-2">Person</h2>
         <%= f.fields_for :person do |pf| %>
           <%= pf.hidden_field :_destroy, value: "0", data: { "party-type-target": "personDestroy" } %>
           <div class="grid md:grid-cols-2 gap-4">
             <div>
+              <label class="label"><span class="label-text">Courtesy title</span></label>
+              <%= pf.text_field :courtesy_title, class: "input input-bordered w-full", placeholder: "Mr., Ms., Dr., etc." %>
+            </div>
+            <div>
               <label class="label"><span class="label-text">First name</span></label>
               <%= pf.text_field :first_name, class: "input input-bordered w-full" %>
             </div>
             <div>
+              <label class="label"><span class="label-text">Middle name</span></label>
+              <%= pf.text_field :middle_name, class: "input input-bordered w-full" %>
+            </div>
+            <div>
               <label class="label"><span class="label-text">Last name</span></label>
               <%= pf.text_field :last_name, class: "input input-bordered w-full" %>
+            </div>
+            <div>
+              <label class="label"><span class="label-text">Suffix</span></label>
+              <%= pf.text_field :name_suffix, class: "input input-bordered w-full", placeholder: "Jr., Sr., II, III" %>
             </div>
             <div class="md:col-span-2">
               <label class="label"><span class="label-text">Date of birth</span></label>
@@ -63,7 +72,7 @@
       </div>
 
       <!-- Organization -->
-      <div data-party-type-target="orgSection">
+      <div data-party-type-target="orgSection" class="md:col-span-2">
         <h2 class="card-title mb-2">Organization</h2>
         <%= f.fields_for :organization do |of| %>
           <%= of.hidden_field :_destroy, value: "1", data: { "party-type-target": "orgDestroy" } %>
@@ -89,31 +98,44 @@
     </div>
   </div>
 
-  <!-- Addresses -->
-  <div class="card bg-base-100 shadow" data-controller="nested-form">
+   <!-- Addresses -->
+  <div class="card bg-base-100 shadow">
     <div class="card-body space-y-4">
       <div class="flex items-center justify-between">
         <h2 class="card-title">Addresses</h2>
-        <button class="btn btn-sm" data-action="nested-form#add" type="button">Add address</button>
+        <%= button_tag "Add address", type: "submit", name: "add_address", value: "1", class: "btn btn-sm" %>
       </div>
 
-      <div data-nested-form-target="container">
-        <%= f.fields_for :addresses do |af| %>
-          <%= render "address_fields", f: af %>
+      <%= f.fields_for :addresses do |af| %>
+        <% if af.object.persisted? %>
+          <%= render "party/parties/address_fields", f: af, address_types: @address_types, countries: @countries %>
         <% end %>
+      <% end %>
+
+      <% @party.addresses.select(&:new_record?).each do |addr| %>
+        <%= f.fields_for :addresses, addr do |af| %>
+          <%= render "party/parties/address_fields", f: af, address_types: @address_types, countries: @countries %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Emails -->
+  <div class="card bg-base-100 shadow">
+    <div class="card-body space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="card-title">Emails</h2>
+        <%= button_tag "Add email", type: "submit", name: "add_email", value: "1", class: "btn btn-sm" %>
       </div>
 
-      <!-- Template for new rows -->
-      <template data-nested-form-target="template">
-        <%= f.fields_for :addresses, Party::Address.new(country_code: "US"), child_index: "NEW_RECORD" do |af| %>
-          <%= render "address_fields", f: af %>
-        <% end %>
-      </template>
+      <%= f.fields_for :emails do |ef| %>
+        <%= render "party/parties/email_fields", f: ef, email_types: @email_types %>
+      <% end %>
     </div>
   </div>
 
   <div class="flex gap-2">
-    <%= f.submit (party.persisted? ? "Update" : "Create"), class: "btn btn-primary" %>
-    <%= link_to "Cancel", (party.persisted? ? party_party_path(party.public_id) : party_parties_path), class: "btn" %>
+    <%= f.submit (@party.persisted? ? "Update" : "Create"), class: "btn btn-primary" %>
+    <%= link_to "Cancel", (@party.persisted? ? party_party_path(@party.public_id) : party_parties_path), class: "btn" %>
   </div>
 <% end %>

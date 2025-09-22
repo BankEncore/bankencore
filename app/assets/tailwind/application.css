@@ -4,4 +4,7 @@
 @source "../../../app/helpers/**/*.rb";
 @source "../../../app/javascript/**/*.js";
 
-@plugin "daisyui";
+/* your other plugins... */
+@plugin "daisyui" {
+  themes: all;              /* or: themes: corporate --default; */
+}

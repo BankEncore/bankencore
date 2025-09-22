@@ -24,7 +24,7 @@
             <td><%= p.party_type %></td>
             <td><%= l(p.created_at, format: :short) %></td>
             <td>
-              <%= link_to "View", party_party_path(p.public_id), class: "btn btn-sm btn-primary" %>
+              <%= link_to "View", party_party_path(p.public_id), class: "btn btn-xs btn-neutral" %>
             </td>
           </tr>
         <% end %>

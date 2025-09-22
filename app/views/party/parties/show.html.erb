@@ -1,12 +1,12 @@
 <%# Header %>
 <div class="p-6">
   <div class="flex items-center justify-between mb-4">
-    <h1 class="text-2xl font-bold">Party</h1>
+    <h1 class="text-3xl font-bold">Party</h1>
     <div class="space-x-2">
-      <%= link_to "Edit", edit_party_party_path(@party.public_id), class: "btn btn-secondary btn-sm" %>
+      <%= link_to "Edit", edit_party_party_path(@party.public_id), class: "btn btn-primary btn-sm" %>
       <%= link_to "Delete", party_party_path(@party.public_id),
             data: { turbo_method: :delete, turbo_confirm: "Delete this party?" },
-            class: "btn btn-error btn-sm" %>
+            class: "btn btn-soft btn-error btn-sm" %>
       <%= link_to "Back", party_parties_path, class: "btn btn-ghost btn-sm" %>
     </div>
   </div>
@@ -71,19 +71,11 @@
             </tr>
           </thead>
           <tbody>
-            <% @party.emails.order(created_at: :desc).each do |e| %>
+            <% @party.emails.order(is_primary: :desc, created_at: :asc).each do |e| %>
               <tr>
-                <td><%= e.email_type_code %></td>
-                <td>
-                  <div data-controller="reveal"
-                       data-reveal-url-value="<%= reveal_party_party_email_path(@party.public_id, e) %>"
-                       class="flex items-center gap-2">
-                    <span data-reveal-target="text" class="font-mono"><%= mask_email(e.email) %></span>
-                    <button class="btn btn-ghost btn-xs" data-reveal-target="button" data-action="reveal#reveal">Reveal</button>
-                    <span class="loading loading-spinner loading-xs hidden" data-reveal-target="spinner"></span>
-                  </div>
-                </td>
-                <td><%= e.is_primary ? "Yes" : "No" %></td>
+                <td><%= e.email_type&.name || e.email_type_code %></td>
+                <td class="font-mono"><%= e.masked %></td>
+                <td><%= e.is_primary? ? "Yes" : "No" %></td>
               </tr>
             <% end %>
           </tbody>
@@ -104,20 +96,21 @@
     </div>
   </div>
 
-  <%# Addresses %>
-  <div class="card bg-base-100 shadow">
-    <div class="card-body">
-      <h2 class="card-title">Addresses</h2>
-      <ul class="space-y-2">
-        <% @party.addresses.order(created_at: :desc).each do |a| %>
-          <li>
-            <div class="font-semibold"><%= a.address_type_code %></div>
-            <div><%= [a.line1, a.line2, a.line3].compact_blank.join(", ") %></div>
-            <div><%= [a.locality, a.region_code, a.postal_code, a.country_code].compact_blank.join(" ") %></div>
-            <% if a.is_primary %><span class="badge badge-primary">Primary</span><% end %>
-          </li>
-        <% end %>
-      </ul>
+  <% @party.addresses.each do |addr| %>
+    <div class="bg-base-100 shadow p-3 flex items-center justify-between">
+      <div>
+        <div><%= addr.line1 %> <%= addr.line2 %></div>
+        <div><%= addr.locality %>, <%= addr.region_code %> <%= addr.postal_code %></div>
+        <div><%= addr.country_code %></div>
+      </div>
+
+      <%= button_to "Delete",
+            party_party_address_path(@party.public_id, addr),
+            method: :delete,
+            data: { turbo_confirm: "Delete this address?" },
+            class: "btn btn-outline btn-error bt-sm" %>
+    </div>
+  <% end %>
     </div>
   </div>
 </div>

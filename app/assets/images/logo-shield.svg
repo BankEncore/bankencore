@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" class="w-64 h-auto">
+  <!-- Hex Grid -->
+  <g transform="translate(30,30)">
+    <!-- Row 1 -->
+    <polygon points="30,0 45,15 30,30 15,15" class="fill-info" />
+    <polygon points="60,0 75,15 60,30 45,15" class="fill-accent" />
+    <!-- Row 2 -->
+    <polygon points="45,30 60,45 45,60 30,45" class="fill-info" />
+    <!-- Row 3 -->
+    <polygon points="15,60 30,75 15,90 0,75" class="fill-info" />
+    <polygon points="45,60 60,75 45,90 30,75" class="fill-info" />
+  </g>
+
+  <!-- Wordmark -->
+  <text x="120" y="65" class="fill-neutral text-3xl font-bold font-sans">
+    BankEncore
+  </text>
+</svg>

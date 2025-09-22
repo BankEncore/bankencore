@@ -1,98 +1,55 @@
-<div class="p-6 space-y-6">
-  <div class="flex items-center justify-between">
-    <h1 class="text-3xl font-bold">Stimulus + Tailwind/DaisyUI Test</h1>
-    <div class="badge badge-success badge-outline">OK</div>
-  </div>
-
-  <!-- Card: Tax ID (with real reveal endpoint) -->
-  <div class="card bg-base-100 shadow">
+<div class="grid gap-4 md:grid-cols-3">
+  <section class="card bg-base-100 card-bordered">
     <div class="card-body">
-      <h2 class="card-title">Masked Tax ID</h2>
-      <p class="text-sm opacity-70">Click reveal to fetch plaintext via JSON.</p>
-
-      <div class="flex items-center gap-3 mt-2"
-           data-controller="reveal"
-           data-reveal-url-value="<%= reveal_tax_id_party_party_path(@party.public_id) if defined?(@party) %>">
-        <span class="font-mono text-lg" data-reveal-target="text">•••-••-1234</span>
-        <button class="btn btn-primary btn-sm" data-reveal-target="button" data-action="click->reveal#reveal">
-          Reveal
-        </button>
-        <span class="loading loading-spinner loading-sm hidden" data-reveal-target="spinner"></span>
+      <div class="card-title">Quick Actions</div>
+      <div class="flex flex-wrap gap-2">
+        <%= link_to "View Parties", party_parties_path, class: "btn btn-primary btn-sm" %>
+        <%= link_to "New Party", new_party_party_path, class: "btn btn-secondary btn-sm" %>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Card: Emails table (per-row reveal) -->
-  <div class="card bg-base-100 shadow">
+  <section class="card bg-base-100 card-bordered">
     <div class="card-body">
-      <h2 class="card-title">Emails</h2>
-      <div class="overflow-x-auto">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th>Email</th>
-              <th>Primary</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% (@party&.emails || []).each do |e| %>
-              <tr>
-                <td><span class="badge"><%= e.email_type_code %></span></td>
-                <td>
-                  <div class="flex items-center gap-3"
-                       data-controller="reveal"
-                       data-reveal-url-value="<%= reveal_party_party_email_path(@party.public_id, e) %>">
-                    <span class="font-mono" data-reveal-target="text">j***@example.com</span>
-                    <button class="btn btn-ghost btn-xs" data-reveal-target="button" data-action="click->reveal#reveal">
-                      Reveal
-                    </button>
-                    <span class="loading loading-spinner loading-xs hidden" data-reveal-target="spinner"></span>
-                  </div>
-                </td>
-                <td><%= e.is_primary ? "Yes" : "No" %></td>
-              </tr>
-            <% end %>
-            <% if (@party&.emails || []).empty? %>
-              <tr>
-                <td colspan="3" class="text-center opacity-60">No emails yet.</td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
+      <div class="card-title">Shortcuts</div>
+      <ul class="list space-y-2">
+        <li class="list-row"><a class="link" href="#">Open Account</a></li>
+        <li class="list-row"><a class="link" href="#">Recent Transactions</a></li>
+        <li class="list-row"><a class="link" href="#">Reports</a></li>
+      </ul>
     </div>
-  </div>
+  </section>
 
-  <!-- Card: Demo buttons (no URL → fallback text) -->
-  <div class="card bg-base-100 shadow">
+  <section class="card bg-base-100 card-bordered">
     <div class="card-body">
-      <h2 class="card-title">Controller Demo (no network)</h2>
-      <div class="grid sm:grid-cols-2 gap-4">
-        <div class="flex items-center gap-3" data-controller="reveal">
-          <span class="font-mono" data-reveal-target="text">[masked]</span>
-          <button class="btn btn-secondary btn-sm" data-reveal-target="button" data-action="click->reveal#reveal">
-            Reveal (Local)
-          </button>
-          <span class="loading loading-spinner loading-xs hidden" data-reveal-target="spinner"></span>
-        </div>
-
-        <div class="flex items-center gap-3" data-controller="reveal">
-          <span class="font-mono" data-reveal-target="text">[hidden]</span>
-          <button class="btn btn-accent btn-sm" data-reveal-target="button" data-action="click->reveal#reveal">
-            Reveal (Local)
-          </button>
-          <span class="loading loading-spinner loading-xs hidden" data-reveal-target="spinner"></span>
-        </div>
-      </div>
+      <div class="card-title">Status</div>
+      <p class="text-sm opacity-70">System nominal.</p>
     </div>
-  </div>
-
-  <!-- Footer actions -->
-  <div class="flex items-center gap-2">
-    <a href="<%= party_parties_path %>" class="btn btn-outline btn-sm">Parties Index</a>
-    <% if defined?(@party) %>
-      <a href="<%= party_party_path(@party.public_id) %>" class="btn btn-ghost btn-sm">Show Party</a>
-    <% end %>
-  </div>
+  </section>
 </div>
+
+<section class="card bg-base-100 card-bordered mt-4">
+  <div class="card-body">
+    <div class="card-title items-center justify-between">
+      <span>Recent Parties</span>
+      <%= link_to "All Parties", party_parties_path, class: "btn btn-outline btn-sm" %>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="table table-zebra w-full">
+        <thead>
+          <tr><th>Name</th><th>Type</th><th>Created</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Acme Holdings, LLC</td><td>Organization</td><td>2025-08-12</td>
+            <td><a class="link" href="#">View</a></td>
+          </tr>
+          <tr>
+            <td>Jane Doe</td><td>Person</td><td>2025-09-01</td>
+            <td><a class="link" href="#">View</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

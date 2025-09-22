@@ -38,8 +38,8 @@ gem "cssbundling-rails"
 
 # == Rails Defaults ==
 gem "tzinfo-data", platforms: %i[ windows jruby ]
-# # Using Sidekiq, so solid_queue is not needed.
-# # gem "solid_queue"
+# Using Sidekiq, so solid_queue is not needed.
+# gem "solid_queue"
 gem "solid_cache"
 gem "solid_cable"
 

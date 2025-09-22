@@ -1,13 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-theme="corporate">
   <head>
-    <title>Betest</title>
+    <title><%= content_for?(:title) ? yield(:title) : "YourApp" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>  <!-- REQUIRED -->
+    <%= javascript_importmap_tags %>
+    <script>
+    (function() {
+      const KEY = 'daisy-theme';
+      const root = document.documentElement;
+      const saved = localStorage.getItem(KEY);
+      if (saved) root.setAttribute('data-theme', saved);
+
+      document.addEventListener('change', function(e){
+        const t = e.target;
+        if (t && t.classList && t.classList.contains('theme-controller')) {
+          const val = t.value;
+          root.setAttribute('data-theme', val);
+          try { localStorage.setItem(KEY, val); } catch(_) {}
+        }
+      });
+
+      document.addEventListener('DOMContentLoaded', function(){
+        const current = root.getAttribute('data-theme') || 'corporate';
+        document.querySelectorAll('.theme-controller').forEach(function(el){
+          el.checked = (el.value === current);
+        });
+      });
+    })();
+  </script>
+
   </head>
-  <body class="min-h-screen">
-    <%= yield %>
+  <div class="container mx-auto flex items-center justify-between p-3">
+  <a href="<%= root_path %>" class="flex items-center gap-2">
+  <!-- Monogram shield logo (Option 1) -->
+  <!-- <svg xmlns="http://www.w3.org/2000/svg" width="225" height="50" viewBox="0 0 160 40" role="img" aria-label="BankEncoRRe"> -->
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" class="w-64 h-auto">
+    <!-- Hex Grid -->
+    <g transform="translate(30,30)">
+      <!-- Row 1 -->
+      <polygon points="30,0 45,15 30,30 15,15" class="fill-info" />
+      <polygon points="60,0 75,15 60,30 45,15" class="fill-accent" />
+      <!-- Row 2 -->
+      <polygon points="45,30 60,45 45,60 30,45" class="fill-info" />
+      <!-- Row 3 -->
+      <polygon points="15,60 30,75 15,90 0,75" class="fill-info" />
+      <polygon points="45,60 60,75 45,90 30,75" class="fill-info" />
+    </g>
+
+    <!-- Wordmark -->
+    <text x="120" y="65" class="fill-neutral text-3xl font-bold font-sans">
+      BankEncore
+    </text>
+  </svg>
+  <defs>
+    <style>
+      .brand-fill{fill:#1f3c88} /* primary */
+      .text{font:600 18px ui-sans-serif,system-ui,sans-serif;fill:#1f3c88}
+    </style>
+  </defs>
+  <g transform="translate(0,2)">
+    <path class="brand-fill" d="M10 2h20l4 6v12c0 10-9 14-14 16C15 34 6 30 6 20V8l4-6z"/>
+    <path fill="#fff" d="M15 10h10v2H15zm0 5h10v2H15zm0 5h7v2h-7z"/>
+  </g>
+  <text class="text" x="48" y="24">BankEncoRRe</text>
+</svg>
+
+  <span class="text-lg font-semibold">YourApp</span>
+</a>
+
+  <div class="flex items-center gap-2">
+    <nav class="hidden md:flex space-x-2">
+      <%= link_to "Home", root_path, class: "btn btn-ghost btn-sm" %>
+      <%= link_to "Parties", party_parties_path, class: "btn btn-ghost btn-sm" %>
+      <%= link_to "Cases", "#", class: "btn btn-ghost btn-sm" %>
+      <%= link_to "Reports", "#", class: "btn btn-ghost btn-sm" %>
+    </nav>
+    <form action="#" method="get" class="flex-1 max-w-xs">
+      <label class="input w-full">
+        <input type="search" name="q" placeholder="Search…" aria-label="Search" />
+      </label>
+    </form>
+
+    <!-- User menu + theme switch -->
+    <div class="dropdown dropdown-end">
+      <div tabindex="0" role="button" class="btn btn-ghost btn-sm">User</div>
+      <div tabindex="0" class="dropdown-content z-10 bg-base-100 rounded-box shadow p-3 w-64">
+        <div class="mb-2 text-sm font-semibold">Theme</div>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <label class="label cursor-pointer justify-start gap-2">
+            <input type="radio" name="theme" value="corporate" class="theme-controller" />
+            <span>Corporate</span>
+          </label>
+          <label class="label cursor-pointer justify-start gap-2">
+            <input type="radio" name="theme" value="business" class="theme-controller" />
+            <span>Business</span>
+          </label>
+          <label class="label cursor-pointer justify-start gap-2">
+            <input type="radio" name="theme" value="light" class="theme-controller" />
+            <span>Light</span>
+          </label>
+          <label class="label cursor-pointer justify-start gap-2">
+            <input type="radio" name="theme" value="dark" class="theme-controller" />
+            <span>Dark</span>
+          </label>
+          <label class="label cursor-pointer justify-start gap-2">
+            <input type="radio" name="theme" value="lofi" class="theme-controller" />
+            <span>Lo-fi</span>
+          </label>
+          <label class="label cursor-pointer justify-start gap-2">
+            <input type="radio" name="theme" value="emerald" class="theme-controller" />
+            <span>Emerald</span>
+          </label>
+            <label class="label cursor-pointer justify-start gap-2">
+            <input type="radio" name="theme" value="retro" class="theme-controller" />
+            <span>Retro</span>
+          </label>
+          </label>
+            <label class="label cursor-pointer justify-start gap-2">
+            <input type="radio" name="theme" value="autumn" class="theme-controller" />
+            <span>Autumn</span>
+          </label>
+        </div>
+
+        <div class="divider my-2"></div>
+        <ul class="menu">
+          <li><a href="#">Profile</a></li>
+          <li><a href="#">Sign out</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    <!-- Main -->
+    <main class="container mx-auto p-6">
+      <% flash.each do |type, msg| %>
+        <% tone = { notice: "info", alert: "warning", error: "error", success: "success" }[type.to_sym] || "info" %>
+        <div class="alert alert-<%= tone %> mb-3"><%= msg %></div>
+      <% end %>
+      <%= yield %>
+    </main>
+
+    <!-- Optional footer -->
+    <footer class="border-t">
+      <div class="container mx-auto p-4 text-sm opacity-70">
+        © <%= Time.current.year %> YourApp · <a href="#" class="link">Privacy</a>
+      </div>
+    </footer>
   </body>
 </html>

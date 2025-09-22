@@ -1,38 +1,43 @@
+# app/controllers/party/emails_controller.rb
 module Party
   class EmailsController < ApplicationController
     before_action :set_party
-    before_action :set_email, only: [:update, :destroy]
+    before_action :set_email, only: [:update, :destroy, :reveal]
 
     def index
-      render json: @party.emails.order(created_at: :desc)
+      @emails = @party.emails.order(is_primary: :desc, created_at: :asc)
     end
 
     def create
-      email = @party.emails.new(email_params)
+      email = @party.emails.build(email_params)
       if email.save
-        render json: email, status: :created
+        redirect_to party_party_path(@party.public_id), notice: "Email added"
       else
-        render json: { errors: email.errors.full_messages }, status: :unprocessable_entity
+        redirect_to party_party_path(@party.public_id), alert: email.errors.full_messages.to_sentence
       end
     end
 
     def update
       if @email.update(email_params)
-        render json: @email
+        redirect_to party_party_path(@party.public_id), notice: "Email updated"
       else
-        render json: { errors: @email.errors.full_messages }, status: :unprocessable_entity
+        redirect_to party_party_path(@party.public_id), alert: @email.errors.full_messages.to_sentence
       end
     end
 
     def destroy
       @email.destroy
-      head :no_content
+      redirect_to party_party_path(@party.public_id), notice: "Email deleted"
+    end
+
+    def reveal
+      render json: { value: @email.email }
     end
 
     private
 
     def set_party
-      @party = Party::Party.find_by!(public_id: params[:party_public_id])
+      @party = ::Party::Party.find_by!(public_id: params[:party_public_id])
     end
 
     def set_email
@@ -40,7 +45,7 @@ module Party
     end
 
     def email_params
-      params.require(:email).permit(:email_type_code, :email, :is_primary)
+      params.require(:email).permit(:email, :email_type_code, :is_primary, :_destroy)
     end
   end
 end

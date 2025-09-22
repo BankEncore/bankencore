@@ -37,7 +37,14 @@ module Party
     end
 
     def person_params
-      params.require(:person).permit(:first_name, :last_name, :date_of_birth)
-    end
+    params.require(:person).permit(
+      :first_name,
+      :middle_name,
+      :last_name,
+      :name_suffix,
+      :courtesy_title,
+      :date_of_birth
+    )
+  end
   end
 end

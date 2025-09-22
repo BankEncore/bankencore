@@ -5,7 +5,7 @@ module Party
     belongs_to :source_party, class_name: "Party::Party", foreign_key: :source_party_id
     belongs_to :target_party, class_name: "Party::Party", foreign_key: :target_party_id
 
-    belongs_to :link_type, class_name: "RefPartyLinkType",
+    belongs_to :link_type, class_name: "Ref::PartyLinkType",
                foreign_key: :party_link_type_code, primary_key: :code
 
     validates :party_link_type_code, presence: true

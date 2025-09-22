@@ -1,4 +1,3 @@
-# config/routes.rb
 Rails.application.routes.draw do
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
@@ -14,7 +13,7 @@ Rails.application.routes.draw do
       resource  :organization, only: %i[show create update destroy]
 
       resources :emails, only: %i[index create update destroy] do
-        member { get :reveal } # /party/parties/:party_public_id/emails/:id/reveal
+        member { get :reveal } # /party/parties/:public_id/emails/:id/reveal
       end
       resources :phones,    only: %i[index create update destroy]
       resources :addresses, only: %i[index create update destroy]
@@ -27,8 +26,7 @@ Rails.application.routes.draw do
     resources :links, only: %i[index create destroy]
   end
 
-  # ⬇️ Step 2: Regions endpoint for dependent selects
   namespace :ref do
-    resources :regions, only: :index  # /ref/regions?country=US -> [{code,name}]
+    resources :regions, only: :index  # /ref/regions?country=US
   end
 end

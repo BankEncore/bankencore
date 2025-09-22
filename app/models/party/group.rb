@@ -2,7 +2,7 @@ module Party
   class Group < ApplicationRecord
     self.table_name = "party_groups"
 
-    belongs_to :group_type, class_name: "RefPartyGroupType",
+    belongs_to :group_type, class_name: "Ref::PartyGroupType",
            foreign_key: "party_group_type_code", primary_key: "code",
            optional: true
 

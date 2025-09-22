@@ -25,8 +25,10 @@ module Party
     end
 
     def destroy
-      @address.destroy
-      head :no_content
+      party = Party.find_by!(public_id: params[:party_public_id])
+      addr  = party.addresses.find(params[:id])
+      addr.destroy
+      redirect_to party_party_path(party.public_id), notice: "Address deleted"
     end
 
     private

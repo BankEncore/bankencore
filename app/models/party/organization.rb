@@ -5,7 +5,7 @@ module Party
 
     belongs_to :party, class_name: "Party::Party", foreign_key: :party_id
 
-    belongs_to :organization_type, class_name: "RefOrganizationType",
+    belongs_to :organization_type, class_name: "Ref::OrganizationType",
            foreign_key: :organization_type_code, primary_key: :code,
            optional: true
 

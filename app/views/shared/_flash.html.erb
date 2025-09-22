@@ -1,0 +1,4 @@
+<% flash.each do |type, msg| %>
+  <% tone = { notice: "info", alert: "warning", error: "error", success: "success" }[type.to_sym] || "info" %>
+  <div class="alert alert-<%= tone %> mb-3"><%= msg %></div>
+<% end %>

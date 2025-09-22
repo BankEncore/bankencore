@@ -40,3 +40,16 @@
 
 /config/credentials/development.key
 /node_modules\n/log\n/tmp\n/storage\n/.env\n/config/master.key\n/config/credentials/*.key
+# secrets
+config/master.key
+config/credentials/*.key
+config/credentials/*.yml.enc
+
+# Rails/Node noise
+/log/
+/tmp/
+/storage/
+/node_modules/
+/vendor/bundle
+/.byebug_history
+/.bundle

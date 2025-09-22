@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_21_183237) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_22_013132) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -115,6 +115,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_21_183237) do
     t.date "date_of_birth"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "middle_name"
+    t.string "name_suffix"
+    t.string "courtesy_title"
     t.index ["party_id"], name: "index_party_people_on_party_id"
   end
 

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="50" viewBox="0 0 160 40" role="img" aria-label="BankEncoRRe">
+  <defs>
+    <style>
+      .brand-fill{fill:#1f3c88} /* primary */
+      .text{font:600 18px ui-sans-serif,system-ui,sans-serif;fill:#1f3c88}
+    </style>
+  </defs>
+  <g transform="translate(0,2)">
+    <path class="brand-fill" d="M10 2h20l4 6v12c0 10-9 14-14 16C15 34 6 30 6 20V8l4-6z"/>
+    <path fill="#fff" d="M15 10h10v2H15zm0 5h10v2H15zm0 5h7v2h-7z"/>
+  </g>
+  <text class="text" x="48" y="24">BankEncoRRe</text>
+</svg>
