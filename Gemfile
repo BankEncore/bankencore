@@ -22,7 +22,7 @@ gem "bcrypt", "~> 3.1.7"     # For secure password hashing (required by Devise)
 # == Core Functionality & Utilities ==
 gem "sidekiq"               # For background jobs (e.g., interest accruals)
 gem "phonelib", "~> 0.10"    # For parsing and formatting phone numbers [cite: 89, 1088]
-gem "countries", "~> 5.1"     # For country and region data [cite: 1277]
+gem "countries", "~> 8.0"     # For country and region data [cite: 1277]
 
 # == Frontend & Assets ==
 gem "propshaft"
