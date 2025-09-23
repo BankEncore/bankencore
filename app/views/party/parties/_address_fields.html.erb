@@ -55,6 +55,15 @@
         <%= f.text_field :postal_code, class: "input input-bordered w-full" %>
       </div>
     </div>
+    <div class="col-span-2 text-right">
+        <% if f.object.persisted? %>
+          <%= f.check_box :_destroy %>
+          <%= f.label :_destroy, "Remove", class: "text-sm" %>
+        <% else %>
+          <button type="button" class="btn btn-ghost btn-sm" data-action="nested-form#remove">Remove</button>
+        <% end %>
+      </div>
+    </div>
   </div>
 
   <div class="flex items-center justify-between mt-3">

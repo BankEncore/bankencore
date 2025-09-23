@@ -6,9 +6,7 @@ module Party
     rescue_from ActionController::ParameterMissing, with: :handle_bad_params
 
     def index
-      @parties = ::Party::Party
-        .includes(:person, :organization, :emails)
-        .order(created_at: :desc)
+      @parties = ::Party::Party.includes(:person, :organization, :emails).order(created_at: :desc)
     end
 
     def show; end
@@ -32,18 +30,18 @@ module Party
       raw = party_params
 
       if params[:add_email].present?
-        @party = ::Party::Party.new(scrub_email_params(raw))
+        @party = ::Party::Party.new(scrub_email_params(scrub_address_params(raw)))
         @party.emails.build
         render :new, status: :unprocessable_content and return
       end
 
       if params[:add_address].present?
-        @party = ::Party::Party.new(raw)
+        @party = ::Party::Party.new(scrub_email_params(scrub_address_params(raw)))
         @party.addresses.build(country_code: "US")
         render :new, status: :unprocessable_content and return
       end
 
-      attrs = scrub_email_params(raw).dup
+      attrs = scrub_email_params(scrub_address_params(raw)).dup
       attrs.delete(:tax_id) if attrs[:tax_id].blank?
 
       @party = ::Party::Party.new(attrs)
@@ -58,18 +56,18 @@ module Party
       raw = party_params
 
       if params[:add_email].present?
-        @party.assign_attributes(scrub_email_params(raw))
+        @party.assign_attributes(scrub_email_params(scrub_address_params(raw)))
         @party.emails.build
         render :edit, status: :unprocessable_content and return
       end
 
       if params[:add_address].present?
-        @party.assign_attributes(raw)
+        @party.assign_attributes(scrub_email_params(scrub_address_params(raw)))
         @party.addresses.build(country_code: "US")
         render :edit, status: :unprocessable_content and return
       end
 
-      attrs = scrub_email_params(raw).dup
+      attrs = scrub_email_params(scrub_address_params(raw)).dup
       attrs.delete(:tax_id) if attrs[:tax_id].blank?
 
       if @party.update(attrs)
@@ -84,7 +82,6 @@ module Party
       redirect_to party_parties_path, notice: "Party deleted"
     end
 
-    # JSON: { value: "<decrypted tax_id>" }
     def reveal_tax_id
       render json: { value: @party.tax_id }
     end
@@ -95,7 +92,6 @@ module Party
       @party = ::Party::Party.find_by!(public_id: params[:public_id])
     end
 
-    # strong params (form uses scope :party_party)
     def party_params
       params.require(:party_party).permit(
         :party_type, :customer_number, :tax_id,
@@ -129,36 +125,47 @@ module Party
       render(action_name == "create" ? :new : :edit, status: :unprocessable_content)
     end
 
-    # Drop blank brand-new emails and keep existing emails when input left empty.
+    # --- scrubbers ----------------------------------------------------------
+
+    # Drop blank NEW email rows; keep existing rows even if email field blank
     def scrub_email_params(attrs)
-      # Normalize ActionController::Parameters → Hash
-      attrs = attrs.respond_to?(:to_h) ? attrs.to_h : attrs
+      attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_unsafe_h : attrs
       attrs = attrs.deep_dup
 
-      ehash = attrs[:emails_attributes] || attrs["emails_attributes"]
-      return attrs unless ehash.present?
+      ehash = attrs[:emails_attributes]
+      return attrs unless ehash.is_a?(Hash)
 
-      list = ehash.is_a?(Hash) ? ehash.values : Array(ehash)
+      cleaned = ehash.values.map { |h| h.symbolize_keys }
 
-      list.each do |ea|
-        # existing row with blank email field → do not overwrite encrypted value
-        if (ea[:id] || ea["id"]).present? && ea[:email].to_s.strip.blank? && ea["email"].to_s.strip.blank?
-          ea.delete(:email)
-          ea.delete("email")
-        end
+      cleaned.each do |h|
+        h.delete(:email) if h[:id].present? && h[:email].to_s.strip.blank?
       end
 
-      filtered = list.reject { |ea|
-        (ea[:id].blank? && ea["id"].blank?) && (ea[:email].to_s.strip.blank? && ea["email"].to_s.strip.blank?)
-      }
+      cleaned.select! do |h|
+        !(h[:id].blank? && h[:email].to_s.strip.blank?)
+      end
 
-      attrs[:emails_attributes] =
-        if ehash.is_a?(Hash)
-          filtered.each_with_index.to_h { |ea, i| [i.to_s, ea] }
-        else
-          filtered
-        end
+      attrs[:emails_attributes] = cleaned.each_with_index.to_h { |h, i| [i.to_s, h] }
+      attrs
+    end
 
+    # Drop blank NEW address rows; keep existing rows
+    def scrub_address_params(attrs)
+      attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_unsafe_h : attrs
+      attrs = attrs.deep_dup
+
+      ahash = attrs[:addresses_attributes]
+      return attrs unless ahash.is_a?(Hash)
+
+      cleaned = ahash.values.map { |h| h.symbolize_keys }
+
+      content_keys = %i[line1 line2 line3 locality region_code postal_code country_code address_type_code is_primary]
+
+      cleaned.select! do |h|
+        h[:id].present? || content_keys.any? { |k| h[k].to_s.strip.present? }
+      end
+
+      attrs[:addresses_attributes] = cleaned.each_with_index.to_h { |h, i| [i.to_s, h] }
       attrs
     end
   end
