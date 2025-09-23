@@ -84,33 +84,79 @@
     </div>
   </div>
 
-  <%# Phones (no reveal needed) %>
-  <div class="card bg-base-100 shadow">
-    <div class="card-body">
-      <h2 class="card-title">Phones</h2>
-      <ul class="list-disc pl-6">
-        <% @party.phones.order(created_at: :desc).each do |ph| %>
-          <li><span class="font-mono"><%= ph.phone_e164 %></span> (<%= ph.phone_type_code %>)</li>
-        <% end %>
-      </ul>
-    </div>
-  </div>
-
-  <% @party.addresses.each do |addr| %>
-    <div class="bg-base-100 shadow p-3 flex items-center justify-between">
-      <div>
-        <div><%= addr.line1 %> <%= addr.line2 %></div>
-        <div><%= addr.locality %>, <%= addr.region_code %> <%= addr.postal_code %></div>
-        <div><%= addr.country_code %></div>
+<%# Phones %>
+<div class="card bg-base-100 shadow">
+  <div class="card-body">
+    <h2 class="card-title">Phones</h2>
+    <% if @party.phones.any? %>
+      <div class="overflow-x-auto">
+        <table class="table w-full">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Number</th>
+              <th>Ext</th>
+              <th>Primary</th>
+              <th>SMS OK</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @party.phones.order(is_primary: :desc, created_at: :asc).each do |ph| %>
+              <tr>
+                <td><%= ph.phone_type&.name || ph.phone_type_code || "(Unspecified)" %></td>
+                <td class="font-mono"><%= ph.phone_e164 %></td>
+                <td><%= ph.phone_ext.presence || "—" %></td>
+                <td><%= ph.is_primary? ? "Yes" : "No" %></td>
+                <td><%= ph.consent_sms? ? "Yes" : "No" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
+    <% else %>
+      <p class="opacity-70">No phones</p>
+    <% end %>
+  </div>
+</div>
 
-      <%= button_to "Delete",
-            party_party_address_path(@party.public_id, addr),
-            method: :delete,
-            data: { turbo_confirm: "Delete this address?" },
-            class: "btn btn-outline btn-error bt-sm" %>
-    </div>
-  <% end %>
-    </div>
+<%# Addresses %>
+<div class="card bg-base-100 shadow">
+  <div class="card-body">
+    <h2 class="card-title">Addresses</h2>
+    <% if @party.addresses.any? %>
+      <div class="overflow-x-auto">
+        <table class="table table-zebra w-full">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Street 1</th>
+              <th>Street 2</th>
+              <th>City</th>
+              <th>Region</th>
+              <th>Postcode</th>
+              <th>Country</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @party.addresses.each do |a| %>
+              <tr>
+                <td>
+                  <%= a.address_type&.name || "(Unspecified)" %>
+                  <% if a.is_primary? %><span class="badge badge-sm ml-2">Primary</span><% end %>
+                </td>
+                <td><%= a.line1 %></td>
+                <td><%= a.line2 %></td>
+                <td><%= a.locality %></td>
+                <td><%= a.region_code %></td>
+                <td><%= a.postal_code %></td>
+                <td><%= a.country&.name || a.country_code %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <p class="opacity-70">No addresses</p>
+    <% end %>
   </div>
 </div>

@@ -1,0 +1,48 @@
+<!-- app/views/party/parties/_phone_fields.html.erb -->
+<div class="grid md:grid-cols-6 gap-4">
+  <div>
+    <label class="label"><span class="label-text">Type</span></label>
+    <%= f.collection_select :phone_type_code, @phone_types, :code, :name,
+          { include_blank: "Select type" }, class: "select select-bordered w-full" %>
+  </div>
+
+  <div>
+    <label class="label"><span class="label-text">Country</span></label>
+    <%= f.select :country_alpha2, phone_country_options,
+          { selected: (f.object.try(:country_alpha2).presence || "US") },
+          class: "select select-bordered w-full" %>
+  </div>
+
+  <div class="md:col-span-2">
+    <label class="label"><span class="label-text">Number</span></label>
+    <%= f.text_field :number_raw, class: "input input-bordered w-full",
+          placeholder: "(555) 123-4567 x123" %>
+  </div>
+
+  <div>
+    <label class="label"><span class="label-text">Ext</span></label>
+    <%= f.text_field :phone_ext, class: "input input-bordered w-full" %>
+  </div>
+
+  <div class="flex items-end gap-4">
+    <label class="label cursor-pointer gap-2">
+      <%= f.check_box :is_primary, class: "checkbox" %>
+      <span class="label-text">Primary</span>
+    </label>
+    <label class="label cursor-pointer gap-2">
+      <%= f.check_box :consent_sms, class: "checkbox" %>
+      <span class="label-text">SMS consent</span>
+    </label>
+  </div>
+
+  <div class="md:col-span-6 text-right">
+    <% if f.object.persisted? %>
+      <% uid = "phone_#{f.object.id}_destroy" %>
+      <%= f.check_box :_destroy, include_hidden: false, id: uid %>
+      <%= f.label :_destroy, "Remove", for: uid, class: "text-sm" %>
+    <% else %>
+      <%= f.hidden_field :_destroy, value: "0", id: nil %>
+      <button type="button" class="btn btn-ghost btn-sm" data-action="nested-form#remove">Remove</button>
+    <% end %>
+  </div>
+</div>

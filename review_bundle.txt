@@ -1385,6 +1385,159 @@
       }
     }
   }
+  .select\! {
+    border: var(--border) solid #0000 !important;
+    position: relative !important;
+    display: inline-flex !important;
+    flex-shrink: 1 !important;
+    appearance: none !important;
+    align-items: center !important;
+    gap: calc(0.25rem * 1.5) !important;
+    background-color: var(--color-base-100) !important;
+    padding-inline-start: calc(0.25rem * 3) !important;
+    padding-inline-end: calc(0.25rem * 7) !important;
+    vertical-align: middle !important;
+    width: clamp(3rem, 20rem, 100%) !important;
+    height: var(--size) !important;
+    font-size: 0.875rem !important;
+    touch-action: manipulation !important;
+    border-start-start-radius: var(--join-ss, var(--radius-field)) !important;
+    border-start-end-radius: var(--join-se, var(--radius-field)) !important;
+    border-end-start-radius: var(--join-es, var(--radius-field)) !important;
+    border-end-end-radius: var(--join-ee, var(--radius-field)) !important;
+    background-image: linear-gradient(45deg, #0000 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, #0000 50%) !important;
+    background-position: calc(100% - 20px) calc(1px + 50%), calc(100% - 16.1px) calc(1px + 50%) !important;
+    background-size: 4px 4px, 4px 4px !important;
+    background-repeat: no-repeat !important;
+    text-overflow: ellipsis !important;
+    box-shadow: 0 1px var(--input-color) inset, 0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset !important;
+    @supports (color: color-mix(in lab, red, red)) {
+      box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000) inset, 0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset !important;
+    }
+    border-color: var(--input-color) !important;
+    --input-color: var(--color-base-content) !important;
+    @supports (color: color-mix(in lab, red, red)) {
+      --input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000) !important;
+    }
+    --size: calc(var(--size-field, 0.25rem) * 10) !important;
+    [dir="rtl"] & {
+      background-position: calc(0% + 12px) calc(1px + 50%), calc(0% + 16px) calc(1px + 50%) !important;
+    }
+    select {
+      margin-inline-start: calc(0.25rem * -3) !important;
+      margin-inline-end: calc(0.25rem * -7) !important;
+      width: calc(100% + 2.75rem) !important;
+      appearance: none !important;
+      padding-inline-start: calc(0.25rem * 3) !important;
+      padding-inline-end: calc(0.25rem * 7) !important;
+      height: calc(100% - calc(var(--border) * 2)) !important;
+      align-items: center !important;
+      background: inherit !important;
+      border-radius: inherit !important;
+      border-style: none !important;
+      &:focus, &:focus-within {
+        --tw-outline-style: none !important;
+        outline-style: none !important;
+        @media (forced-colors: active) {
+          outline: 2px solid transparent !important;
+          outline-offset: 2px !important;
+        }
+      }
+      &:not(:last-child) {
+        margin-inline-end: calc(0.25rem * -5.5) !important;
+        background-image: none !important;
+      }
+    }
+    &:focus, &:focus-within {
+      --input-color: var(--color-base-content) !important;
+      box-shadow: 0 1px var(--input-color) !important;
+      @supports (color: color-mix(in lab, red, red)) {
+        box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000) !important;
+      }
+      outline: 2px solid var(--input-color) !important;
+      outline-offset: 2px !important;
+      isolation: isolate !important;
+      z-index: 1 !important;
+    }
+    &:has(> select[disabled]), &:is(:disabled, [disabled]), fieldset:disabled & {
+      cursor: not-allowed !important;
+      border-color: var(--color-base-200) !important;
+      background-color: var(--color-base-200) !important;
+      color: var(--color-base-content) !important;
+      @supports (color: color-mix(in lab, red, red)) {
+        color: color-mix(in oklab, var(--color-base-content) 40%, transparent) !important;
+      }
+      &::placeholder {
+        color: var(--color-base-content) !important;
+        @supports (color: color-mix(in lab, red, red)) {
+          color: color-mix(in oklab, var(--color-base-content) 20%, transparent) !important;
+        }
+      }
+    }
+    &:has(> select[disabled]) > select[disabled] {
+      cursor: not-allowed !important;
+    }
+    &, & select {
+      @supports (appearance: base-select) {
+        appearance: base-select !important;
+      }
+      @supports (appearance: base-select) {
+        &::picker(select) {
+          appearance: base-select !important;
+        }
+      }
+      &::picker(select) {
+        color: inherit !important;
+        max-height: min(24rem, 70dvh) !important;
+        border: var(--border) solid var(--color-base-200) !important;
+        margin-block: calc(0.25rem * 2) !important;
+        border-radius: var(--radius-box) !important;
+        padding: calc(0.25rem * 2) !important;
+        background-color: inherit !important;
+        box-shadow: 0 2px calc(var(--depth) * 3px) -2px oklch(0% 0 0/0.2) !important;
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / calc(var(--depth) * 0.1)), 0 8px 10px -6px rgb(0 0 0 / calc(var(--depth) * 0.1)) !important;
+      }
+      &::picker-icon {
+        display: none !important;
+      }
+      optgroup {
+        padding-top: 0.5em !important;
+        option {
+          &:nth-child(1) {
+            margin-top: 0.5em !important;
+          }
+        }
+      }
+      option {
+        border-radius: var(--radius-field) !important;
+        padding-inline: calc(0.25rem * 3) !important;
+        padding-block: calc(0.25rem * 1.5) !important;
+        transition-property: color, background-color !important;
+        transition-duration: 0.2s !important;
+        transition-timing-function: cubic-bezier(0, 0, 0.2, 1) !important;
+        &:not(:disabled) {
+          &:hover, &:focus-visible {
+            cursor: pointer !important;
+            background-color: var(--color-base-content) !important;
+            @supports (color: color-mix(in lab, red, red)) {
+              background-color: color-mix(in oklab, var(--color-base-content) 10%, transparent) !important;
+            }
+            --tw-outline-style: none !important;
+            outline-style: none !important;
+            @media (forced-colors: active) {
+              outline: 2px solid transparent !important;
+              outline-offset: 2px !important;
+            }
+          }
+          &:active {
+            background-color: var(--color-neutral) !important;
+            color: var(--color-neutral-content) !important;
+            box-shadow: 0 2px calc(var(--depth) * 3px) -2px var(--color-neutral) !important;
+          }
+        }
+      }
+    }
+  }
   .diff-resizer {
     position: relative;
     z-index: 1;
@@ -1764,6 +1917,9 @@
       }
     }
   }
+  .relative {
+    position: relative;
+  }
   .static {
     position: static;
   }
@@ -1883,6 +2039,86 @@
     }
     &:has(> textarea[disabled]) > textarea[disabled] {
       cursor: not-allowed;
+    }
+  }
+  .isolate {
+    isolation: isolate;
+  }
+  .stack {
+    display: inline-grid;
+    grid-template-columns: 3px 4px 1fr 4px 3px;
+    grid-template-rows: 3px 4px 1fr 4px 3px;
+    & > * {
+      height: 100%;
+      width: 100%;
+      &:nth-child(n + 2) {
+        width: 100%;
+        opacity: 70%;
+      }
+      &:nth-child(2) {
+        z-index: 2;
+        opacity: 90%;
+      }
+      &:nth-child(1) {
+        z-index: 3;
+        width: 100%;
+      }
+    }
+    &, &.stack-bottom {
+      > * {
+        grid-column: 3 / 4;
+        grid-row: 3 / 6;
+        &:nth-child(2) {
+          grid-column: 2 / 5;
+          grid-row: 2 / 5;
+        }
+        &:nth-child(1) {
+          grid-column: 1 / 6;
+          grid-row: 1 / 4;
+        }
+      }
+    }
+    &.stack-top {
+      > * {
+        grid-column: 3 / 4;
+        grid-row: 1 / 4;
+        &:nth-child(2) {
+          grid-column: 2 / 5;
+          grid-row: 2 / 5;
+        }
+        &:nth-child(1) {
+          grid-column: 1 / 6;
+          grid-row: 3 / 6;
+        }
+      }
+    }
+    &.stack-start {
+      > * {
+        grid-column: 1 / 4;
+        grid-row: 3 / 4;
+        &:nth-child(2) {
+          grid-column: 2 / 5;
+          grid-row: 2 / 5;
+        }
+        &:nth-child(1) {
+          grid-column: 3 / 6;
+          grid-row: 1 / 6;
+        }
+      }
+    }
+    &.stack-end {
+      > * {
+        grid-column: 3 / 6;
+        grid-row: 3 / 4;
+        &:nth-child(2) {
+          grid-column: 2 / 5;
+          grid-row: 2 / 5;
+        }
+        &:nth-child(1) {
+          grid-column: 1 / 4;
+          grid-row: 1 / 6;
+        }
+      }
     }
   }
   .z-10 {
@@ -2349,11 +2585,20 @@
   .inline {
     display: inline;
   }
+  .inline-flex {
+    display: inline-flex;
+  }
   .table {
     display: table;
   }
   .h-6 {
     height: calc(var(--spacing) * 6);
+  }
+  .h-24 {
+    height: calc(var(--spacing) * 24);
+  }
+  .h-auto {
+    height: auto;
   }
   .h-dvh {
     height: 100dvh;
@@ -2612,6 +2857,15 @@
   .mask-repeat {
     mask-repeat: repeat;
   }
+  .fill-accent {
+    fill: var(--color-accent);
+  }
+  .fill-info {
+    fill: var(--color-info);
+  }
+  .fill-neutral {
+    fill: var(--color-neutral);
+  }
   .p-2 {
     padding: calc(var(--spacing) * 2);
   }
@@ -2641,6 +2895,9 @@
   }
   .font-mono {
     font-family: var(--font-mono);
+  }
+  .font-sans {
+    font-family: var(--font-sans);
   }
   .text-2xl {
     font-size: var(--text-2xl);
@@ -2687,6 +2944,9 @@
   }
   .text-primary {
     color: var(--color-primary);
+  }
+  .capitalize {
+    text-transform: capitalize;
   }
   .underline {
     text-decoration-line: underline;
@@ -2760,6 +3020,52 @@
       }
     }
   }
+  .btn-soft {
+    &:not(.btn-active, :hover, :active:focus, :focus-visible, :disabled, [disabled], .btn-disabled) {
+      --btn-shadow: "";
+      --btn-fg: var(--btn-color, var(--color-base-content));
+      --btn-bg: var(--btn-color, var(--color-base-content));
+      @supports (color: color-mix(in lab, red, red)) {
+        --btn-bg: color-mix(
+      in oklab,
+      var(--btn-color, var(--color-base-content)) 8%,
+      var(--color-base-100)
+    );
+      }
+      --btn-border: var(--btn-color, var(--color-base-content));
+      @supports (color: color-mix(in lab, red, red)) {
+        --btn-border: color-mix(
+      in oklab,
+      var(--btn-color, var(--color-base-content)) 10%,
+      var(--color-base-100)
+    );
+      }
+      --btn-noise: none;
+    }
+    @media (hover: none) {
+      &:hover:not(.btn-active, :active, :focus-visible, :disabled, [disabled], .btn-disabled) {
+        --btn-shadow: "";
+        --btn-fg: var(--btn-color, var(--color-base-content));
+        --btn-bg: var(--btn-color, var(--color-base-content));
+        @supports (color: color-mix(in lab, red, red)) {
+          --btn-bg: color-mix(
+        in oklab,
+        var(--btn-color, var(--color-base-content)) 8%,
+        var(--color-base-100)
+      );
+        }
+        --btn-border: var(--btn-color, var(--color-base-content));
+        @supports (color: color-mix(in lab, red, red)) {
+          --btn-border: color-mix(
+        in oklab,
+        var(--btn-color, var(--color-base-content)) 10%,
+        var(--color-base-100)
+      );
+        }
+        --btn-noise: none;
+      }
+    }
+  }
   .btn-sm {
     --fontsize: 0.75rem;
     --btn-p: 0.75rem;
@@ -2803,6 +3109,16 @@
       grid-column: span 2 / span 2;
     }
   }
+  .md\:col-span-4 {
+    @media (width >= 48rem) {
+      grid-column: span 4 / span 4;
+    }
+  }
+  .md\:col-span-5 {
+    @media (width >= 48rem) {
+      grid-column: span 5 / span 5;
+    }
+  }
   .md\:flex {
     @media (width >= 48rem) {
       display: flex;
@@ -2816,6 +3132,16 @@
   .md\:grid-cols-3 {
     @media (width >= 48rem) {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .md\:grid-cols-4 {
+    @media (width >= 48rem) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .md\:grid-cols-5 {
+    @media (width >= 48rem) {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
     }
   }
 }
@@ -4438,41 +4764,46 @@ end
 ===== END:app/controllers/party/addresses_controller.rb =====
 
 ===== BEGIN:app/controllers/party/emails_controller.rb =====
+# app/controllers/party/emails_controller.rb
 module Party
   class EmailsController < ApplicationController
     before_action :set_party
-    before_action :set_email, only: [:update, :destroy]
+    before_action :set_email, only: [:update, :destroy, :reveal]
 
     def index
-      render json: @party.emails.order(created_at: :desc)
+      @emails = @party.emails.order(is_primary: :desc, created_at: :asc)
     end
 
     def create
-      email = @party.emails.new(email_params)
+      email = @party.emails.build(email_params)
       if email.save
-        render json: email, status: :created
+        redirect_to party_party_path(@party.public_id), notice: "Email added"
       else
-        render json: { errors: email.errors.full_messages }, status: :unprocessable_entity
+        redirect_to party_party_path(@party.public_id), alert: email.errors.full_messages.to_sentence
       end
     end
 
     def update
       if @email.update(email_params)
-        render json: @email
+        redirect_to party_party_path(@party.public_id), notice: "Email updated"
       else
-        render json: { errors: @email.errors.full_messages }, status: :unprocessable_entity
+        redirect_to party_party_path(@party.public_id), alert: @email.errors.full_messages.to_sentence
       end
     end
 
     def destroy
       @email.destroy
-      head :no_content
+      redirect_to party_party_path(@party.public_id), notice: "Email deleted"
+    end
+
+    def reveal
+      render json: { value: @email.email }
     end
 
     private
 
     def set_party
-      @party = Party::Party.find_by!(public_id: params[:party_public_id])
+      @party = ::Party::Party.find_by!(public_id: params[:party_public_id])
     end
 
     def set_email
@@ -4480,7 +4811,7 @@ module Party
     end
 
     def email_params
-      params.require(:email).permit(:email_type_code, :email, :is_primary)
+      params.require(:email).permit(:email, :email_type_code, :is_primary, :_destroy)
     end
   end
 end
@@ -4625,73 +4956,101 @@ module Party
     rescue_from ActionController::ParameterMissing, with: :handle_bad_params
 
     def index
-      @parties = ::Party::Party
-        .includes(:person, :organization, :emails) # avoids N+1 when showing masked emails
-        .order(created_at: :desc)
+      @parties = ::Party::Party.includes(:person, :organization, :emails).order(created_at: :desc)
     end
 
     def show; end
 
     def new
-      @party = Party::Party.new(party_type: "person")
-      @party.build_person; @party.build_organization
+      @party = ::Party::Party.new(party_type: "person")
+      @party.build_person
+      @party.build_organization
       @party.addresses.build(country_code: "US") if @party.addresses.empty?
       @party.emails.build if @party.emails.empty?
+      @party.phones.build(country_alpha2: "US") if @party.phones.empty?
     end
 
     def edit
-      @party.build_person unless @party.person
+      @party.build_person       unless @party.person
       @party.build_organization unless @party.organization
       @party.addresses.build(country_code: "US") if @party.addresses.empty?
       @party.emails.build if @party.emails.empty?
+      @party.phones.build(country_alpha2: "US") if @party.phones.empty?
     end
 
+    # app/controllers/party/parties_controller.rb
     def create
-      if params[:add_email]
-        @party = Party::Party.new(scrub_email_params(party_params))
-        @party.emails.build
-        load_ref_options
+      raw = party_params
+
+      if params[:add_phone].present?
+        @party = ::Party::Party.new(raw)
+        @party.phones.build(country_alpha2: "US")
         render :new, status: :unprocessable_entity and return
       end
 
-      attrs = scrub_email_params(party_params).dup
+      if params[:add_email].present?
+        attrs = scrub_email_params(scrub_address_params(raw))
+        @party = ::Party::Party.new(attrs)
+        @party.emails.build
+        render :new, status: :unprocessable_entity and return
+      end
+
+      if params[:add_address].present?
+        attrs = scrub_email_params(scrub_address_params(raw))
+        @party = ::Party::Party.new(attrs)
+        @party.addresses.build(country_code: "US")
+        render :new, status: :unprocessable_entity and return
+      end
+
+      attrs = scrub_email_params(scrub_address_params(raw)).dup
       attrs.delete(:tax_id) if attrs[:tax_id].blank?
-      @party = Party::Party.new(attrs)
+      @party = ::Party::Party.new(attrs)
+
       if @party.save
         redirect_to party_party_path(@party.public_id), notice: "Party created"
       else
-        load_ref_options
         render :new, status: :unprocessable_entity
       end
     end
 
-
     def update
-      if params[:add_email]
-        @party.assign_attributes(scrub_email_params(party_params))
-        @party.emails.build
-        load_ref_options
+      raw = party_params
+
+      if params[:add_phone].present?
+        @party.assign_attributes(raw)
+        @party.phones.build(country_alpha2: "US")
         render :edit, status: :unprocessable_entity and return
       end
 
-      attrs = scrub_email_params(party_params).dup
+      if params[:add_email].present?
+        @party.assign_attributes(scrub_email_params(scrub_address_params(raw)))
+        @party.emails.build
+        render :edit, status: :unprocessable_entity and return
+      end
+
+      if params[:add_address].present?
+        @party.assign_attributes(scrub_email_params(scrub_address_params(raw)))
+        @party.addresses.build(country_code: "US")
+        render :edit, status: :unprocessable_entity and return
+      end
+
+      attrs = scrub_email_params(scrub_address_params(raw)).dup
       attrs.delete(:tax_id) if attrs[:tax_id].blank?
+
       if @party.update(attrs)
         redirect_to party_party_path(@party.public_id), notice: "Party updated"
       else
-        load_ref_options
         render :edit, status: :unprocessable_entity
       end
     end
+
 
     def destroy
       @party.destroy
       redirect_to party_parties_path, notice: "Party deleted"
     end
 
-    # Consider authorizing this action.
     def reveal_tax_id
-      # authorize @party
       render json: { value: @party.tax_id }
     end
 
@@ -4702,7 +5061,6 @@ module Party
     end
 
     def party_params
-      # param root matches Party::Party
       params.require(:party_party).permit(
         :party_type, :customer_number, :tax_id,
         person_attributes: [
@@ -4718,7 +5076,8 @@ module Party
         ],
         emails_attributes: [
           :id, :email, :email_type_code, :is_primary, :_destroy
-        ]
+        ],
+        phones_attributes: %i[id phone_type_code number_raw country_alpha2 phone_ext _destroy]
       )
     end
 
@@ -4727,21 +5086,56 @@ module Party
       @countries     = Ref::Country.order(:name)
       @org_types     = Ref::OrganizationType.order(:name)
       @email_types   = Ref::EmailType.order(:name)
+      @phone_types   = Ref::PhoneType.order(:name)
     end
 
     def handle_bad_params(_ex)
       @party ||= ::Party::Party.new
       flash.now[:alert] = "Invalid form submission."
-      render(action_name == "create" ? :new : :edit, status: :unprocessable_entity)
+      render(action_name == "create" ? :new : :edit, status: :unprocessable_content)
     end
 
-    private
+    # --- scrubbers ----------------------------------------------------------
+
+    # Drop blank NEW email rows; keep existing rows even if email field blank
     def scrub_email_params(attrs)
-      return attrs unless attrs[:emails_attributes].present?
-      attrs[:emails_attributes].each_value do |ea|
-        ea.delete(:email) if ea[:id].present? && ea[:email].to_s.strip.blank?
+      attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_unsafe_h : attrs
+      attrs = attrs.deep_dup
+
+      ehash = attrs[:emails_attributes]
+      return attrs unless ehash.is_a?(Hash)
+
+      cleaned = ehash.values.map { |h| h.symbolize_keys }
+
+      cleaned.each do |h|
+        h.delete(:email) if h[:id].present? && h[:email].to_s.strip.blank?
       end
-      attrs[:emails_attributes].delete_if { |_k, ea| ea[:id].blank? && ea[:email].to_s.strip.blank? }
+
+      cleaned.select! do |h|
+        !(h[:id].blank? && h[:email].to_s.strip.blank?)
+      end
+
+      attrs[:emails_attributes] = cleaned.each_with_index.to_h { |h, i| [i.to_s, h] }
+      attrs
+    end
+
+    # Drop blank NEW address rows; keep existing rows
+    def scrub_address_params(attrs)
+      attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_unsafe_h : attrs
+      attrs = attrs.deep_dup
+
+      ahash = attrs[:addresses_attributes]
+      return attrs unless ahash.is_a?(Hash)
+
+      cleaned = ahash.values.map { |h| h.symbolize_keys }
+
+      content_keys = %i[line1 line2 line3 locality region_code postal_code country_code address_type_code is_primary]
+
+      cleaned.select! do |h|
+        h[:id].present? || content_keys.any? { |k| h[k].to_s.strip.present? }
+      end
+
+      attrs[:addresses_attributes] = cleaned.each_with_index.to_h { |h, i| [i.to_s, h] }
       attrs
     end
   end
@@ -4906,6 +5300,22 @@ module NavigationHelper
   end
 end
 ===== END:app/helpers/navigation_helper.rb =====
+
+===== BEGIN:app/helpers/phone_helper.rb =====
+module PhoneHelper
+  def phone_country_options
+    if defined?(ISO3166::Country)
+      ISO3166::Country.all
+        .select(&:alpha2)
+        .map { |c| ["#{c.emoji_flag} #{c.translations[I18n.locale.to_s] || c.name}", c.alpha2] }
+        .sort_by(&:first)
+    else
+      # Minimal fallback
+      [["🇺🇸 United States", "US"], ["🇨🇦 Canada", "CA"], ["🇬🇧 United Kingdom", "GB"]]
+    end
+  end
+end
+===== END:app/helpers/phone_helper.rb =====
 
 ===== BEGIN:app/javascript/application.js =====
 // Configure your import map in config/importmap.rb.
@@ -5138,22 +5548,22 @@ module Party
     self.table_name = "party_emails"
 
     belongs_to :party, class_name: "Party::Party", inverse_of: :emails
+    belongs_to :email_type, class_name: "Ref::EmailType",
+      foreign_key: :email_type_code, primary_key: :code, optional: true
 
     # Encryption + blind index
     encrypts :email, deterministic: true
     blind_index :email,
       key: BlindIndex.master_key,
-      attribute: :email_bidx,
       encode: false,
-      expression: ->(v) { v.to_s.strip.downcase }
+      expression: ->(v) { v.to_s.strip.downcase }  # column is email_bidx by default
 
-    # Lookups
-    belongs_to :email_type, class_name: "Ref::EmailType",
-      foreign_key: :email_type_code, primary_key: :code, optional: true
-
-    # Basic validations
+    # Normalize
     before_validation { self.email = email.to_s.strip.downcase.presence }
-    
+
+    # If the blind index is missing (legacy rows), force recompute
+    before_validation :ensure_email_bidx
+
     validates :email,
       presence: true,
       format: { with: /\A[^@\s]+@[^@\s]+\z/ },
@@ -5161,12 +5571,9 @@ module Party
 
     validates :party_id, uniqueness: { scope: :email_bidx }
 
-    # Ensure only one primary per party
     validate :only_one_primary, if: -> { is_primary? }
-
     before_save :set_domain_and_masked
 
-    # Masking for display: e****l@yahoo.com
     def masked
       return email_masked if email_masked.present?
       self.class.mask(email)
@@ -5183,8 +5590,11 @@ module Party
 
     private
 
-    def normalize_email
-      self.email = email.to_s.strip.downcase.presence
+    def ensure_email_bidx
+      # If we have an email but no blind index, reassign to trigger blind_index callback.
+      if email.present? && email_bidx.nil?
+        self.email = email
+      end
     end
 
     def set_domain_and_masked
@@ -5195,7 +5605,7 @@ module Party
     end
 
     def only_one_primary
-      sibling = party.emails.where(is_primary: true).where.not(id: id).exists?
+      sibling = party&.emails&.where(is_primary: true)&.where.not(id: id)&.exists?
       errors.add(:is_primary, "already have a primary email") if sibling
     end
   end
@@ -5298,7 +5708,7 @@ module Party
     has_one  :organization, class_name: "Party::Organization", inverse_of: :party, dependent: :destroy
     has_many :phones,       class_name: "Party::Phone",        inverse_of: :party, dependent: :destroy
     has_many :addresses,    class_name: "Party::Address",      inverse_of: :party, dependent: :destroy
-    has_many :emails,       class_name: "Party::Email",        inverse_of: :party, dependent: :destroy
+    has_many :emails,        class_name: "Party::Email",       inverse_of: :party, dependent: :destroy
     has_many :group_memberships, class_name: "Party::GroupMembership",
          inverse_of: :party, dependent: :destroy
     has_many :groups, through: :group_memberships, class_name: "Party::Group"
@@ -5314,10 +5724,16 @@ module Party
     scope :by_public_id,  ->(pid) { where(public_id: pid) }
     scope :by_customer_number, ->(num) { where(customer_number: num) }
 
-    accepts_nested_attributes_for :person, :organization, :addresses, allow_destroy: true
-    accepts_nested_attributes_for :emails,
-      allow_destroy: true,
-      reject_if: ->(h) { h['id'].blank? && h['email'].to_s.strip.blank? }
+    accepts_nested_attributes_for :person, :organization, allow_destroy: true
+    
+    accepts_nested_attributes_for :addresses, allow_destroy: true,
+      reject_if: ->(h) { %i[line1 line2 line3 locality region_code postal_code country_code].all? { |k| h[k].to_s.strip.blank? } }
+      
+    accepts_nested_attributes_for :emails, allow_destroy: true,
+      reject_if: ->(h) { h['email'].to_s.strip.blank? }
+
+    accepts_nested_attributes_for :phones, allow_destroy: true,
+      reject_if: ->(h) { h['number_raw'].to_s.strip.blank? && h['phone_e164'].to_s.strip.blank? }
 
     before_validation :ensure_public_id, :ensure_customer_number, on: :create
 
@@ -5364,6 +5780,8 @@ module Party
     end
     def to_s = display_name
 
+    def to_param = public_id
+
     private
 
     def ensure_public_id
@@ -5408,9 +5826,29 @@ module Party
 
     belongs_to :party, class_name: "Party::Party", inverse_of: :phones
     belongs_to :phone_type, class_name: "Ref::PhoneType",
-               foreign_key: :phone_type_code, primary_key: :code, optional: true, inverse_of: :phones
+      foreign_key: :phone_type_code, primary_key: :code, optional: true
 
-    validates :number, presence: true
+    attr_accessor :number_raw, :country_alpha2
+
+    before_validation :normalize_number
+
+    private
+
+    def normalize_number
+      raw = number_raw.to_s.strip
+      return if raw.blank? # let reject_if or scrubbing drop empty rows
+
+      region = raw.start_with?("+") ? nil : (country_alpha2.presence || "US")
+      parsed = Phonelib.parse(raw, region)
+      unless parsed.valid?
+        errors.add(:number_raw, "is not a valid phone number")
+        return
+      end
+
+      self.phone_e164 = parsed.e164
+      # keep whatever came from the form; column is phone_ext
+      self.phone_ext = self.phone_ext.to_s.strip.presence
+    end
   end
 end
 
@@ -5540,21 +5978,10 @@ end
 ===== BEGIN:app/models/ref/phone_type.rb =====
 module Ref
   class PhoneType < ApplicationRecord
-    self.table_name  = "ref_phone_types"
-    self.primary_key = "code"
-
-    has_many :phones,
-      class_name: "Party::Phone",
-      foreign_key: :phone_type_code,
-      primary_key: :code,
-      inverse_of: :phone_type,
-      dependent: :restrict_with_error
-
-    validates :code, presence: true
-    validates :name, presence: true
+    self.table_name = "ref_phone_types" # optional if conventional
+    scope :enabled, -> { where(disabled_at: nil) }  # requires a disabled_at column
   end
 end
-
 ===== END:app/models/ref/phone_type.rb =====
 
 ===== BEGIN:app/models/ref/region.rb =====
@@ -5691,118 +6118,69 @@ end
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
     <script>
-    (function() {
-      const KEY = 'daisy-theme';
-      const root = document.documentElement;
-      const saved = localStorage.getItem(KEY);
-      if (saved) root.setAttribute('data-theme', saved);
-
-      document.addEventListener('change', function(e){
-        const t = e.target;
-        if (t && t.classList && t.classList.contains('theme-controller')) {
-          const val = t.value;
-          root.setAttribute('data-theme', val);
-          try { localStorage.setItem(KEY, val); } catch(_) {}
-        }
-      });
-
-      document.addEventListener('DOMContentLoaded', function(){
-        const current = root.getAttribute('data-theme') || 'corporate';
-        document.querySelectorAll('.theme-controller').forEach(function(el){
-          el.checked = (el.value === current);
+      (function(){
+        const KEY='daisy-theme',root=document.documentElement,saved=localStorage.getItem(KEY);
+        if(saved) root.setAttribute('data-theme',saved);
+        document.addEventListener('change',function(e){
+          const t=e.target;
+          if(t && t.classList && t.classList.contains('theme-controller')){
+            const val=t.value; root.setAttribute('data-theme',val);
+            try{localStorage.setItem(KEY,val);}catch(_){}
+          }
         });
-      });
-    })();
-  </script>
-  <%= favicon_link_tag "favicon.svg", type: "image/svg+xml" %>
-
+        document.addEventListener('DOMContentLoaded',function(){
+          const current=root.getAttribute('data-theme')||'corporate';
+          document.querySelectorAll('.theme-controller').forEach(function(el){
+            el.checked=(el.value===current);
+          });
+        });
+      })();
+    </script>
   </head>
-  <div class="container mx-auto flex items-center justify-between p-3">
-  <a href="<%= root_path %>" class="flex items-center gap-2">
-  <!-- Monogram shield logo (Option 1) -->
-  <svg xmlns="http://www.w3.org/2000/svg" width="225" height="50" viewBox="0 0 160 40" role="img" aria-label="BankEncoRRe">
-  <defs>
-    <style>
-      .brand-fill{fill:#1f3c88} /* primary */
-      .text{font:600 18px ui-sans-serif,system-ui,sans-serif;fill:#1f3c88}
-    </style>
-  </defs>
-  <g transform="translate(0,2)">
-    <path class="brand-fill" d="M10 2h20l4 6v12c0 10-9 14-14 16C15 34 6 30 6 20V8l4-6z"/>
-    <path fill="#fff" d="M15 10h10v2H15zm0 5h10v2H15zm0 5h7v2h-7z"/>
-  </g>
-  <text class="text" x="48" y="24">BankEncoRRe</text>
-</svg>
 
-  <span class="text-lg font-semibold">YourApp</span>
-</a>
+  <body>
+    <div class="container mx-auto flex items-center justify-between p-3">
+      <a href="<%= root_path %>" class="flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="225" height="50" viewBox="0 0 160 40" role="img" aria-label="BankEncoRRe"></svg>
+      </a>
 
-  <div class="flex items-center gap-2">
-    <nav class="hidden md:flex space-x-2">
-      <%= link_to "Home", root_path, class: "btn btn-ghost btn-sm" %>
-      <%= link_to "Parties", party_parties_path, class: "btn btn-ghost btn-sm" %>
-      <%= link_to "Cases", "#", class: "btn btn-ghost btn-sm" %>
-      <%= link_to "Reports", "#", class: "btn btn-ghost btn-sm" %>
-    </nav>
-    <form action="#" method="get" class="flex-1 max-w-xs">
-      <label class="input w-full">
-        <input type="search" name="q" placeholder="Search…" aria-label="Search" />
-      </label>
-    </form>
+      <div class="flex items-center gap-2">
+        <nav class="hidden md:flex space-x-2">
+          <%= link_to "Home", root_path, class: "btn btn-ghost btn-sm" %>
+          <%= link_to "Parties", party_parties_path, class: "btn btn-ghost btn-sm" %>
+          <%= link_to "Cases", "#", class: "btn btn-ghost btn-sm" %>
+          <%= link_to "Reports", "#", class: "btn btn-ghost btn-sm" %>
+        </nav>
 
-    <!-- User menu + theme switch -->
-    <div class="dropdown dropdown-end">
-      <div tabindex="0" role="button" class="btn btn-ghost btn-sm">User</div>
-      <div tabindex="0" class="dropdown-content z-10 bg-base-100 rounded-box shadow p-3 w-64">
-        <div class="mb-2 text-sm font-semibold">Theme</div>
-        <div class="grid grid-cols-2 gap-2 text-sm">
-          <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="corporate" class="theme-controller" />
-            <span>Corporate</span>
+        <form action="#" method="get" class="flex-1 max-w-xs">
+          <label class="input w-full">
+            <input type="search" name="q" placeholder="Search…" aria-label="Search" />
           </label>
-          <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="business" class="theme-controller" />
-            <span>Business</span>
-          </label>
-          <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="light" class="theme-controller" />
-            <span>Light</span>
-          </label>
-          <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="dark" class="theme-controller" />
-            <span>Dark</span>
-          </label>
-          <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="lofi" class="theme-controller" />
-            <span>Lo-fi</span>
-          </label>
-          <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="emerald" class="theme-controller" />
-            <span>Emerald</span>
-          </label>
-            <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="retro" class="theme-controller" />
-            <span>Retro</span>
-          </label>
-          </label>
-            <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="autumn" class="theme-controller" />
-            <span>Autumn</span>
-          </label>
+        </form>
+
+        <div class="dropdown dropdown-end">
+          <div tabindex="0" role="button" class="btn btn-ghost btn-sm">User</div>
+          <div tabindex="0" class="dropdown-content z-10 bg-base-100 rounded-box shadow p-3 w-64">
+            <div class="mb-2 text-sm font-semibold">Theme</div>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <% ["corporate","business","light","dark","lofi","emerald","retro","autumn","caramellate"].each do |t| %>
+                <label class="label cursor-pointer justify-start gap-2">
+                  <input type="radio" name="theme" value="<%= t %>" class="theme-controller" />
+                  <span><%= t.capitalize %></span>
+                </label>
+              <% end %>
+            </div>
+
+            <div class="divider my-2"></div>
+            <ul class="menu">
+              <li><a href="#">Profile</a></li>
+              <li><a href="#">Sign out</a></li>
+            </ul>
+          </div>
         </div>
-
-        <div class="divider my-2"></div>
-        <ul class="menu">
-          <li><a href="#">Profile</a></li>
-          <li><a href="#">Sign out</a></li>
-        </ul>
       </div>
     </div>
-  </div>
-</div>
 
-
-    <!-- Main -->
     <main class="container mx-auto p-6">
       <% flash.each do |type, msg| %>
         <% tone = { notice: "info", alert: "warning", error: "error", success: "success" }[type.to_sym] || "info" %>
@@ -5811,7 +6189,6 @@ end
       <%= yield %>
     </main>
 
-    <!-- Optional footer -->
     <footer class="border-t">
       <div class="container mx-auto p-4 text-sm opacity-70">
         © <%= Time.current.year %> YourApp · <a href="#" class="link">Privacy</a>
@@ -5819,6 +6196,7 @@ end
     </footer>
   </body>
 </html>
+
 ===== END:app/views/layouts/application.html.erb =====
 
 ===== BEGIN:app/views/layouts/mailer.html.erb =====
@@ -5901,6 +6279,16 @@ end
         <%= f.text_field :postal_code, class: "input input-bordered w-full" %>
       </div>
     </div>
+    <div class="col-span-2 text-right">
+       <% if f.object.persisted? %>
+          <%= f.check_box :_destroy, include_hidden: false, id: "#{f.object.model_name.singular}_#{f.object.id}_destroy" %>
+          <%= f.label :_destroy, "Remove", for: "#{f.object.model_name.singular}_#{f.object.id}_destroy", class: "text-sm" %>
+        <% else %>
+          <%= f.hidden_field :_destroy, value: "0", id: nil %>
+          <button type="button" class="btn btn-ghost btn-sm" data-action="nested-form#remove">Remove</button>
+        <% end %>
+      </div>
+    </div>
   </div>
 
   <div class="flex items-center justify-between mt-3">
@@ -5952,15 +6340,15 @@ end
   </div>
 
   <div class="col-span-1 text-right">
-    <% if f.object.persisted? %>
-      <%= f.check_box :_destroy %>
-      <%= f.label :_destroy, "Remove", class: "text-sm" %>
-    <% else %>
-      <button type="button" class="btn btn-ghost btn-sm" data-action="nested-form#remove">Remove</button>
-    <% end %>
+      <% if f.object.persisted? %>
+        <%= f.check_box :_destroy, include_hidden: false, id: "#{f.object.model_name.singular}_#{f.object.id}_destroy" %>
+        <%= f.label :_destroy, "Remove", for: "#{f.object.model_name.singular}_#{f.object.id}_destroy", class: "text-sm" %>
+      <% else %>
+        <%= f.hidden_field :_destroy, value: "0", id: nil %>
+        <button type="button" class="btn btn-ghost btn-sm" data-action="nested-form#remove">Remove</button>
+      <% end %>
   </div>
 
-  <%# Per-row errors only (remove top-level duplication) %>
   <% if f.object.errors.any? %>
     <div class="col-span-12 text-error text-sm">
       <ul class="list-disc list-inside">
@@ -5974,22 +6362,20 @@ end
 
 ===== BEGIN:app/views/party/parties/_form.html.erb =====
 <%= form_with model: @party,
+              scope: :party_party,
               url: (@party.persisted? ? party_party_path(@party.public_id) : party_parties_path),
               data: { turbo: false }, local: true, novalidate: true, class: "space-y-6" do |f| %>
 
-  <% if party.errors.any? || party.person&.errors&.any? || party.addresses.any? { |a| a.errors.any? } || party.emails.any? { |e| e.errors.any? } %>
+  <% if @party.errors.any? || @party.person&.errors&.any? || @party.addresses.any? { |a| a.errors.any? } || @party.emails.any? { |e| e.errors.any? } %>
     <div class="alert alert-error">
       <b>There were problems:</b>
       <ul class="mt-2 list-disc list-inside">
-        <% party.errors.full_messages.each { |m| %><li><%= m %></li><% } %>
-        <% if party.person %>
-          <% party.person.errors.full_messages.each { |m| %><li>Person: <%= m %></li><% } %>
+        <% @party.errors.full_messages.each { |m| %><li><%= m %></li><% } %>
+        <% if @party.person %>
+          <% @party.person.errors.full_messages.each { |m| %><li>Person: <%= m %></li><% } %>
         <% end %>
-        <% party.addresses.each_with_index do |a, i| %>
+        <% @party.addresses.each_with_index do |a, i| %>
           <% a.errors.full_messages.each { |m| %><li>Address <%= i+1 %>: <%= m %></li><% } %>
-        <% end %>
-        <% party.emails.each_with_index do |e, i| %>
-          <% e.errors.full_messages.each { |m| %><li>Email <%= i+1 %>: <%= m %></li><% } %>
         <% end %>
       </ul>
     </div>
@@ -6007,14 +6393,11 @@ end
 
       <div>
         <label class="label"><span class="label-text">Tax ID</span></label>
-        <p class="text-sm opacity-70 mb-2">Current: <%= party.tax_id_masked || "[not set]" %></p>
+        <p class="text-sm opacity-70 mb-2">Current: <%= @party.tax_id_masked || "[not set]" %></p>
         <%= f.password_field :tax_id,
               placeholder: "Enter to change (leave blank to keep)",
               class: "input input-bordered w-full",
-              value: nil,
-              autocomplete: "off",
-              autocapitalize: "off",
-              inputmode: "numeric" %>
+              value: nil, autocomplete: "off", autocapitalize: "off", inputmode: "numeric" %>
       </div>
 
       <!-- Person -->
@@ -6078,60 +6461,63 @@ end
     </div>
   </div>
 
-  <!-- Addresses -->
-  <div class="card bg-base-100 shadow" data-controller="nested-form">
-    <div class="card-body space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="card-title">Addresses</h2>
-        <button class="btn btn-sm" data-action="nested-form#add" type="button">Add address</button>
-      </div>
-
-      <div data-nested-form-target="container">
-        <%= f.fields_for :addresses do |af| %>
-          <%= render "address_fields", f: af %>
-        <% end %>
-      </div>
-
-      <template data-nested-form-target="template">
-        <%= f.fields_for :addresses, Party::Address.new(country_code: "US"), child_index: "NEW_ADDRESS" do |af| %>
-          <%= render "address_fields", f: af %>
-        <% end %>
-      </template>
+<!-- app/views/party/parties/_form.html.erb -->
+<div class="card bg-base-100 shadow">
+  <div class="card-body space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="card-title">Addresses</h2>
+      <%= button_tag "Add address",
+            type: "submit",
+            name: "add_address",
+            value: "1",
+            class: "btn btn-sm" %>
     </div>
+
+    <%= f.fields_for :addresses do |af| %>
+      <%= render "party/parties/address_fields", f: af, address_types: @address_types, countries: @countries %>
+    <% end %>
   </div>
+</div>
 
-  <!-- Emails -->
-  <div class="card bg-base-100 shadow">
-    <div class="card-body space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="card-title">Emails</h2>
-        <%= button_tag "Add another email",
-              type: "submit", name: "add_email", value: "1",
-              class: "btn btn-sm" %>
-      </div>
-
-      <%# existing emails (masked, no email input) %>
-      <%= f.fields_for :emails do |ef| %>
-        <% if ef.object.persisted? %>
-          <%= render "party/parties/email_fields", f: ef, email_types: @email_types %>
-        <% end %>
-      <% end %>
-
-      <%# newly added rows (built in controller or on validation failure) %>
-      <% @party.emails.select(&:new_record?).each do |new_email| %>
-        <%= f.fields_for :emails, new_email do |ef| %>
-          <%= render "party/parties/email_fields", f: ef, email_types: @email_types %>
-        <% end %>
-      <% end %>
+<div class="card bg-base-100 shadow">
+  <div class="card-body space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="card-title">Phones</h2>
+      <%= button_tag "Add phone",
+            type: "submit",
+            name: "add_phone",
+            value: "1",
+            class: "btn btn-sm" %>
     </div>
+
+    <%= f.fields_for :phones do |pf| %>
+      <%= render "party/parties/phone_fields", f: pf, phone_types: @phone_types, countries: @countries %>
+    <% end %>
   </div>
+</div>
+
+<div class="card bg-base-100 shadow">
+  <div class="card-body space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="card-title">Emails</h2>
+      <%= button_tag "Add email",
+            type: "submit",
+            name: "add_email",
+            value: "1",
+            class: "btn btn-sm" %>
+    </div>
+
+    <%= f.fields_for :emails do |ef| %>
+      <%= render "party/parties/email_fields", f: ef, email_types: @email_types %>
+    <% end %>
+  </div>
+</div>
 
   <div class="flex gap-2">
-    <%= f.submit (party.persisted? ? "Update" : "Create"), class: "btn btn-primary", formnovalidate: true %>
-    <%= link_to "Cancel", (party.persisted? ? party_party_path(party.public_id) : party_parties_path), class: "btn" %>
+    <%= f.submit (@party.persisted? ? "Update" : "Create"), class: "btn btn-primary" %>
+    <%= link_to "Cancel", (@party.persisted? ? party_party_path(@party.public_id) : party_parties_path), class: "btn" %>
   </div>
 <% end %>
-
 ===== END:app/views/party/parties/_form.html.erb =====
 
 ===== BEGIN:app/views/party/parties/index.html.erb =====
@@ -6245,6 +6631,40 @@ end
 
 ===== END:app/views/party/parties/_person.html.erb =====
 
+===== BEGIN:app/views/party/parties/_phone_fields.html.erb =====
+<!-- app/views/party/parties/_phone_fields.html.erb -->
+<div class="grid md:grid-cols-5 gap-4">
+  <div>
+    <label class="label"><span class="label-text">Type</span></label>
+    <%= f.collection_select :phone_type_code, @phone_types, :code, :name,
+          { include_blank: "Select type" }, class: "select select-bordered w-full" %>
+  </div>
+
+  <div>
+    <label class="label"><span class="label-text">Country</span></label>
+    <%= f.select :country_alpha2, phone_country_options, {},
+          class: "select select-bordered w-full" %>
+  </div>
+
+  <div class="md:col-span-2">
+    <label class="label"><span class="label-text">Number</span></label>
+    <%= f.text_field :number_raw, value: f.object.number_raw,
+          class: "input input-bordered w-full", placeholder: "(555) 123-4567 x89" %>
+  </div>
+
+  <div>
+    <label class="label"><span class="label-text">Ext</span></label>
+    <%= f.text_field :phone_ext, class: "input input-bordered w-full" %>
+  </div>
+
+  <div class="md:col-span-5 text-right">
+    <%= f.check_box :_destroy %>
+    <%= f.label :_destroy, "Remove", class: "text-sm" %>
+  </div>
+</div>
+
+===== END:app/views/party/parties/_phone_fields.html.erb =====
+
 ===== BEGIN:app/views/party/parties/show.html.erb =====
 <%# Header %>
 <div class="p-6">
@@ -6254,7 +6674,7 @@ end
       <%= link_to "Edit", edit_party_party_path(@party.public_id), class: "btn btn-primary btn-sm" %>
       <%= link_to "Delete", party_party_path(@party.public_id),
             data: { turbo_method: :delete, turbo_confirm: "Delete this party?" },
-            class: "btn btn-outline btn-error btn-sm" %>
+            class: "btn btn-soft btn-error btn-sm" %>
       <%= link_to "Back", party_parties_path, class: "btn btn-ghost btn-sm" %>
     </div>
   </div>
@@ -6345,7 +6765,7 @@ end
   </div>
 
   <% @party.addresses.each do |addr| %>
-    <div class="border rounded p-3 flex items-center justify-between">
+    <div class="bg-base-100 shadow p-3 flex items-center justify-between">
       <div>
         <div><%= addr.line1 %> <%= addr.line2 %></div>
         <div><%= addr.locality %>, <%= addr.region_code %> <%= addr.postal_code %></div>
@@ -7013,6 +7433,13 @@ Rails.application.config.filter_parameters += [
 
 ===== END:config/initializers/inflections.rb =====
 
+===== BEGIN:config/initializers/phonelib.rb =====
+# config/initializers/phonelib.rb
+Phonelib.default_country = "US"
+Phonelib.strict_check = false
+
+===== END:config/initializers/phonelib.rb =====
+
 ===== BEGIN:config/locales/en.yml =====
 # Files in the config/locales directory are used for internationalization and
 # are automatically loaded by Rails. If you want to use locales other than
@@ -7134,7 +7561,6 @@ production:
 ===== END:config/recurring.yml =====
 
 ===== BEGIN:config/routes.rb =====
-# config/routes.rb
 Rails.application.routes.draw do
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
@@ -7150,7 +7576,7 @@ Rails.application.routes.draw do
       resource  :organization, only: %i[show create update destroy]
 
       resources :emails, only: %i[index create update destroy] do
-        member { get :reveal } # /party/parties/:party_public_id/emails/:id/reveal
+        member { get :reveal } # /party/parties/:public_id/emails/:id/reveal
       end
       resources :phones,    only: %i[index create update destroy]
       resources :addresses, only: %i[index create update destroy]
@@ -7161,15 +7587,10 @@ Rails.application.routes.draw do
     end
 
     resources :links, only: %i[index create destroy]
-
-    resources :parties, param: :public_id do
-      resources :addresses, module: :party, only: [:destroy]
-    end
   end
 
-  # ⬇️ Step 2: Regions endpoint for dependent selects
   namespace :ref do
-    resources :regions, only: :index  # /ref/regions?country=US -> [{code,name}]
+    resources :regions, only: :index  # /ref/regions?country=US
   end
 end
 

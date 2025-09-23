@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 module Party
   class Email < ApplicationRecord
+    include SinglePrimary 
     self.table_name = "party_emails"
 
     belongs_to :party, class_name: "Party::Party", inverse_of: :emails

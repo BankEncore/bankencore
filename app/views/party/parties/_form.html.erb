@@ -98,50 +98,44 @@
     </div>
   </div>
 
-   <!-- Addresses -->
-  <div class="card bg-base-100 shadow">
-    <div class="card-body space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="card-title">Addresses</h2>
-        <%= button_tag "Add address", type: "submit", name: "add_address", value: "1", class: "btn btn-sm" %>
-      </div>
-
-      <%= f.fields_for :addresses do |af| %>
-        <% if af.object.persisted? %>
-          <%= render "party/parties/address_fields", f: af, address_types: @address_types, countries: @countries %>
-        <% end %>
-      <% end %>
-
-      <% @party.addresses.select(&:new_record?).each do |addr| %>
-        <%= f.fields_for :addresses, addr do |af| %>
-          <%= render "party/parties/address_fields", f: af, address_types: @address_types, countries: @countries %>
-        <% end %>
-      <% end %>
-        <div class="col-span-2 text-right">
-          <% if f.object.persisted? %>
-            <%= f.check_box :_destroy %>
-            <%= f.label :_destroy, "Remove", class: "text-sm" %>
-          <% else %>
-            <button type="button" class="btn btn-ghost btn-sm" data-action="nested-form#remove">Remove</button>
-          <% end %>
-        </div>
-      </div>
+<!-- Addresses -->
+<div class="card bg-base-100 shadow">
+  <div class="card-body space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="card-title">Addresses</h2>
+      <%= button_tag "Add address", type: "submit", name: "add_address", value: "1", class: "btn btn-sm" %>
     </div>
+    <%= f.fields_for :addresses do |af| %>
+      <%= render "party/parties/address_fields", f: af, address_types: @address_types, countries: @countries %>
+    <% end %>
   </div>
+</div>
 
-  <!-- Emails -->
-  <div class="card bg-base-100 shadow">
-    <div class="card-body space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="card-title">Emails</h2>
-        <%= button_tag "Add email", type: "submit", name: "add_email", value: "1", class: "btn btn-sm" %>
-      </div>
-
-      <%= f.fields_for :emails do |ef| %>
-        <%= render "party/parties/email_fields", f: ef, email_types: @email_types %>
-      <% end %>
+<!-- Phones -->
+<div class="card bg-base-100 shadow">
+  <div class="card-body space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="card-title">Phones</h2>
+      <%= button_tag "Add phone", type: "submit", name: "add_phone", value: "1", class: "btn btn-sm" %>
     </div>
+    <%= f.fields_for :phones do |pf| %>
+      <%= render "party/parties/phone_fields", f: pf, phone_types: @phone_types %>
+    <% end %>
   </div>
+</div>
+
+<!-- Emails -->
+<div class="card bg-base-100 shadow">
+  <div class="card-body space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="card-title">Emails</h2>
+      <%= button_tag "Add email", type: "submit", name: "add_email", value: "1", class: "btn btn-sm" %>
+    </div>
+    <%= f.fields_for :emails do |ef| %>
+      <%= render "party/parties/email_fields", f: ef, email_types: @email_types %>
+    <% end %>
+  </div>
+</div>
 
   <div class="flex gap-2">
     <%= f.submit (@party.persisted? ? "Update" : "Create"), class: "btn btn-primary" %>

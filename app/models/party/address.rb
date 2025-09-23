@@ -1,6 +1,7 @@
 module Party
   class Address < ApplicationRecord
     self.table_name = "party_addresses"
+    include SinglePrimary
 
     belongs_to :party, class_name: "Party::Party", foreign_key: :party_id, inverse_of: :addresses
 

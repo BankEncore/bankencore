@@ -8,109 +8,69 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
     <script>
-    (function() {
-      const KEY = 'daisy-theme';
-      const root = document.documentElement;
-      const saved = localStorage.getItem(KEY);
-      if (saved) root.setAttribute('data-theme', saved);
-
-      document.addEventListener('change', function(e){
-        const t = e.target;
-        if (t && t.classList && t.classList.contains('theme-controller')) {
-          const val = t.value;
-          root.setAttribute('data-theme', val);
-          try { localStorage.setItem(KEY, val); } catch(_) {}
-        }
-      });
-
-      document.addEventListener('DOMContentLoaded', function(){
-        const current = root.getAttribute('data-theme') || 'corporate';
-        document.querySelectorAll('.theme-controller').forEach(function(el){
-          el.checked = (el.value === current);
+      (function(){
+        const KEY='daisy-theme',root=document.documentElement,saved=localStorage.getItem(KEY);
+        if(saved) root.setAttribute('data-theme',saved);
+        document.addEventListener('change',function(e){
+          const t=e.target;
+          if(t && t.classList && t.classList.contains('theme-controller')){
+            const val=t.value; root.setAttribute('data-theme',val);
+            try{localStorage.setItem(KEY,val);}catch(_){}
+          }
         });
-      });
-    })();
-  </script>
-
+        document.addEventListener('DOMContentLoaded',function(){
+          const current=root.getAttribute('data-theme')||'corporate';
+          document.querySelectorAll('.theme-controller').forEach(function(el){
+            el.checked=(el.value===current);
+          });
+        });
+      })();
+    </script>
   </head>
-  <div class="container mx-auto flex items-center justify-between p-3">
-  <a href="<%= root_path %>" class="flex items-center gap-2">
-  <!-- Monogram shield logo (Option 1) -->
-  <svg xmlns="http://www.w3.org/2000/svg" width="225" height="50" viewBox="0 0 160 40" role="img" aria-label="BankEncoRRe" />
-  <!-- <span class="text-lg font-semibold">YourApp</span> -->
-</a>
 
-  <div class="flex items-center gap-2">
-    <nav class="hidden md:flex space-x-2">
-      <%= link_to "Home", root_path, class: "btn btn-ghost btn-sm" %>
-      <%= link_to "Parties", party_parties_path, class: "btn btn-ghost btn-sm" %>
-      <%= link_to "Cases", "#", class: "btn btn-ghost btn-sm" %>
-      <%= link_to "Reports", "#", class: "btn btn-ghost btn-sm" %>
-    </nav>
-    <form action="#" method="get" class="flex-1 max-w-xs">
-      <label class="input w-full">
-        <input type="search" name="q" placeholder="Search…" aria-label="Search" />
-      </label>
-    </form>
+  <body>
+    <div class="container mx-auto flex items-center justify-between p-3">
+      <a href="<%= root_path %>" class="flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="225" height="50" viewBox="0 0 160 40" role="img" aria-label="BankEncoRRe"></svg>
+      </a>
 
-    <!-- User menu + theme switch -->
-    <div class="dropdown dropdown-end">
-      <div tabindex="0" role="button" class="btn btn-ghost btn-sm">User</div>
-      <div tabindex="0" class="dropdown-content z-10 bg-base-100 rounded-box shadow p-3 w-64">
-        <div class="mb-2 text-sm font-semibold">Theme</div>
-        <div class="grid grid-cols-2 gap-2 text-sm">
-          <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="corporate" class="theme-controller" />
-            <span>Corporate</span>
+      <div class="flex items-center gap-2">
+        <nav class="hidden md:flex space-x-2">
+          <%= link_to "Home", root_path, class: "btn btn-ghost btn-sm" %>
+          <%= link_to "Parties", party_parties_path, class: "btn btn-ghost btn-sm" %>
+          <%= link_to "Cases", "#", class: "btn btn-ghost btn-sm" %>
+          <%= link_to "Reports", "#", class: "btn btn-ghost btn-sm" %>
+        </nav>
+
+        <form action="#" method="get" class="flex-1 max-w-xs">
+          <label class="input w-full">
+            <input type="search" name="q" placeholder="Search…" aria-label="Search" />
           </label>
-          <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="business" class="theme-controller" />
-            <span>Business</span>
-          </label>
-          <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="light" class="theme-controller" />
-            <span>Light</span>
-          </label>
-          <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="dark" class="theme-controller" />
-            <span>Dark</span>
-          </label>
-          <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="lofi" class="theme-controller" />
-            <span>Lo-fi</span>
-          </label>
-          <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="emerald" class="theme-controller" />
-            <span>Emerald</span>
-          </label>
-            <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="retro" class="theme-controller" />
-            <span>Retro</span>
-          </label>
-          </label>
-            <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="autumn" class="theme-controller" />
-            <span>Autumn</span>
-          </label>
-          </label>
-            <label class="label cursor-pointer justify-start gap-2">
-            <input type="radio" name="theme" value="caramellate" class="theme-controller" />
-            <span>Caremellate</span>
-          </label>
+        </form>
+
+        <div class="dropdown dropdown-end">
+          <div tabindex="0" role="button" class="btn btn-ghost btn-sm">User</div>
+          <div tabindex="0" class="dropdown-content z-10 bg-base-100 rounded-box shadow p-3 w-64">
+            <div class="mb-2 text-sm font-semibold">Theme</div>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <% ["corporate","business","light","dark","lofi","emerald","retro","autumn","caramellate"].each do |t| %>
+                <label class="label cursor-pointer justify-start gap-2">
+                  <input type="radio" name="theme" value="<%= t %>" class="theme-controller" />
+                  <span><%= t.capitalize %></span>
+                </label>
+              <% end %>
+            </div>
+
+            <div class="divider my-2"></div>
+            <ul class="menu">
+              <li><a href="#">Profile</a></li>
+              <li><a href="#">Sign out</a></li>
+            </ul>
+          </div>
         </div>
-
-        <div class="divider my-2"></div>
-        <ul class="menu">
-          <li><a href="#">Profile</a></li>
-          <li><a href="#">Sign out</a></li>
-        </ul>
       </div>
     </div>
-  </div>
-</div>
 
-
-    <!-- Main -->
     <main class="container mx-auto p-6">
       <% flash.each do |type, msg| %>
         <% tone = { notice: "info", alert: "warning", error: "error", success: "success" }[type.to_sym] || "info" %>
@@ -119,7 +79,6 @@
       <%= yield %>
     </main>
 
-    <!-- Optional footer -->
     <footer class="border-t">
       <div class="container mx-auto p-4 text-sm opacity-70">
         © <%= Time.current.year %> YourApp · <a href="#" class="link">Privacy</a>
