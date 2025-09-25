@@ -1,14 +1,28 @@
 <% o = party.organization %>
 <% if o.present? %>
+  <% display_name = o.operating_name.present? ? "#{o.legal_name} d/b/a #{o.operating_name}" : o.legal_name %>
+
   <div class="grid md:grid-cols-3 gap-4">
+    <div class="md:col-span-3">
+      <div class="label"><span class="label-text">Display name</span></div>
+      <div><%= display_name %></div>
+    </div>
+
     <div>
       <div class="label"><span class="label-text">Legal name</span></div>
       <div><%= o.legal_name %></div>
     </div>
+
+    <div>
+      <div class="label"><span class="label-text">Operating name (d/b/a)</span></div>
+      <div><%= o.operating_name.presence || "—" %></div>
+    </div>
+
     <div>
       <div class="label"><span class="label-text">Type</span></div>
       <div><%= o.organization_type_code %></div>
     </div>
+
     <div>
       <div class="label"><span class="label-text">Formation date</span></div>
       <div><%= o.formation_date %></div>

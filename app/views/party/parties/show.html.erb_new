@@ -1,0 +1,223 @@
+<%# app/views/party/parties/show.html.erb %>
+<div class="container mx-auto mt-6">
+  <!-- Breadcrumbs -->
+  <nav class="breadcrumbs text-sm mb-4">
+    <ul>
+      <li><%= link_to "Home", root_path %></li>
+      <li><%= link_to "Parties", party_parties_path %></li>
+      <li><span><%= @party.display_name.presence || "Party" %></span></li>
+    </ul>
+  </nav>
+
+  <!-- Header -->
+  <div class="card card-border p-4 mb-6">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold flex items-center gap-3">
+          <%= @party.display_name.presence || "Untitled" %>
+          <% if @party.party_type.present? %>
+            <span class="badge badge-primary"><%= @party.party_type.capitalize %></span>
+          <% end %>
+          <% if @party.respond_to?(:status) && @party.status.present? %>
+            <span class="badge"><%= @party.status %></span>
+          <% end %>
+        </h1>
+        <p class="text-sm mt-2 text-base-content/70">
+          Customer Number: <%= @party.customer_number %>
+          • Created <%= time_ago_in_words(@party.created_at) %> ago
+          • Updated <%= time_ago_in_words(@party.updated_at) %> ago
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <%= link_to "Edit", edit_party_party_path(@party.public_id), class: "btn btn-primary" %>
+        <%= link_to "Back", party_parties_path, class: "btn btn-ghost" %>
+        <%= link_to "Delete",
+              party_party_path(@party.public_id),
+              data: { turbo_method: :delete, turbo_confirm: "Delete this party?" },
+              class: "btn btn-error" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider">Profile</div>
+
+  <!-- Tabs -->
+  <div data-controller="tabs" data-tabs-active-value="details">
+    <menu class="menu mb-4">
+      <li><button type="button" data-tabs-target="button" data-tab="details" data-action="tabs#show">Details</button></li>
+      <li><button type="button" data-tabs-target="button" data-tab="addresses" data-action="tabs#show">Addresses</button></li>
+      <li><button type="button" data-tabs-target="button" data-tab="phones" data-action="tabs#show">Phones</button></li>
+      <li><button type="button" data-tabs-target="button" data-tab="emails" data-action="tabs#show">Emails</button></li>
+      <li><button type="button" data-tabs-target="button" data-tab="relationships" data-action="tabs#show">Relationships</button></li>
+    </menu>
+
+    <!-- Details panel -->
+    <section data-tabs-target="panel" data-panel="details" class="card card-border p-4 mb-6">
+      <h2 class="text-xl font-semibold mb-3">Details</h2>
+
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12 md:col-span-6">
+          <div class="list">
+            <div class="list-row">
+              <div class="label w-40">Display name</div>
+              <div class="list-col-grow"><%= @party.display_name %></div>
+            </div>
+
+            <% if @party.person %>
+              <div class="list-row">
+                <div class="label w-40">Person</div>
+                <div class="list-col-grow">
+                  <%= [@party.person.first_name, @party.person.last_name].compact.join(" ") %>
+                </div>
+              </div>
+            <% end %>
+
+            <% if @party.organization %>
+              <div class="list-row">
+                <div class="label w-40">Organization</div>
+                <div class="list-col-grow"><%= @party.organization.legal_name %></div>
+              </div>
+            <% end %>
+
+            <%# Tax ID masked (uses raw value) %>
+            <% if @party.respond_to?(:tax_id) && @party.tax_id.present? %>
+              <div class="list-row">
+                <div class="label w-40">Tax ID</div>
+                <div class="list-col-grow">
+                  <% masked = @party.tax_id.to_s.gsub(/\d(?=\d{4})/, "•") %>
+                  <span><%= masked %></span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="col-span-12 md:col-span-6">
+          <div class="list">
+            <div class="list-row">
+              <div class="label w-40">Type</div>
+              <div class="list-col-grow"><%= @party.party_type&.humanize %></div>
+            </div>
+
+            <% if @party.try(:notes).present? %>
+              <div class="list-row">
+                <div class="label w-40">Notes</div>
+                <div class="list-col-grow whitespace-pre-line"><%= @party.notes %></div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Addresses panel -->
+    <section data-tabs-target="panel" data-panel="addresses" class="card card-border p-4 mb-6 hidden">
+      <h2 class="text-xl font-semibold mb-3">Addresses</h2>
+      <% if @party.addresses.any? %>
+        <div class="grid grid-cols-12 gap-4">
+          <% @party.addresses.sort_by { |a| a.is_primary ? 0 : 1 }.each do |addr| %>
+            <div class="col-span-12 md:col-span-6">
+              <div class="card p-4 card-border">
+                <div class="flex items-center justify-between">
+                  <div class="font-semibold">
+                    <%= (addr.address_type.try(:name) || addr.address_type.try(:key) || addr.address_type.try(:code) || addr.address_type_id).to_s.titleize %>
+                  </div>
+                  <% if addr.is_primary %><span class="badge badge-primary">Primary</span><% end %>
+                </div>
+                <div class="mt-2 text-sm">
+                  <div><%= addr.line1 %></div>
+                  <% if addr.line2.present? %><div><%= addr.line2 %></div><% end %>
+                  <div><%= [addr.locality, addr.region_code, addr.postal_code].compact.join(", ") %></div>
+                  <div><%= addr.country_code %></div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-base-content/70">No addresses.</p>
+      <% end %>
+    </section>
+
+    <!-- Phones panel -->
+    <section data-tabs-target="panel" data-panel="phones" class="card card-border p-4 mb-6 hidden">
+      <h2 class="text-xl font-semibold mb-3">Phones</h2>
+      <% if @party.phones.any? %>
+        <div class="table">
+          <table class="w-full">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Number</th>
+                <th>Primary</th>
+                <th>SMS Consent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @party.phones.sort_by { |p| p.is_primary ? 0 : 1 }.each do |ph| %>
+                <tr class="row-hover">
+                  <td><%= defined?(ref_label) ? ref_label(ph.phone_type) : (ph.phone_type.try(:name) || ph.phone_type.try(:key) || ph.phone_type.try(:code) || ph.phone_type_id).to_s.titleize %></td>
+                  <td>
+                    <% rawn = ph.respond_to?(:phone_e164) && ph.phone_e164.present? ? ph.phone_e164.to_s : ph.number.to_s %>
+                    <%= link_to rawn, "tel:#{rawn.gsub(/[^0-9+]/,'')}", class: "link" %>
+                  </td>
+                  <td><% if ph.is_primary %><span class="badge badge-primary">Primary</span><% end %></td>
+                  <td><span class="badge <%= ph.consent_sms ? 'badge-success' : '' %>"><%= ph.consent_sms ? 'Yes' : 'No' %></span></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <p class="text-base-content/70">No phones.</p>
+      <% end %>
+    </section>
+
+    <!-- Emails panel -->
+    <section data-tabs-target="panel" data-panel="emails" class="card card-border p-4 mb-6 hidden">
+      <h2 class="text-xl font-semibold mb-3">Emails</h2>
+      <% if @party.emails.any? %>
+        <div class="table">
+          <table class="w-full">
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Primary</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @party.emails.sort_by { |e| e.is_primary ? 0 : 1 }.each do |em| %>
+                <tr class="row-hover">
+                  <td><%= mail_to em.email, em.email, class: "link" %></td>
+                  <td><% if em.is_primary %><span class="badge badge-primary">Primary</span><% end %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <p class="text-base-content/70">No emails.</p>
+      <% end %>
+    </section>
+
+    <!-- Relationships panel -->
+    <section data-tabs-target="panel" data-panel="relationships" class="card card-border p-4 mb-10 hidden">
+      <h2 class="text-xl font-semibold mb-3">Relationships</h2>
+      <% if @party.respond_to?(:relationships) && @party.relationships.any? %>
+        <div class="list">
+          <% @party.relationships.each do |rel| %>
+            <div class="list-row">
+              <div><span class="badge"><%= rel.kind.humanize %></span></div>
+              <div class="list-col-grow">
+                <%= link_to rel.other_party.display_name, party_party_path(rel.other_party.public_id), class: "link" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-base-content/70">No relationships.</p>
+      <% end %>
+    </section>
+  </div>
+</div>

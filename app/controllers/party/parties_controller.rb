@@ -79,7 +79,7 @@ module Party
           :name_suffix, :courtesy_title, :date_of_birth, :_destroy
         ],
         organization_attributes: [
-          :id, :legal_name, :organization_type_code, :formation_date, :_destroy
+          :id, :legal_name, :operating_name, :organization_type_code, :formation_date, :_destroy
         ],
         addresses_attributes: [
           :id, :address_type_code, :line1, :line2, :line3, :locality,

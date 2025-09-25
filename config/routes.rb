@@ -8,6 +8,7 @@ Rails.application.routes.draw do
   namespace :party do
     resources :parties, param: :public_id do
       member { get :reveal_tax_id }  # /party/parties/:public_id/reveal_tax_id
+      post :reveal_tax_id   # new POST for the Stimulus controller
 
       resource  :person,       only: %i[show create update destroy]
       resource  :organization, only: %i[show create update destroy]

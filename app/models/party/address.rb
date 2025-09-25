@@ -12,6 +12,11 @@ module Party
     belongs_to :region,  class_name: "Ref::Region",  foreign_key: "region_code",  primary_key: "code", optional: true
 
     before_validation { self.country_code ||= "US" }
+    before_validation { Rails.logger.info("addr cc=#{country_code.inspect} rc=#{region_code.inspect}") }
+    before_validation do
+      self.country_code = country_code&.upcase&.strip
+      self.region_code  = region_code&.upcase&.strip
+    end
     validates :country_code, presence: true
     validates :address_type_code, presence: true
   end

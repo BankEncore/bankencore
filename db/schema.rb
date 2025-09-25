@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_22_013132) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_23_185948) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -105,6 +105,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_22_013132) do
     t.date "formation_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "operating_name"
     t.index ["organization_type_code"], name: "fk_rails_ad9f5a4e18"
     t.index ["party_id"], name: "index_party_organizations_on_party_id"
   end

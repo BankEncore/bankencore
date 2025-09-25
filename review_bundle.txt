@@ -330,6 +330,86 @@
       outline-offset: 2px;
     }
   }
+  .tab {
+    position: relative;
+    display: inline-flex;
+    cursor: pointer;
+    appearance: none;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    webkit-user-select: none;
+    user-select: none;
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-base-content);
+      }
+    }
+    --tab-p: 1rem;
+    --tab-bg: var(--color-base-100);
+    --tab-border-color: var(--color-base-300);
+    --tab-radius-ss: 0;
+    --tab-radius-se: 0;
+    --tab-radius-es: 0;
+    --tab-radius-ee: 0;
+    --tab-order: 0;
+    --tab-radius-min: calc(0.75rem - var(--border));
+    border-color: #0000;
+    order: var(--tab-order);
+    height: var(--tab-height);
+    font-size: 0.875rem;
+    padding-inline-start: var(--tab-p);
+    padding-inline-end: var(--tab-p);
+    &:is(input[type="radio"]) {
+      min-width: fit-content;
+      &:after {
+        content: attr(aria-label);
+      }
+    }
+    &:is(label) {
+      position: relative;
+      input {
+        position: absolute;
+        inset: calc(0.25rem * 0);
+        cursor: pointer;
+        appearance: none;
+        opacity: 0%;
+      }
+    }
+    &:checked, &:is(label:has(:checked)), &:is(.tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]) {
+      & + .tab-content {
+        display: block;
+        height: calc(100% - var(--tab-height) + var(--border));
+      }
+    }
+    &:not(:checked, label:has(:checked), :hover, .tab-active, [aria-selected=true], [aria-current=true], [aria-current=page]) {
+      color: var(--color-base-content);
+      @supports (color: color-mix(in lab, red, red)) {
+        color: color-mix(in oklab, var(--color-base-content) 50%, transparent);
+      }
+    }
+    &:not(input):empty {
+      flex-grow: 1;
+      cursor: default;
+    }
+    &:focus {
+      --tw-outline-style: none;
+      outline-style: none;
+      @media (forced-colors: active) {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+      }
+    }
+    &:focus-visible, &:is(label:has(:checked:focus-visible)) {
+      outline: 2px solid currentColor;
+      outline-offset: -5px;
+    }
+    &[disabled] {
+      pointer-events: none;
+      opacity: 40%;
+    }
+  }
   .menu {
     display: flex;
     width: fit-content;
@@ -2124,6 +2204,23 @@
   .z-10 {
     z-index: 10;
   }
+  .tab-content {
+    order: var(--tabcontent-order);
+    display: none;
+    border-color: transparent;
+    --tabcontent-radius-ss: 0;
+    --tabcontent-radius-se: 0;
+    --tabcontent-radius-es: 0;
+    --tabcontent-radius-ee: 0;
+    --tabcontent-order: 1;
+    width: 100%;
+    margin: var(--tabcontent-margin);
+    border-width: var(--border);
+    border-start-start-radius: var(--tabcontent-radius-ss);
+    border-start-end-radius: var(--tabcontent-radius-se);
+    border-end-start-radius: var(--tabcontent-radius-es);
+    border-end-end-radius: var(--tabcontent-radius-ee);
+  }
   .col-span-1 {
     grid-column: span 1 / span 1;
   }
@@ -2287,6 +2384,9 @@
   .mt-4 {
     margin-top: calc(var(--spacing) * 4);
   }
+  .mt-6 {
+    margin-top: calc(var(--spacing) * 6);
+  }
   .breadcrumbs {
     max-width: 100%;
     overflow-x: auto;
@@ -2355,6 +2455,15 @@
   }
   .mb-4 {
     margin-bottom: calc(var(--spacing) * 4);
+  }
+  .mb-6 {
+    margin-bottom: calc(var(--spacing) * 6);
+  }
+  .mb-10 {
+    margin-bottom: calc(var(--spacing) * 10);
+  }
+  .ml-2 {
+    margin-left: calc(var(--spacing) * 2);
   }
   .status {
     display: inline-block;
@@ -2615,6 +2724,9 @@
   .w-6 {
     width: calc(var(--spacing) * 6);
   }
+  .w-40 {
+    width: calc(var(--spacing) * 40);
+  }
   .w-52 {
     width: calc(var(--spacing) * 52);
   }
@@ -2714,6 +2826,9 @@
   }
   .items-end {
     align-items: flex-end;
+  }
+  .items-start {
+    align-items: flex-start;
   }
   .justify-between {
     justify-content: space-between;
@@ -2881,6 +2996,11 @@
   .p-8 {
     padding: calc(var(--spacing) * 8);
   }
+  .badge-sm {
+    --size: calc(var(--size-selector, 0.25rem) * 5);
+    font-size: 0.75rem;
+    padding-inline: calc(0.25rem * 2.5 - var(--border));
+  }
   .px-2 {
     padding-inline: calc(var(--spacing) * 2);
   }
@@ -2930,8 +3050,17 @@
   .text-wrap {
     text-wrap: wrap;
   }
+  .whitespace-pre-line {
+    white-space: pre-line;
+  }
   .text-base-content {
     color: var(--color-base-content);
+  }
+  .text-base-content\/70 {
+    color: var(--color-base-content);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-base-content) 70%, transparent);
+    }
   }
   .text-black {
     color: var(--color-black);
@@ -3109,14 +3238,19 @@
       grid-column: span 2 / span 2;
     }
   }
-  .md\:col-span-4 {
+  .md\:col-span-3 {
     @media (width >= 48rem) {
-      grid-column: span 4 / span 4;
+      grid-column: span 3 / span 3;
     }
   }
   .md\:col-span-5 {
     @media (width >= 48rem) {
       grid-column: span 5 / span 5;
+    }
+  }
+  .md\:col-span-6 {
+    @media (width >= 48rem) {
+      grid-column: span 6 / span 6;
     }
   }
   .md\:flex {
@@ -3134,14 +3268,14 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
-  .md\:grid-cols-4 {
-    @media (width >= 48rem) {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-  }
   .md\:grid-cols-5 {
     @media (width >= 48rem) {
       grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+  .md\:grid-cols-6 {
+    @media (width >= 48rem) {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
     }
   }
 }
@@ -4667,10 +4801,11 @@
 
 ===== END:app/assets/builds/application.css =====
 
-===== BEGIN:app/assets/builds/tailwind.css =====
-/*! tailwindcss v4.1.13 | MIT License | https://tailwindcss.com */
-@layer properties{@supports (((-webkit-hyphens:none)) and (not (margin-trim:inline))) or ((-moz-orient:inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--tw-space-y-reverse:0;--tw-space-x-reverse:0;--tw-font-weight:initial;--tw-shadow:0 0 #0000;--tw-shadow-color:initial;--tw-shadow-alpha:100%;--tw-inset-shadow:0 0 #0000;--tw-inset-shadow-color:initial;--tw-inset-shadow-alpha:100%;--tw-ring-color:initial;--tw-ring-shadow:0 0 #0000;--tw-inset-ring-color:initial;--tw-inset-ring-shadow:0 0 #0000;--tw-ring-inset:initial;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-offset-shadow:0 0 #0000;--tw-blur:initial;--tw-brightness:initial;--tw-contrast:initial;--tw-grayscale:initial;--tw-hue-rotate:initial;--tw-invert:initial;--tw-opacity:initial;--tw-saturate:initial;--tw-sepia:initial;--tw-drop-shadow:initial;--tw-drop-shadow-color:initial;--tw-drop-shadow-alpha:100%;--tw-drop-shadow-size:initial}}}@layer theme{:root,:host{--font-sans:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--color-black:#000;--spacing:.25rem;--text-sm:.875rem;--text-sm--line-height:calc(1.25/.875);--text-xl:1.25rem;--text-xl--line-height:calc(1.75/1.25);--text-2xl:1.5rem;--text-2xl--line-height:calc(2/1.5);--font-weight-semibold:600;--font-weight-bold:700;--default-font-family:var(--font-sans);--default-mono-font-family:var(--font-mono)}}@layer base{*,:after,:before,::backdrop{box-sizing:border-box;border:0 solid;margin:0;padding:0}::file-selector-button{box-sizing:border-box;border:0 solid;margin:0;padding:0}html,:host{-webkit-text-size-adjust:100%;tab-size:4;line-height:1.5;font-family:var(--default-font-family,ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji");font-feature-settings:var(--default-font-feature-settings,normal);font-variation-settings:var(--default-font-variation-settings,normal);-webkit-tap-highlight-color:transparent}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;-webkit-text-decoration:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var(--default-mono-font-family,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace);font-feature-settings:var(--default-mono-font-feature-settings,normal);font-variation-settings:var(--default-mono-font-variation-settings,normal);font-size:1em}small{font-size:80%}sub,sup{vertical-align:baseline;font-size:75%;line-height:0;position:relative}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{vertical-align:middle;display:block}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;opacity:1;background-color:#0000;border-radius:0}::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;opacity:1;background-color:#0000;border-radius:0}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1}@supports (not ((-webkit-appearance:-apple-pay-button))) or (contain-intrinsic-size:1px){::placeholder{color:currentColor}@supports (color:color-mix(in lab, red, red)){::placeholder{color:color-mix(in oklab,currentcolor 50%,transparent)}}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit{padding-block:0}::-webkit-datetime-edit-year-field{padding-block:0}::-webkit-datetime-edit-month-field{padding-block:0}::-webkit-datetime-edit-day-field{padding-block:0}::-webkit-datetime-edit-hour-field{padding-block:0}::-webkit-datetime-edit-minute-field{padding-block:0}::-webkit-datetime-edit-second-field{padding-block:0}::-webkit-datetime-edit-millisecond-field{padding-block:0}::-webkit-datetime-edit-meridiem-field{padding-block:0}::-webkit-calendar-picker-indicator{line-height:1}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]){appearance:button}::file-selector-button{appearance:button}::-webkit-inner-spin-button{height:auto}::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}:where(:root),:root:has(input.theme-controller[value=light]:checked),[data-theme=light]{color-scheme:light;--color-base-100:oklch(100% 0 0);--color-base-200:oklch(98% 0 0);--color-base-300:oklch(95% 0 0);--color-base-content:oklch(21% .006 285.885);--color-primary:oklch(45% .24 277.023);--color-primary-content:oklch(93% .034 272.788);--color-secondary:oklch(65% .241 354.308);--color-secondary-content:oklch(94% .028 342.258);--color-accent:oklch(77% .152 181.912);--color-accent-content:oklch(38% .063 188.416);--color-neutral:oklch(14% .005 285.823);--color-neutral-content:oklch(92% .004 286.32);--color-info:oklch(74% .16 232.661);--color-info-content:oklch(29% .066 243.157);--color-success:oklch(76% .177 163.223);--color-success-content:oklch(37% .077 168.94);--color-warning:oklch(82% .189 84.429);--color-warning-content:oklch(41% .112 45.904);--color-error:oklch(71% .194 13.428);--color-error-content:oklch(27% .105 12.094);--radius-selector:.5rem;--radius-field:.25rem;--radius-box:.5rem;--size-selector:.25rem;--size-field:.25rem;--border:1px;--depth:1;--noise:0}@media (prefers-color-scheme:dark){:root:not([data-theme]){color-scheme:dark;--color-base-100:oklch(25.33% .016 252.42);--color-base-200:oklch(23.26% .014 253.1);--color-base-300:oklch(21.15% .012 254.09);--color-base-content:oklch(97.807% .029 256.847);--color-primary:oklch(58% .233 277.117);--color-primary-content:oklch(96% .018 272.314);--color-secondary:oklch(65% .241 354.308);--color-secondary-content:oklch(94% .028 342.258);--color-accent:oklch(77% .152 181.912);--color-accent-content:oklch(38% .063 188.416);--color-neutral:oklch(14% .005 285.823);--color-neutral-content:oklch(92% .004 286.32);--color-info:oklch(74% .16 232.661);--color-info-content:oklch(29% .066 243.157);--color-success:oklch(76% .177 163.223);--color-success-content:oklch(37% .077 168.94);--color-warning:oklch(82% .189 84.429);--color-warning-content:oklch(41% .112 45.904);--color-error:oklch(71% .194 13.428);--color-error-content:oklch(27% .105 12.094);--radius-selector:.5rem;--radius-field:.25rem;--radius-box:.5rem;--size-selector:.25rem;--size-field:.25rem;--border:1px;--depth:1;--noise:0}}:root:has(input.theme-controller[value=light]:checked),[data-theme=light]{color-scheme:light;--color-base-100:oklch(100% 0 0);--color-base-200:oklch(98% 0 0);--color-base-300:oklch(95% 0 0);--color-base-content:oklch(21% .006 285.885);--color-primary:oklch(45% .24 277.023);--color-primary-content:oklch(93% .034 272.788);--color-secondary:oklch(65% .241 354.308);--color-secondary-content:oklch(94% .028 342.258);--color-accent:oklch(77% .152 181.912);--color-accent-content:oklch(38% .063 188.416);--color-neutral:oklch(14% .005 285.823);--color-neutral-content:oklch(92% .004 286.32);--color-info:oklch(74% .16 232.661);--color-info-content:oklch(29% .066 243.157);--color-success:oklch(76% .177 163.223);--color-success-content:oklch(37% .077 168.94);--color-warning:oklch(82% .189 84.429);--color-warning-content:oklch(41% .112 45.904);--color-error:oklch(71% .194 13.428);--color-error-content:oklch(27% .105 12.094);--radius-selector:.5rem;--radius-field:.25rem;--radius-box:.5rem;--size-selector:.25rem;--size-field:.25rem;--border:1px;--depth:1;--noise:0}:root:has(input.theme-controller[value=dark]:checked),[data-theme=dark]{color-scheme:dark;--color-base-100:oklch(25.33% .016 252.42);--color-base-200:oklch(23.26% .014 253.1);--color-base-300:oklch(21.15% .012 254.09);--color-base-content:oklch(97.807% .029 256.847);--color-primary:oklch(58% .233 277.117);--color-primary-content:oklch(96% .018 272.314);--color-secondary:oklch(65% .241 354.308);--color-secondary-content:oklch(94% .028 342.258);--color-accent:oklch(77% .152 181.912);--color-accent-content:oklch(38% .063 188.416);--color-neutral:oklch(14% .005 285.823);--color-neutral-content:oklch(92% .004 286.32);--color-info:oklch(74% .16 232.661);--color-info-content:oklch(29% .066 243.157);--color-success:oklch(76% .177 163.223);--color-success-content:oklch(37% .077 168.94);--color-warning:oklch(82% .189 84.429);--color-warning-content:oklch(41% .112 45.904);--color-error:oklch(71% .194 13.428);--color-error-content:oklch(27% .105 12.094);--radius-selector:.5rem;--radius-field:.25rem;--radius-box:.5rem;--size-selector:.25rem;--size-field:.25rem;--border:1px;--depth:1;--noise:0}:where(:root:has(.modal-open,.modal[open],.modal:target,.modal-toggle:checked,.drawer:not(.drawer-open)>.drawer-toggle:checked)){scrollbar-gutter:stable;background-image:linear-gradient(var(--color-base-100),var(--color-base-100));--root-bg:var(--color-base-100)}@supports (color:color-mix(in lab, red, red)){:where(:root:has(.modal-open,.modal[open],.modal:target,.modal-toggle:checked,.drawer:not(.drawer-open)>.drawer-toggle:checked)){--root-bg:color-mix(in srgb,var(--color-base-100),oklch(0% 0 0) 40%)}}:where(.modal[open],.modal-open,.modal-toggle:checked+.modal):not(.modal-start,.modal-end){scrollbar-gutter:stable}@property --radialprogress{syntax: "<percentage>"; inherits: true; initial-value: 0%;}:root{--fx-noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.34' numOctaves='4' stitchTiles='stitch'%3E%3C/feTurbulence%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23a)' opacity='0.2'%3E%3C/rect%3E%3C/svg%3E")}:root,[data-theme]{background-color:var(--root-bg,var(--color-base-100));color:var(--color-base-content)}:root{scrollbar-color:currentColor #0000}@supports (color:color-mix(in lab, red, red)){:root{scrollbar-color:color-mix(in oklch,currentColor 35%,#0000)#0000}}:root:has(.modal-open,.modal[open],.modal:target,.modal-toggle:checked,.drawer:not([class*=drawer-open])>.drawer-toggle:checked){overflow:hidden}}@layer components;@layer utilities{.diff{webkit-user-select:none;-webkit-user-select:none;user-select:none;direction:ltr;grid-template-rows:1fr 1.8rem 1fr;grid-template-columns:auto 1fr;width:100%;display:grid;position:relative;overflow:hidden;container-type:inline-size}.diff:focus-visible,.diff:has(.diff-item-1:focus-visible),.diff:focus-visible{outline-style:var(--tw-outline-style);outline-offset:1px;outline-width:2px;outline-color:var(--color-base-content)}.diff:focus-visible .diff-resizer{min-width:95cqi;max-width:95cqi}.diff:has(.diff-item-1:focus-visible){outline-style:var(--tw-outline-style);outline-offset:1px;outline-width:2px}.diff:has(.diff-item-1:focus-visible) .diff-resizer{min-width:5cqi;max-width:5cqi}@supports (-webkit-overflow-scrolling:touch) and (overflow:-webkit-paged-x){.diff:focus .diff-resizer{min-width:5cqi;max-width:5cqi}.diff:has(.diff-item-1:focus) .diff-resizer{min-width:95cqi;max-width:95cqi}}:where(.btn){width:unset}.btn{cursor:pointer;text-align:center;vertical-align:middle;outline-offset:2px;webkit-user-select:none;-webkit-user-select:none;user-select:none;padding-inline:var(--btn-p);color:var(--btn-fg);--tw-prose-links:var(--btn-fg);height:var(--size);font-size:var(--fontsize,.875rem);outline-color:var(--btn-color,var(--color-base-content));background-color:var(--btn-bg);background-size:auto,calc(var(--noise)*100%);background-image:none,var(--btn-noise);border-width:var(--border);border-style:solid;border-color:var(--btn-border);text-shadow:0 .5px oklch(100% 0 0/calc(var(--depth)*.15));touch-action:manipulation;box-shadow:0 .5px 0 .5px oklch(100% 0 0/calc(var(--depth)*6%))inset,var(--btn-shadow);--size:calc(var(--size-field,.25rem)*10);--btn-bg:var(--btn-color,var(--color-base-200));--btn-fg:var(--color-base-content);--btn-p:1rem;--btn-border:var(--btn-bg);border-start-start-radius:var(--join-ss,var(--radius-field));border-start-end-radius:var(--join-se,var(--radius-field));border-end-end-radius:var(--join-ee,var(--radius-field));border-end-start-radius:var(--join-es,var(--radius-field));flex-wrap:nowrap;flex-shrink:0;justify-content:center;align-items:center;gap:.375rem;font-weight:600;transition-property:color,background-color,border-color,box-shadow;transition-duration:.2s;transition-timing-function:cubic-bezier(0,0,.2,1);display:inline-flex}@supports (color:color-mix(in lab, red, red)){.btn{--btn-border:color-mix(in oklab,var(--btn-bg),#000 calc(var(--depth)*5%))}}.btn{--btn-shadow:0 3px 2px -2px var(--btn-bg),0 4px 3px -2px var(--btn-bg)}@supports (color:color-mix(in lab, red, red)){.btn{--btn-shadow:0 3px 2px -2px color-mix(in oklab,var(--btn-bg)calc(var(--depth)*30%),#0000),0 4px 3px -2px color-mix(in oklab,var(--btn-bg)calc(var(--depth)*30%),#0000)}}.btn{--btn-noise:var(--fx-noise)}.prose .btn{text-decoration-line:none}@media (hover:hover){.btn:hover{--btn-bg:var(--btn-color,var(--color-base-200))}@supports (color:color-mix(in lab, red, red)){.btn:hover{--btn-bg:color-mix(in oklab,var(--btn-color,var(--color-base-200)),#000 7%)}}}.btn:focus-visible,.btn:has(:focus-visible){isolation:isolate;outline-width:2px;outline-style:solid}.btn:active:not(.btn-active){--btn-bg:var(--btn-color,var(--color-base-200));translate:0 .5px}@supports (color:color-mix(in lab, red, red)){.btn:active:not(.btn-active){--btn-bg:color-mix(in oklab,var(--btn-color,var(--color-base-200)),#000 5%)}}.btn:active:not(.btn-active){--btn-border:var(--btn-color,var(--color-base-200))}@supports (color:color-mix(in lab, red, red)){.btn:active:not(.btn-active){--btn-border:color-mix(in oklab,var(--btn-color,var(--color-base-200)),#000 7%)}}.btn:active:not(.btn-active){--btn-shadow:0 0 0 0 oklch(0% 0 0/0),0 0 0 0 oklch(0% 0 0/0)}.btn:is(:disabled,[disabled],.btn-disabled):not(.btn-link,.btn-ghost){background-color:var(--color-base-content)}@supports (color:color-mix(in lab, red, red)){.btn:is(:disabled,[disabled],.btn-disabled):not(.btn-link,.btn-ghost){background-color:color-mix(in oklab,var(--color-base-content)10%,transparent)}}.btn:is(:disabled,[disabled],.btn-disabled):not(.btn-link,.btn-ghost){box-shadow:none}.btn:is(:disabled,[disabled],.btn-disabled){pointer-events:none;--btn-border:#0000;--btn-noise:none;--btn-fg:var(--color-base-content)}@supports (color:color-mix(in lab, red, red)){.btn:is(:disabled,[disabled],.btn-disabled){--btn-fg:color-mix(in oklch,var(--color-base-content)20%,#0000)}}@media (hover:hover){.btn:is(:disabled,[disabled],.btn-disabled):hover{pointer-events:none;background-color:var(--color-neutral)}@supports (color:color-mix(in lab, red, red)){.btn:is(:disabled,[disabled],.btn-disabled):hover{background-color:color-mix(in oklab,var(--color-neutral)20%,transparent)}}.btn:is(:disabled,[disabled],.btn-disabled):hover{--btn-border:#0000;--btn-fg:var(--color-base-content)}@supports (color:color-mix(in lab, red, red)){.btn:is(:disabled,[disabled],.btn-disabled):hover{--btn-fg:color-mix(in oklch,var(--color-base-content)20%,#0000)}}}.btn:is(input[type=checkbox],input[type=radio]){appearance:none}.btn:is(input[type=checkbox],input[type=radio]):after{content:attr(aria-label)}.btn:where(input:checked:not(.filter .btn)){--btn-color:var(--color-primary);--btn-fg:var(--color-primary-content);isolation:isolate}.loading{pointer-events:none;aspect-ratio:1;vertical-align:middle;width:calc(var(--size-selector,.25rem)*6);background-color:currentColor;display:inline-block;-webkit-mask-image:url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='black' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform-origin='center'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3' stroke-linecap='round'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='2s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dasharray' values='0,150;42,150;42,150' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dashoffset' values='0;-16;-59' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='black' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform-origin='center'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3' stroke-linecap='round'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='2s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dasharray' values='0,150;42,150;42,150' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dashoffset' values='0;-16;-59' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");-webkit-mask-position:50%;mask-position:50%;-webkit-mask-size:100%;mask-size:100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}.list{flex-direction:column;font-size:.875rem;display:flex}.list :where(.list-row){--list-grid-cols:minmax(0,auto)1fr;border-radius:var(--radius-box);word-break:break-word;grid-auto-flow:column;grid-template-columns:var(--list-grid-cols);gap:1rem;padding:1rem;display:grid;position:relative}.list :where(.list-row):has(.list-col-grow:first-child){--list-grid-cols:1fr}.list :where(.list-row):has(.list-col-grow:nth-child(2)){--list-grid-cols:minmax(0,auto)1fr}.list :where(.list-row):has(.list-col-grow:nth-child(3)){--list-grid-cols:minmax(0,auto)minmax(0,auto)1fr}.list :where(.list-row):has(.list-col-grow:nth-child(4)){--list-grid-cols:minmax(0,auto)minmax(0,auto)minmax(0,auto)1fr}.list :where(.list-row):has(.list-col-grow:nth-child(5)){--list-grid-cols:minmax(0,auto)minmax(0,auto)minmax(0,auto)minmax(0,auto)1fr}.list :where(.list-row):has(.list-col-grow:nth-child(6)){--list-grid-cols:minmax(0,auto)minmax(0,auto)minmax(0,auto)minmax(0,auto)minmax(0,auto)1fr}.list :where(.list-row) :not(.list-col-wrap){grid-row-start:1}:is(.list>:not(:last-child).list-row,.list>:not(:last-child) .list-row):after{content:"";border-bottom:var(--border)solid;inset-inline:var(--radius-box);border-color:var(--color-base-content);position:absolute;bottom:0}@supports (color:color-mix(in lab, red, red)){:is(.list>:not(:last-child).list-row,.list>:not(:last-child) .list-row):after{border-color:color-mix(in oklab,var(--color-base-content)5%,transparent)}}.toggle{border:var(--border)solid currentColor;color:var(--input-color);cursor:pointer;appearance:none;vertical-align:middle;webkit-user-select:none;-webkit-user-select:none;user-select:none;--radius-selector-max:calc(var(--radius-selector) + var(--radius-selector) + var(--radius-selector));border-radius:calc(var(--radius-selector) + min(var(--toggle-p),var(--radius-selector-max)) + min(var(--border),var(--radius-selector-max)));padding:var(--toggle-p);flex-shrink:0;grid-template-columns:0fr 1fr 1fr;place-content:center;display:inline-grid;position:relative;box-shadow:inset 0 1px}@supports (color:color-mix(in lab, red, red)){.toggle{box-shadow:0 1px color-mix(in oklab,currentColor calc(var(--depth)*10%),#0000)inset}}.toggle{--input-color:var(--color-base-content);transition:color .3s,grid-template-columns .2s}@supports (color:color-mix(in lab, red, red)){.toggle{--input-color:color-mix(in oklab,var(--color-base-content)50%,#0000)}}.toggle{--toggle-p:calc(var(--size)*.125);--size:calc(var(--size-selector,.25rem)*6);width:calc((var(--size)*2) - (var(--border) + var(--toggle-p))*2);height:var(--size)}.toggle>*{z-index:1;cursor:pointer;appearance:none;background-color:#0000;border:none;grid-column:2/span 1;grid-row-start:1;height:100%;padding:.125rem;transition:opacity .2s,rotate .4s}.toggle>:focus{--tw-outline-style:none;outline-style:none}@media (forced-colors:active){.toggle>:focus{outline-offset:2px;outline:2px solid #0000}}.toggle>:nth-child(2){color:var(--color-base-100);rotate:none}.toggle>:nth-child(3){color:var(--color-base-100);opacity:0;rotate:-15deg}.toggle:has(:checked)>:nth-child(2){opacity:0;rotate:15deg}.toggle:has(:checked)>:nth-child(3){opacity:1;rotate:none}.toggle:before{aspect-ratio:1;border-radius:var(--radius-selector);--tw-content:"";content:var(--tw-content);height:100%;box-shadow:0 -1px oklch(0% 0 0/calc(var(--depth)*.1))inset,0 8px 0 -4px oklch(100% 0 0/calc(var(--depth)*.1))inset,0 1px currentColor;background-color:currentColor;grid-row-start:1;grid-column-start:2;transition:background-color .1s,translate .2s,inset-inline-start .2s;position:relative;inset-inline-start:0;translate:0}@supports (color:color-mix(in lab, red, red)){.toggle:before{box-shadow:0 -1px oklch(0% 0 0/calc(var(--depth)*.1))inset,0 8px 0 -4px oklch(100% 0 0/calc(var(--depth)*.1))inset,0 1px color-mix(in oklab,currentColor calc(var(--depth)*10%),#0000)}}.toggle:before{background-size:auto,calc(var(--noise)*100%);background-image:none,var(--fx-noise)}@media (forced-colors:active){.toggle:before{outline-style:var(--tw-outline-style);outline-offset:calc(1px*-1);outline-width:1px}}@media print{.toggle:before{outline-offset:-1rem;outline:.25rem solid}}.toggle:focus-visible,.toggle:has(:focus-visible){outline-offset:2px;outline:2px solid}.toggle:checked,.toggle[aria-checked=true],.toggle:has(>input:checked){background-color:var(--color-base-100);--input-color:var(--color-base-content);grid-template-columns:1fr 1fr 0fr}:is(.toggle:checked,.toggle[aria-checked=true],.toggle:has(>input:checked)):before{background-color:currentColor}@starting-style{:is(.toggle:checked,.toggle[aria-checked=true],.toggle:has(>input:checked)):before{opacity:0}}.toggle:indeterminate{grid-template-columns:.5fr 1fr .5fr}.toggle:disabled{cursor:not-allowed;opacity:.3}.toggle:disabled:before{border:var(--border)solid currentColor;background-color:#0000}.table{border-radius:var(--radius-box);text-align:left;width:100%;font-size:.875rem;position:relative}.table:where(:dir(rtl),[dir=rtl],[dir=rtl] *){text-align:right}@media (hover:hover){:is(.table tr.row-hover,.table tr.row-hover:nth-child(2n)):hover{background-color:var(--color-base-200)}}.table :where(th,td){vertical-align:middle;padding-block:.75rem;padding-inline:1rem}.table :where(thead,tfoot){white-space:nowrap;color:var(--color-base-content)}@supports (color:color-mix(in lab, red, red)){.table :where(thead,tfoot){color:color-mix(in oklab,var(--color-base-content)60%,transparent)}}.table :where(thead,tfoot){font-size:.875rem;font-weight:600}.table :where(tfoot){border-top:var(--border)solid var(--color-base-content)}@supports (color:color-mix(in lab, red, red)){.table :where(tfoot){border-top:var(--border)solid color-mix(in oklch,var(--color-base-content)5%,#0000)}}.table :where(.table-pin-rows thead tr){z-index:1;background-color:var(--color-base-100);position:sticky;top:0}.table :where(.table-pin-rows tfoot tr){z-index:1;background-color:var(--color-base-100);position:sticky;bottom:0}.table :where(.table-pin-cols tr th){background-color:var(--color-base-100);position:sticky;left:0;right:0}.table :where(thead tr,tbody tr:not(:last-child)){border-bottom:var(--border)solid var(--color-base-content)}@supports (color:color-mix(in lab, red, red)){.table :where(thead tr,tbody tr:not(:last-child)){border-bottom:var(--border)solid color-mix(in oklch,var(--color-base-content)5%,#0000)}}.steps{counter-reset:step;grid-auto-columns:1fr;grid-auto-flow:column;display:inline-grid;overflow:auto hidden}.steps .step{text-align:center;--step-bg:var(--color-base-300);--step-fg:var(--color-base-content);grid-template-rows:40px 1fr;grid-template-columns:auto;place-items:center;min-width:4rem;display:grid}.steps .step:before{width:100%;height:.5rem;color:var(--step-bg);background-color:var(--step-bg);--tw-content:"";content:var(--tw-content);border:1px solid;grid-row-start:1;grid-column-start:1;margin-inline-start:-100%;top:0}.steps .step>.step-icon,.steps .step:not(:has(.step-icon)):after{content:counter(step);counter-increment:step;z-index:1;color:var(--step-fg);background-color:var(--step-bg);border:1px solid var(--step-bg);border-radius:3.40282e38px;grid-row-start:1;grid-column-start:1;place-self:center;place-items:center;width:2rem;height:2rem;display:grid;position:relative}.steps .step:first-child:before{content:none}.steps .step[data-content]:after{content:attr(data-content)}.steps .step-neutral+.step-neutral:before,.steps .step-neutral:after,.steps .step-neutral>.step-icon{--step-bg:var(--color-neutral);--step-fg:var(--color-neutral-content)}.steps .step-primary+.step-primary:before,.steps .step-primary:after,.steps .step-primary>.step-icon{--step-bg:var(--color-primary);--step-fg:var(--color-primary-content)}.steps .step-secondary+.step-secondary:before,.steps .step-secondary:after,.steps .step-secondary>.step-icon{--step-bg:var(--color-secondary);--step-fg:var(--color-secondary-content)}.steps .step-accent+.step-accent:before,.steps .step-accent:after,.steps .step-accent>.step-icon{--step-bg:var(--color-accent);--step-fg:var(--color-accent-content)}.steps .step-info+.step-info:before,.steps .step-info:after,.steps .step-info>.step-icon{--step-bg:var(--color-info);--step-fg:var(--color-info-content)}.steps .step-success+.step-success:before,.steps .step-success:after,.steps .step-success>.step-icon{--step-bg:var(--color-success);--step-fg:var(--color-success-content)}.steps .step-warning+.step-warning:before,.steps .step-warning:after,.steps .step-warning>.step-icon{--step-bg:var(--color-warning);--step-fg:var(--color-warning-content)}.steps .step-error+.step-error:before,.steps .step-error:after,.steps .step-error>.step-icon{--step-bg:var(--color-error);--step-fg:var(--color-error-content)}.card{border-radius:var(--radius-box);outline-offset:2px;outline:0 solid #0000;flex-direction:column;transition:outline .2s ease-in-out;display:flex;position:relative}.card:focus{--tw-outline-style:none;outline-style:none}@media (forced-colors:active){.card:focus{outline-offset:2px;outline:2px solid #0000}}.card:focus-visible{outline-color:currentColor}.card :where(figure:first-child){border-start-start-radius:inherit;border-start-end-radius:inherit;border-end-end-radius:unset;border-end-start-radius:unset;overflow:hidden}.card :where(figure:last-child){border-start-start-radius:unset;border-start-end-radius:unset;border-end-end-radius:inherit;border-end-start-radius:inherit;overflow:hidden}.card:where(.card-border){border:var(--border)solid var(--color-base-200)}.card:where(.card-dash){border:var(--border)dashed var(--color-base-200)}.card.image-full{display:grid}.card.image-full>*{grid-row-start:1;grid-column-start:1}.card.image-full>.card-body{color:var(--color-neutral-content);position:relative}.card.image-full :where(figure){border-radius:inherit;overflow:hidden}.card.image-full>figure img{object-fit:cover;filter:brightness(28%);height:100%}.card figure{justify-content:center;align-items:center;display:flex}.card:has(>input:is(input[type=checkbox],input[type=radio])){cursor:pointer;-webkit-user-select:none;user-select:none}.card:has(>:checked){outline:2px solid}.static{position:static}.container{width:100%}@media (min-width:40rem){.container{max-width:40rem}}@media (min-width:48rem){.container{max-width:48rem}}@media (min-width:64rem){.container{max-width:64rem}}@media (min-width:80rem){.container{max-width:80rem}}@media (min-width:96rem){.container{max-width:96rem}}.filter{flex-wrap:wrap;display:flex}.filter input[type=radio]{width:auto}.filter input{opacity:1;transition:margin .1s,opacity .3s,padding .3s,border-width .1s;overflow:hidden;scale:1}.filter input:not(:last-child){margin-inline-end:.25rem}.filter input.filter-reset{aspect-ratio:1}.filter input.filter-reset:after{content:"×"}.filter:not(:has(input:checked:not(.filter-reset))) .filter-reset,.filter:not(:has(input:checked:not(.filter-reset))) input[type=reset],.filter:has(input:checked:not(.filter-reset)) input:not(:checked,.filter-reset,input[type=reset]){opacity:0;border-width:0;width:0;margin-inline:0;padding-inline:0;scale:0}.label{white-space:nowrap;color:currentColor;align-items:center;gap:.375rem;display:inline-flex}@supports (color:color-mix(in lab, red, red)){.label{color:color-mix(in oklab,currentColor 60%,transparent)}}.label:has(input){cursor:pointer}.label:is(.input>*,.select>*){white-space:nowrap;height:calc(100% - .5rem);font-size:inherit;align-items:center;padding-inline:.75rem;display:flex}.label:is(.input>*,.select>*):first-child{border-inline-end:var(--border)solid currentColor;margin-inline:-.75rem .75rem}@supports (color:color-mix(in lab, red, red)){.label:is(.input>*,.select>*):first-child{border-inline-end:var(--border)solid color-mix(in oklab,currentColor 10%,#0000)}}.label:is(.input>*,.select>*):last-child{border-inline-start:var(--border)solid currentColor;margin-inline:.75rem -.75rem}@supports (color:color-mix(in lab, red, red)){.label:is(.input>*,.select>*):last-child{border-inline-start:var(--border)solid color-mix(in oklab,currentColor 10%,#0000)}}.mb-4{margin-bottom:calc(var(--spacing)*4)}.status{aspect-ratio:1;border-radius:var(--radius-selector);background-color:var(--color-base-content);width:.5rem;height:.5rem;display:inline-block}@supports (color:color-mix(in lab, red, red)){.status{background-color:color-mix(in oklab,var(--color-base-content)20%,transparent)}}.status{vertical-align:middle;color:#0000004d;background-position:50%;background-repeat:no-repeat}@supports (color:color-mix(in lab, red, red)){.status{color:#0000004d}@supports (color:color-mix(in lab, red, red)){.status{color:color-mix(in oklab,var(--color-black)30%,transparent)}}}.status{background-image:radial-gradient(circle at 35% 30%,oklch(1 0 0/calc(var(--depth)*.5)),#0000);box-shadow:0 2px 3px -1px}@supports (color:color-mix(in lab, red, red)){.status{box-shadow:0 2px 3px -1px color-mix(in oklab,currentColor calc(var(--depth)*100%),#0000)}}.badge{border-radius:var(--radius-selector);vertical-align:middle;color:var(--badge-fg);border:var(--border)solid var(--badge-color,var(--color-base-200));width:fit-content;padding-inline:calc(.25rem*3 - var(--border));background-size:auto,calc(var(--noise)*100%);background-image:none,var(--fx-noise);background-color:var(--badge-bg);--badge-bg:var(--badge-color,var(--color-base-100));--badge-fg:var(--color-base-content);--size:calc(var(--size-selector,.25rem)*6);height:var(--size);justify-content:center;align-items:center;gap:.5rem;font-size:.875rem;display:inline-flex}.card-body{padding:var(--card-p,1.5rem);font-size:var(--card-fs,.875rem);flex-direction:column;flex:auto;gap:.5rem;display:flex}.card-body :where(p){flex-grow:1}.card-title{font-size:var(--cardtitle-fs,1.125rem);align-items:center;gap:.5rem;font-weight:600;display:flex}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.inline{display:inline}.table{display:table}.min-h-screen{min-height:100vh}.loading-xs{width:calc(var(--size-selector,.25rem)*4)}.link{cursor:pointer;text-decoration-line:underline}.link:focus{--tw-outline-style:none;outline-style:none}@media (forced-colors:active){.link:focus{outline-offset:2px;outline:2px solid #0000}}.link:focus-visible{outline-offset:2px;outline:2px solid}.list-disc{list-style-type:disc}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-2{gap:calc(var(--spacing)*2)}.gap-4{gap:calc(var(--spacing)*4)}:where(.space-y-2>:not(:last-child)){--tw-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing)*2)*var(--tw-space-y-reverse));margin-block-end:calc(calc(var(--spacing)*2)*calc(1 - var(--tw-space-y-reverse)))}:where(.space-y-6>:not(:last-child)){--tw-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing)*6)*var(--tw-space-y-reverse));margin-block-end:calc(calc(var(--spacing)*6)*calc(1 - var(--tw-space-y-reverse)))}:where(.space-x-2>:not(:last-child)){--tw-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing)*2)*var(--tw-space-x-reverse));margin-inline-end:calc(calc(var(--spacing)*2)*calc(1 - var(--tw-space-x-reverse)))}.overflow-x-auto{overflow-x:auto}.table-zebra tbody tr:where(:nth-child(2n)),.table-zebra tbody tr:where(:nth-child(2n)) :where(.table-pin-cols tr th){background-color:var(--color-base-200)}@media (hover:hover){:is(.table-zebra tbody tr.row-hover,.table-zebra tbody tr.row-hover:where(:nth-child(2n))):hover{background-color:var(--color-base-300)}}.bg-base-100{background-color:var(--color-base-100)}.loading-spinner{-webkit-mask-image:url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='black' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform-origin='center'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3' stroke-linecap='round'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='2s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dasharray' values='0,150;42,150;42,150' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dashoffset' values='0;-16;-59' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg width='24' height='24' stroke='black' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform-origin='center'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='3' stroke-linecap='round'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='2s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dasharray' values='0,150;42,150;42,150' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dashoffset' values='0;-16;-59' keyTimes='0;0.475;1' dur='1.5s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/g%3E%3C/svg%3E")}.p-6{padding:calc(var(--spacing)*6)}.pl-6{padding-left:calc(var(--spacing)*6)}.font-mono{font-family:var(--font-mono)}.text-2xl{font-size:var(--text-2xl);line-height:var(--tw-leading,var(--text-2xl--line-height))}.text-sm{font-size:var(--text-sm);line-height:var(--tw-leading,var(--text-sm--line-height))}.text-xl{font-size:var(--text-xl);line-height:var(--tw-leading,var(--text-xl--line-height))}.font-bold{--tw-font-weight:var(--font-weight-bold);font-weight:var(--font-weight-bold)}.font-semibold{--tw-font-weight:var(--font-weight-semibold);font-weight:var(--font-weight-semibold)}.opacity-70{opacity:.7}.shadow{--tw-shadow:0 1px 3px 0 var(--tw-shadow-color,#0000001a),0 1px 2px -1px var(--tw-shadow-color,#0000001a);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.btn-ghost:not(.btn-active,:hover,:active:focus,:focus-visible){--btn-shadow:"";--btn-bg:#0000;--btn-border:#0000;--btn-noise:none}.btn-ghost:not(.btn-active,:hover,:active:focus,:focus-visible):not(:disabled,[disabled],.btn-disabled){--btn-fg:currentColor;outline-color:currentColor}@media (hover:none){.btn-ghost:hover:not(.btn-active,:active,:focus-visible,:disabled,[disabled],.btn-disabled){--btn-shadow:"";--btn-bg:#0000;--btn-border:#0000;--btn-noise:none;--btn-fg:currentColor}}.filter{filter:var(--tw-blur,)var(--tw-brightness,)var(--tw-contrast,)var(--tw-grayscale,)var(--tw-hue-rotate,)var(--tw-invert,)var(--tw-saturate,)var(--tw-sepia,)var(--tw-drop-shadow,)}.btn-sm{--fontsize:.75rem;--btn-p:.75rem;--size:calc(var(--size-field,.25rem)*8)}.btn-xs{--fontsize:.6875rem;--btn-p:.5rem;--size:calc(var(--size-field,.25rem)*6)}.badge-primary{--badge-color:var(--color-primary);--badge-fg:var(--color-primary-content)}.btn-primary{--btn-color:var(--color-primary);--btn-fg:var(--color-primary-content)}@media (min-width:48rem){.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}}@keyframes dropdown{0%{opacity:0}}@keyframes radio{0%{padding:5px}50%{padding:3px}}@keyframes toast{0%{opacity:0;scale:.9}to{opacity:1;scale:1}}@keyframes rating{0%,40%{filter:brightness(1.05)contrast(1.05);scale:1.1}}@keyframes skeleton{0%{background-position:150%}to{background-position:-50%}}@keyframes progress{50%{background-position-x:-115%}}@property --tw-space-y-reverse{syntax:"*";inherits:false;initial-value:0}@property --tw-space-x-reverse{syntax:"*";inherits:false;initial-value:0}@property --tw-font-weight{syntax:"*";inherits:false}@property --tw-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-shadow-color{syntax:"*";inherits:false}@property --tw-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-shadow-color{syntax:"*";inherits:false}@property --tw-inset-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-ring-color{syntax:"*";inherits:false}@property --tw-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-ring-color{syntax:"*";inherits:false}@property --tw-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-ring-inset{syntax:"*";inherits:false}@property --tw-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0}@property --tw-ring-offset-color{syntax:"*";inherits:false;initial-value:#fff}@property --tw-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-blur{syntax:"*";inherits:false}@property --tw-brightness{syntax:"*";inherits:false}@property --tw-contrast{syntax:"*";inherits:false}@property --tw-grayscale{syntax:"*";inherits:false}@property --tw-hue-rotate{syntax:"*";inherits:false}@property --tw-invert{syntax:"*";inherits:false}@property --tw-opacity{syntax:"*";inherits:false}@property --tw-saturate{syntax:"*";inherits:false}@property --tw-sepia{syntax:"*";inherits:false}@property --tw-drop-shadow{syntax:"*";inherits:false}@property --tw-drop-shadow-color{syntax:"*";inherits:false}@property --tw-drop-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-drop-shadow-size{syntax:"*";inherits:false}
-===== END:app/assets/builds/tailwind.css =====
+===== BEGIN:app/assets/config/manifest.js =====
+//= link_tree ../images
+//= link_tree ../../javascript .js
+//= link_tree ../../../vendor/javascript .js
+===== END:app/assets/config/manifest.js =====
 
 ===== BEGIN:app/assets/stylesheets/application.tailwind.css =====
 @import "tailwindcss";
@@ -4699,6 +4834,26 @@ class ApplicationController < ActionController::Base
 end
 
 ===== END:app/controllers/application_controller.rb =====
+
+===== BEGIN:app/controllers/concerns/single_primary.rb =====
+# app/models/concerns/single_primary.rb
+module SinglePrimary
+  extend ActiveSupport::Concern
+
+  included do
+    before_save :enforce_single_primary
+    validates :is_primary, inclusion: { in: [true, false] }
+  end
+
+  private
+
+  def enforce_single_primary
+    return unless is_primary_changed? && is_primary? && party_id.present?
+    self.class.where(party_id: party_id).where.not(id: id).update_all(is_primary: false)
+  end
+end
+
+===== END:app/controllers/concerns/single_primary.rb =====
 
 ===== BEGIN:app/controllers/home_controller.rb =====
 class HomeController < ApplicationController
@@ -4966,46 +5121,25 @@ module Party
       @party.build_person
       @party.build_organization
       @party.addresses.build(country_code: "US") if @party.addresses.empty?
-      @party.emails.build if @party.emails.empty?
-      @party.phones.build(country_alpha2: "US") if @party.phones.empty?
+      @party.emails.build                         if @party.emails.empty?
+      @party.phones.build(country_alpha2: "US")   if @party.phones.empty?
     end
 
     def edit
       @party.build_person       unless @party.person
       @party.build_organization unless @party.organization
       @party.addresses.build(country_code: "US") if @party.addresses.empty?
-      @party.emails.build if @party.emails.empty?
-      @party.phones.build(country_alpha2: "US") if @party.phones.empty?
+      @party.emails.build                         if @party.emails.empty?
+      @party.phones.build(country_alpha2: "US")   if @party.phones.empty?
     end
 
-    # app/controllers/party/parties_controller.rb
     def create
-      raw = party_params
+      return add_row_and_render(:new)  if params[:add_address] || params[:add_email] || params[:add_phone]
 
-      if params[:add_phone].present?
-        @party = ::Party::Party.new(raw)
-        @party.phones.build(country_alpha2: "US")
-        render :new, status: :unprocessable_entity and return
-      end
-
-      if params[:add_email].present?
-        attrs = scrub_email_params(scrub_address_params(raw))
-        @party = ::Party::Party.new(attrs)
-        @party.emails.build
-        render :new, status: :unprocessable_entity and return
-      end
-
-      if params[:add_address].present?
-        attrs = scrub_email_params(scrub_address_params(raw))
-        @party = ::Party::Party.new(attrs)
-        @party.addresses.build(country_code: "US")
-        render :new, status: :unprocessable_entity and return
-      end
-
-      attrs = scrub_email_params(scrub_address_params(raw)).dup
+      attrs = scrub_email_params(scrub_address_params(party_params)).dup
       attrs.delete(:tax_id) if attrs[:tax_id].blank?
-      @party = ::Party::Party.new(attrs)
 
+      @party = ::Party::Party.new(attrs)
       if @party.save
         redirect_to party_party_path(@party.public_id), notice: "Party created"
       else
@@ -5014,26 +5148,9 @@ module Party
     end
 
     def update
-      raw = party_params
+      return add_row_and_render(:edit) if params[:add_address] || params[:add_email] || params[:add_phone]
 
-      if params[:add_phone].present?
-        @party.assign_attributes(raw)
-        @party.phones.build(country_alpha2: "US")
-        render :edit, status: :unprocessable_entity and return
-      end
-
-      if params[:add_email].present?
-        @party.assign_attributes(scrub_email_params(scrub_address_params(raw)))
-        @party.emails.build
-        render :edit, status: :unprocessable_entity and return
-      end
-
-      if params[:add_address].present?
-        @party.assign_attributes(scrub_email_params(scrub_address_params(raw)))
-        @party.addresses.build(country_code: "US")
-        render :edit, status: :unprocessable_entity and return
-      end
-
+      raw   = party_params
       attrs = scrub_email_params(scrub_address_params(raw)).dup
       attrs.delete(:tax_id) if attrs[:tax_id].blank?
 
@@ -5043,7 +5160,6 @@ module Party
         render :edit, status: :unprocessable_entity
       end
     end
-
 
     def destroy
       @party.destroy
@@ -5068,7 +5184,7 @@ module Party
           :name_suffix, :courtesy_title, :date_of_birth, :_destroy
         ],
         organization_attributes: [
-          :id, :legal_name, :organization_type_code, :formation_date, :_destroy
+          :id, :legal_name, :operating_name, :organization_type_code, :formation_date, :_destroy
         ],
         addresses_attributes: [
           :id, :address_type_code, :line1, :line2, :line3, :locality,
@@ -5077,7 +5193,10 @@ module Party
         emails_attributes: [
           :id, :email, :email_type_code, :is_primary, :_destroy
         ],
-        phones_attributes: %i[id phone_type_code number_raw country_alpha2 phone_ext _destroy]
+        phones_attributes: [
+          :id, :phone_type_code, :number_raw, :country_alpha2, :phone_ext,
+          :is_primary, :consent_sms, :_destroy
+        ]
       )
     end
 
@@ -5092,29 +5211,30 @@ module Party
     def handle_bad_params(_ex)
       @party ||= ::Party::Party.new
       flash.now[:alert] = "Invalid form submission."
-      render(action_name == "create" ? :new : :edit, status: :unprocessable_content)
+      render(action_name == "create" ? :new : :edit, status: :unprocessable_entity)
     end
 
-    # --- scrubbers ----------------------------------------------------------
+    # ------- helpers --------------------------------------------------------
 
-    # Drop blank NEW email rows; keep existing rows even if email field blank
+    def add_row_and_render(view)
+      @party ||= ::Party::Party.new
+      @party.assign_attributes(scrub_email_params(scrub_address_params(party_params)))
+      @party.addresses.build(country_code: "US") if params[:add_address]
+      @party.emails.build                        if params[:add_email]
+      @party.phones.build(country_alpha2: "US")  if params[:add_phone]
+      render view, status: :unprocessable_entity and return
+    end
+
+    # Drop blank NEW email rows; keep existing rows
     def scrub_email_params(attrs)
       attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_unsafe_h : attrs
       attrs = attrs.deep_dup
-
       ehash = attrs[:emails_attributes]
       return attrs unless ehash.is_a?(Hash)
 
       cleaned = ehash.values.map { |h| h.symbolize_keys }
-
-      cleaned.each do |h|
-        h.delete(:email) if h[:id].present? && h[:email].to_s.strip.blank?
-      end
-
-      cleaned.select! do |h|
-        !(h[:id].blank? && h[:email].to_s.strip.blank?)
-      end
-
+      cleaned.each { |h| h.delete(:email) if h[:id].present? && h[:email].to_s.strip.blank? }
+      cleaned.select! { |h| h[:id].present? || h[:email].to_s.strip.present? }
       attrs[:emails_attributes] = cleaned.each_with_index.to_h { |h, i| [i.to_s, h] }
       attrs
     end
@@ -5123,18 +5243,12 @@ module Party
     def scrub_address_params(attrs)
       attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_unsafe_h : attrs
       attrs = attrs.deep_dup
-
       ahash = attrs[:addresses_attributes]
       return attrs unless ahash.is_a?(Hash)
 
       cleaned = ahash.values.map { |h| h.symbolize_keys }
-
       content_keys = %i[line1 line2 line3 locality region_code postal_code country_code address_type_code is_primary]
-
-      cleaned.select! do |h|
-        h[:id].present? || content_keys.any? { |k| h[k].to_s.strip.present? }
-      end
-
+      cleaned.select! { |h| h[:id].present? || content_keys.any? { |k| h[k].to_s.strip.present? } }
       attrs[:addresses_attributes] = cleaned.each_with_index.to_h { |h, i| [i.to_s, h] }
       attrs
     end
@@ -5267,7 +5381,13 @@ module ApplicationHelper
         path = h.respond_to?(helper) ? h.public_send(helper) : "#"
         nav_link_to(name, path, **opts)
     end
-
+    def ref_label(ref)
+        return "" if ref.blank?
+        val = (ref.respond_to?(:name) && ref.name.presence) ||
+            (ref.respond_to?(:key)  && ref.key.presence)  ||
+            (ref.respond_to?(:code) && ref.code.presence)
+        (val || ref).to_s.titleize
+    end
 end
 
 ===== END:app/helpers/application_helper.rb =====
@@ -5318,10 +5438,8 @@ end
 ===== END:app/helpers/phone_helper.rb =====
 
 ===== BEGIN:app/javascript/application.js =====
-// Configure your import map in config/importmap.rb.
 import "@hotwired/turbo-rails"
-import "controllers"   // <- this boots Stimulus via controllers/application.js
-
+import "controllers"
 ===== END:app/javascript/application.js =====
 
 ===== BEGIN:app/javascript/controllers/application.js =====
@@ -5463,6 +5581,34 @@ export default class extends Controller {
 
 ===== END:app/javascript/controllers/reveal_controller.js =====
 
+===== BEGIN:app/javascript/controllers/tabs_controller.js =====
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  static targets = ["panel", "button"]
+  static values = { active: String }
+
+  connect() {
+    const key = this.activeValue || this.buttonTargets[0]?.dataset.tab
+    this.showByKey(key)
+  }
+
+  show(e) { this.showByKey(e.currentTarget.dataset.tab) }
+
+  showByKey(key) {
+    if (!key) return
+    this.panelTargets.forEach(p => p.classList.toggle("hidden", p.dataset.panel !== key))
+    this.buttonTargets.forEach(b => {
+      const on = b.dataset.tab === key
+      b.classList.toggle("menu-active", on)
+      b.ariaSelected = on
+    })
+    this.activeValue = key
+  }
+}
+
+===== END:app/javascript/controllers/tabs_controller.js =====
+
 ===== BEGIN:app/javascript/controllers/toggle_input_controller.js =====
 // app/javascript/controllers/toggle_input_controller.js
 import { Controller } from "@hotwired/stimulus"
@@ -5524,6 +5670,7 @@ end
 module Party
   class Address < ApplicationRecord
     self.table_name = "party_addresses"
+    include SinglePrimary
 
     belongs_to :party, class_name: "Party::Party", foreign_key: :party_id, inverse_of: :addresses
 
@@ -5545,6 +5692,7 @@ end
 # frozen_string_literal: true
 module Party
   class Email < ApplicationRecord
+    include SinglePrimary 
     self.table_name = "party_emails"
 
     belongs_to :party, class_name: "Party::Party", inverse_of: :emails
@@ -5684,8 +5832,17 @@ module Party
            foreign_key: :organization_type_code, primary_key: :code,
            optional: true
 
+    before_validation do
+      self.legal_name = legal_name&.strip
+      self.operating_name = operating_name&.strip
+    end
 
     validates :legal_name, presence: true
+
+    def display_name
+      return legal_name.to_s if operating_name.blank?
+      "#{legal_name} d/b/a #{operating_name}"
+    end
   end
 end
 
@@ -5697,105 +5854,57 @@ module Party
   class Party < ApplicationRecord
     self.table_name = "parties"
 
-    # Encryption / search
+    # Sensitive fields
     encrypts :tax_id, deterministic: true
-    blind_index :tax_id,
-      key: BlindIndex.master_key,
-      encode: false # column: tax_id_bidx
+    blind_index :tax_id, key: BlindIndex.master_key, encode: false
 
     # Associations
     has_one  :person,       class_name: "Party::Person",       inverse_of: :party, dependent: :destroy
     has_one  :organization, class_name: "Party::Organization", inverse_of: :party, dependent: :destroy
-    has_many :phones,       class_name: "Party::Phone",        inverse_of: :party, dependent: :destroy
     has_many :addresses,    class_name: "Party::Address",      inverse_of: :party, dependent: :destroy
-    has_many :emails,        class_name: "Party::Email",       inverse_of: :party, dependent: :destroy
-    has_many :group_memberships, class_name: "Party::GroupMembership",
-         inverse_of: :party, dependent: :destroy
-    has_many :groups, through: :group_memberships, class_name: "Party::Group"
+    has_many :emails,       class_name: "Party::Email",        inverse_of: :party, dependent: :destroy
+    has_many :phones,       class_name: "Party::Phone",        inverse_of: :party, dependent: :destroy
 
-    has_many :outgoing_links, class_name: "Party::Link",
-            foreign_key: :source_party_id, inverse_of: :source_party, dependent: :destroy
-    has_many :incoming_links, class_name: "Party::Link",
-            foreign_key: :target_party_id, inverse_of: :target_party, dependent: :destroy
+    # Nested attributes (server round-trip “Add …” flow)
+    accepts_nested_attributes_for :person, allow_destroy: true
+    accepts_nested_attributes_for :organization, allow_destroy: true
 
-    # Scopes    
-    scope :people,        -> { where(party_type: "person") }
-    scope :organizations, -> { where(party_type: "organization") }
-    scope :by_public_id,  ->(pid) { where(public_id: pid) }
-    scope :by_customer_number, ->(num) { where(customer_number: num) }
+    accepts_nested_attributes_for :addresses, allow_destroy: true, reject_if: ->(h) {
+      %i[line1 line2 line3 locality region_code postal_code country_code].all? { |k| h[k].to_s.strip.blank? }
+    }
 
-    accepts_nested_attributes_for :person, :organization, allow_destroy: true
-    
-    accepts_nested_attributes_for :addresses, allow_destroy: true,
-      reject_if: ->(h) { %i[line1 line2 line3 locality region_code postal_code country_code].all? { |k| h[k].to_s.strip.blank? } }
-      
-    accepts_nested_attributes_for :emails, allow_destroy: true,
-      reject_if: ->(h) { h['email'].to_s.strip.blank? }
+    accepts_nested_attributes_for :emails, allow_destroy: true, reject_if: ->(h) {
+      h["email"].to_s.strip.blank?
+    }
 
-    accepts_nested_attributes_for :phones, allow_destroy: true,
-      reject_if: ->(h) { h['number_raw'].to_s.strip.blank? && h['phone_e164'].to_s.strip.blank? }
+    accepts_nested_attributes_for :phones, allow_destroy: true, reject_if: ->(h) {
+      h['id'].blank? &&                 # only reject brand-new rows
+      h['number_raw'].to_s.strip.blank? &&
+      h['phone_e164'].to_s.strip.blank? &&
+      h['phone_ext'].to_s.strip.blank?
+    }
 
-    before_validation :ensure_public_id, :ensure_customer_number, on: :create
+    # Optional: convenience helpers for display (safe on nils)
+    def display_name
+      if person
+        [person.first_name, person.middle_name, person.last_name, person.name_suffix].compact_blank.join(" ")
+      elsif organization
+        organization.legal_name.to_s
+      else
+        "(Unnamed Party)"
+      end
+    end
 
-    validates :public_id,       presence: true, uniqueness: true, length: { is: 36 }
-    validates :customer_number, presence: true, uniqueness: true, length: { is: 10 }
-    validates :party_type,      presence: true, inclusion: { in: %w[person organization] }
-    validates :tax_id,
-      format: { with: /\A\d{9}\z/, message: "must be 9 digits" },
-      allow_nil: true
-    
-    # Email helpers
     def primary_email
       emails.find { |e| e.is_primary? } || emails.first
     end
 
-    def email_masked
-      primary_email&.masked
-    end
-
-    # Address helpers
     def primary_address
       addresses.find { |a| a.is_primary? } || addresses.first
     end
 
-    # Normalize and keep masked cache in sync
-    def tax_id=(val)
-      s = val.to_s.gsub(/\D/, "")
-      super(s.presence) # nil if blank
-      if has_attribute?(:tax_id_masked)
-        self[:tax_id_masked] = mask_tax_id(s)
-      end
-    end
-
-    def tax_id_masked
-      return self[:tax_id_masked] if has_attribute?(:tax_id_masked) && self[:tax_id_masked].present?
-      mask_tax_id(tax_id)
-    end
-
-    def display_name
-      case party_type
-      when "organization" then organization&.legal_name.presence
-      when "person"       then [person&.first_name, person&.last_name].compact.join(" ").presence
-      end || customer_number || public_id
-    end
-    def to_s = display_name
-
-    def to_param = public_id
-
-    private
-
-    def ensure_public_id
-      self.public_id ||= SecureRandom.uuid
-    end
-
-    def ensure_customer_number
-      self.customer_number ||= CustomerNumber::Generator.call
-    end
-
-    def mask_tax_id(raw)
-      s = raw.to_s.gsub(/\D/, "")
-      return "" if s.blank?
-      ("•" * [s.length - 4, 0].max) + s.last(4)
+    def primary_phone
+      phones.first
     end
   end
 end
@@ -5819,35 +5928,54 @@ end
 ===== END:app/models/party/person.rb =====
 
 ===== BEGIN:app/models/party/phone.rb =====
-# app/models/party/phone.rb
 module Party
   class Phone < ApplicationRecord
+    include SinglePrimary
     self.table_name = "party_phones"
 
     belongs_to :party, class_name: "Party::Party", inverse_of: :phones
     belongs_to :phone_type, class_name: "Ref::PhoneType",
       foreign_key: :phone_type_code, primary_key: :code, optional: true
 
+    # virtuals posted by the form
     attr_accessor :number_raw, :country_alpha2
 
-    before_validation :normalize_number
+    # show something in the form when editing
+    def number_raw = @number_raw.presence || phone_e164
+    def country_alpha2 = @country_alpha2.presence || "US"
+
+    before_validation :normalize_phone!
+
+    # validate only when user entered anything
+    with_options if: :row_has_content? do
+      validates :phone_e164, presence: true
+      validates :phone_type_code, presence: true
+    end
 
     private
 
-    def normalize_number
-      raw = number_raw.to_s.strip
-      return if raw.blank? # let reject_if or scrubbing drop empty rows
+    def row_has_content?
+      number_raw.to_s.strip.present? || phone_ext.to_s.strip.present? || phone_type_code.to_s.strip.present?
+    end
 
-      region = raw.start_with?("+") ? nil : (country_alpha2.presence || "US")
-      parsed = Phonelib.parse(raw, region)
+    def normalize_phone!
+      raw = number_raw.to_s.strip
+      return if raw.blank? # reject_if will drop empty rows
+
+      # strip extension typed as "x123" or "ext 123"
+      ext  = raw[/\b(?:ext\.?|x)\s*([0-9]{1,10})\b/i, 1]
+      main = raw.sub(/\s*\b(?:ext\.?|x)\s*[0-9]{1,10}\b/i, "").strip
+
+      region = main.start_with?("+") ? nil : country_alpha2
+      parsed = Phonelib.parse(main, region)
+
       unless parsed.valid?
         errors.add(:number_raw, "is not a valid phone number")
         return
       end
 
       self.phone_e164 = parsed.e164
-      # keep whatever came from the form; column is phone_ext
-      self.phone_ext = self.phone_ext.to_s.strip.presence
+      self.phone_ext  = ext.presence || phone_ext.to_s.strip.presence
     end
   end
 end
@@ -5978,10 +6106,11 @@ end
 ===== BEGIN:app/models/ref/phone_type.rb =====
 module Ref
   class PhoneType < ApplicationRecord
-    self.table_name = "ref_phone_types" # optional if conventional
-    scope :enabled, -> { where(disabled_at: nil) }  # requires a disabled_at column
+    self.table_name = "ref_phone_types"
+    # add scopes later if you add columns like disabled_at
   end
 end
+
 ===== END:app/models/ref/phone_type.rb =====
 
 ===== BEGIN:app/models/ref/region.rb =====
@@ -6222,82 +6351,69 @@ end
 ===== END:app/views/layouts/mailer.text.erb =====
 
 ===== BEGIN:app/views/party/parties/_address_fields.html.erb =====
-<!-- app/views/party/parties/_address_fields.html.erb -->
-<div class="border rounded p-4 space-y-3" data-address-wrapper>
-  <%= f.hidden_field :_destroy, value: "0" %>
+<div class="grid md:grid-cols-6 gap-4">
+  <div class="md:col-span-2">
+    <label class="label"><span class="label-text">Type</span></label>
+    <%= f.collection_select :address_type_code, @address_types, :code, :name,
+          { include_blank: "Select type" }, class: "select select-bordered w-full" %>
+  </div>
 
-  <!-- One controller wrapping BOTH country + region -->
-  <div
-    data-controller="dependent-select"
-    data-dependent-select-url-value="<%= ref_regions_path %>"
-  >
-    <!-- country_code -->
+  <div class="md:col-span-2">
     <label class="label"><span class="label-text">Country</span></label>
     <%= f.collection_select :country_code, @countries, :code, :name,
-          { include_blank: "Select country" },
-          class: "select select-bordered w-full",
-          data: { "dependent-select-target": "country",
-                  action: "change->dependent-select#refresh" } %>
-
-    <!-- lines -->
-    <div class="grid md:grid-cols-2 gap-3 mt-3">
-      <div>
-    <label class="label"><span class="label-text">Address type</span></label>
-      <%= f.collection_select :address_type_code,
-            @address_types, :code, :name,
-            { include_blank: "Select type" },
-            class: "select select-bordered w-full" %>
-    </div>
-      <div>
-        <label class="label"><span class="label-text">Line 1</span></label>
-        <%= f.text_field :line1, class: "input input-bordered w-full" %>
-      </div>
-      <div>
-        <label class="label"><span class="label-text">Line 2</span></label>
-        <%= f.text_field :line2, class: "input input-bordered w-full" %>
-      </div>
-    </div>
-
-    <!-- locality / region / postal -->
-    <div class="grid md:grid-cols-3 gap-3 mt-3">
-      <div>
-        <label class="label"><span class="label-text">City / Locality</span></label>
-        <%= f.text_field :locality, class: "input input-bordered w-full" %>
-      </div>
-
-      <div>
-        <label class="label"><span class="label-text">Region / State</span></label>
-        <%= f.select :region_code, [],
-              { include_blank: "Select region" },
-              class: "select select-bordered w-full",
-              data: { "dependent-select-target": "region" },
-              "data-current": (f.object.respond_to?(:region_code) ? f.object.region_code : nil) %>
-      </div>
-
-      <div>
-        <label class="label"><span class="label-text">Postal code</span></label>
-        <%= f.text_field :postal_code, class: "input input-bordered w-full" %>
-      </div>
-    </div>
-    <div class="col-span-2 text-right">
-       <% if f.object.persisted? %>
-          <%= f.check_box :_destroy, include_hidden: false, id: "#{f.object.model_name.singular}_#{f.object.id}_destroy" %>
-          <%= f.label :_destroy, "Remove", for: "#{f.object.model_name.singular}_#{f.object.id}_destroy", class: "text-sm" %>
-        <% else %>
-          <%= f.hidden_field :_destroy, value: "0", id: nil %>
-          <button type="button" class="btn btn-ghost btn-sm" data-action="nested-form#remove">Remove</button>
-        <% end %>
-      </div>
-    </div>
+          { selected: (f.object.country_code.presence || "US") },
+          class: "select select-bordered w-full" %>
   </div>
 
-  <div class="flex items-center justify-between mt-3">
-    <label class="cursor-pointer label">
-      <span class="label-text mr-2">Primary</span>
-      <%= f.check_box :is_primary, class: "toggle" %>
+  <div class="md:col-span-2">
+    <label class="label"><span class="label-text">Region/State</span></label>
+    <%= f.text_field :region_code, class: "input input-bordered w-full", placeholder: "MI" %>
+  </div>
+
+  <div class="md:col-span-3">
+    <label class="label"><span class="label-text">Address line 1</span></label>
+    <%= f.text_field :line1, class: "input input-bordered w-full" %>
+  </div>
+
+  <div class="md:col-span-3">
+    <label class="label"><span class="label-text">Address line 2</span></label>
+    <%= f.text_field :line2, class: "input input-bordered w-full" %>
+  </div>
+
+  <div class="md:col-span-3">
+    <label class="label"><span class="label-text">Address line 3</span></label>
+    <%= f.text_field :line3, class: "input input-bordered w-full" %>
+  </div>
+
+  <div class="md:col-span-2">
+    <label class="label"><span class="label-text">City</span></label>
+    <%= f.text_field :locality, class: "input input-bordered w-full" %>
+  </div>
+
+  <div>
+    <label class="label"><span class="label-text">Postal code</span></label>
+    <%= f.text_field :postal_code, class: "input input-bordered w-full" %>
+  </div>
+
+  <div class="md:col-span-6 flex items-center justify-between">
+    <label class="label cursor-pointer gap-2">
+      <%= f.check_box :is_primary, class: "checkbox" %>
+      <span class="label-text">Primary</span>
     </label>
+
+    <% if f.object.persisted? %>
+      <% uid = "address_#{f.object.id}_destroy" %>
+      <div>
+        <%= f.check_box :_destroy, include_hidden: false, id: uid %>
+        <%= f.label :_destroy, "Remove", for: uid, class: "text-sm" %>
+      </div>
+    <% else %>
+      <%= f.hidden_field :_destroy, value: "0", id: nil %>
+      <button type="button" class="btn btn-ghost btn-sm" data-action="nested-form#remove">Remove</button>
+    <% end %>
   </div>
 </div>
+
 ===== END:app/views/party/parties/_address_fields.html.erb =====
 
 ===== BEGIN:app/views/party/parties/edit.html.erb =====
@@ -6309,53 +6425,35 @@ end
 ===== END:app/views/party/parties/edit.html.erb =====
 
 ===== BEGIN:app/views/party/parties/_email_fields.html.erb =====
-<!-- app/views/party/parties/_email_fields.html.erb -->
-<div class="grid grid-cols-12 gap-3 items-end border p-3 rounded" data-nested-form-target="item">
-  <% if f.object.persisted? %>
-    <%= f.hidden_field :id %>
-    <div class="col-span-6">
-      <div class="label"><span class="label-text">Email</span></div>
-      <div class="font-mono"><%= f.object.masked %></div>
-    </div>
-  <% else %>
-    <div class="col-span-6">
-      <%= f.label :email %>
-      <%= f.email_field :email, class: "input input-bordered w-full", autocomplete: "off", autocapitalize: "off" %>
-    </div>
-  <% end %>
-
-  <div class="col-span-3">
-    <%= f.label :email_type_code, "Type" %>
-    <%= f.select :email_type_code,
-          email_types.map { |t| [t.name, t.code] },
-          { include_blank: "Select" },
-          class: "select select-bordered w-full" %>
+<div class="grid md:grid-cols-5 gap-4">
+  <div class="md:col-span-3">
+    <label class="label"><span class="label-text">Email</span></label>
+    <%= f.email_field :email, class: "input input-bordered w-full" %>
   </div>
 
-  <div class="col-span-2">
-    <label class="label cursor-pointer">
+  <div>
+    <label class="label"><span class="label-text">Type</span></label>
+    <%= f.collection_select :email_type_code, @email_types, :code, :name,
+          { include_blank: "Select type" }, class: "select select-bordered w-full" %>
+  </div>
+
+  <div class="flex items-end">
+    <label class="label cursor-pointer gap-2">
+      <%= f.check_box :is_primary, class: "checkbox" %>
       <span class="label-text">Primary</span>
-      <%= f.check_box :is_primary, class: "toggle" %>
     </label>
   </div>
 
-  <div class="col-span-1 text-right">
-      <% if f.object.persisted? %>
-        <%= f.check_box :_destroy, include_hidden: false, id: "#{f.object.model_name.singular}_#{f.object.id}_destroy" %>
-        <%= f.label :_destroy, "Remove", for: "#{f.object.model_name.singular}_#{f.object.id}_destroy", class: "text-sm" %>
-      <% else %>
-        <%= f.hidden_field :_destroy, value: "0", id: nil %>
-        <button type="button" class="btn btn-ghost btn-sm" data-action="nested-form#remove">Remove</button>
-      <% end %>
+  <div class="md:col-span-5 text-right">
+    <% if f.object.persisted? %>
+      <% uid = "email_#{f.object.id}_destroy" %>
+      <%= f.check_box :_destroy, include_hidden: false, id: uid %>
+      <%= f.label :_destroy, "Remove", for: uid, class: "text-sm" %>
+    <% else %>
+      <%= f.hidden_field :_destroy, value: "0", id: nil %>
+      <button type="button" class="btn btn-ghost btn-sm" data-action="nested-form#remove">Remove</button>
+    <% end %>
   </div>
-
-  <% if f.object.errors.any? %>
-    <div class="col-span-12 text-error text-sm">
-      <ul class="list-disc list-inside">
-        <% f.object.errors.full_messages.each { |m| %><li><%= m %></li><% } %>
-      </ul>
-    </div>
-  <% end %>
 </div>
 
 ===== END:app/views/party/parties/_email_fields.html.erb =====
@@ -6461,52 +6559,39 @@ end
     </div>
   </div>
 
-<!-- app/views/party/parties/_form.html.erb -->
+<!-- Addresses -->
 <div class="card bg-base-100 shadow">
   <div class="card-body space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="card-title">Addresses</h2>
-      <%= button_tag "Add address",
-            type: "submit",
-            name: "add_address",
-            value: "1",
-            class: "btn btn-sm" %>
+      <%= button_tag "Add address", type: "submit", name: "add_address", value: "1", class: "btn btn-sm" %>
     </div>
-
     <%= f.fields_for :addresses do |af| %>
       <%= render "party/parties/address_fields", f: af, address_types: @address_types, countries: @countries %>
     <% end %>
   </div>
 </div>
 
+<!-- Phones -->
 <div class="card bg-base-100 shadow">
   <div class="card-body space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="card-title">Phones</h2>
-      <%= button_tag "Add phone",
-            type: "submit",
-            name: "add_phone",
-            value: "1",
-            class: "btn btn-sm" %>
+      <%= button_tag "Add phone", type: "submit", name: "add_phone", value: "1", class: "btn btn-sm" %>
     </div>
-
     <%= f.fields_for :phones do |pf| %>
-      <%= render "party/parties/phone_fields", f: pf, phone_types: @phone_types, countries: @countries %>
+      <%= render "party/parties/phone_fields", f: pf, phone_types: @phone_types %>
     <% end %>
   </div>
 </div>
 
+<!-- Emails -->
 <div class="card bg-base-100 shadow">
   <div class="card-body space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="card-title">Emails</h2>
-      <%= button_tag "Add email",
-            type: "submit",
-            name: "add_email",
-            value: "1",
-            class: "btn btn-sm" %>
+      <%= button_tag "Add email", type: "submit", name: "add_email", value: "1", class: "btn btn-sm" %>
     </div>
-
     <%= f.fields_for :emails do |ef| %>
       <%= render "party/parties/email_fields", f: ef, email_types: @email_types %>
     <% end %>
@@ -6569,15 +6654,29 @@ end
 ===== BEGIN:app/views/party/parties/_organization.html.erb =====
 <% o = party.organization %>
 <% if o.present? %>
+  <% display_name = o.operating_name.present? ? "#{o.legal_name} d/b/a #{o.operating_name}" : o.legal_name %>
+
   <div class="grid md:grid-cols-3 gap-4">
+    <div class="md:col-span-3">
+      <div class="label"><span class="label-text">Display name</span></div>
+      <div><%= display_name %></div>
+    </div>
+
     <div>
       <div class="label"><span class="label-text">Legal name</span></div>
       <div><%= o.legal_name %></div>
     </div>
+
+    <div>
+      <div class="label"><span class="label-text">Operating name (d/b/a)</span></div>
+      <div><%= o.operating_name.presence || "—" %></div>
+    </div>
+
     <div>
       <div class="label"><span class="label-text">Type</span></div>
       <div><%= o.organization_type_code %></div>
     </div>
+
     <div>
       <div class="label"><span class="label-text">Formation date</span></div>
       <div><%= o.formation_date %></div>
@@ -6633,7 +6732,7 @@ end
 
 ===== BEGIN:app/views/party/parties/_phone_fields.html.erb =====
 <!-- app/views/party/parties/_phone_fields.html.erb -->
-<div class="grid md:grid-cols-5 gap-4">
+<div class="grid md:grid-cols-6 gap-4">
   <div>
     <label class="label"><span class="label-text">Type</span></label>
     <%= f.collection_select :phone_type_code, @phone_types, :code, :name,
@@ -6642,14 +6741,15 @@ end
 
   <div>
     <label class="label"><span class="label-text">Country</span></label>
-    <%= f.select :country_alpha2, phone_country_options, {},
+    <%= f.select :country_alpha2, phone_country_options,
+          { selected: (f.object.try(:country_alpha2).presence || "US") },
           class: "select select-bordered w-full" %>
   </div>
 
   <div class="md:col-span-2">
     <label class="label"><span class="label-text">Number</span></label>
-    <%= f.text_field :number_raw, value: f.object.number_raw,
-          class: "input input-bordered w-full", placeholder: "(555) 123-4567 x89" %>
+    <%= f.text_field :number_raw, class: "input input-bordered w-full",
+          placeholder: "(555) 123-4567 x123" %>
   </div>
 
   <div>
@@ -6657,9 +6757,26 @@ end
     <%= f.text_field :phone_ext, class: "input input-bordered w-full" %>
   </div>
 
-  <div class="md:col-span-5 text-right">
-    <%= f.check_box :_destroy %>
-    <%= f.label :_destroy, "Remove", class: "text-sm" %>
+  <div class="flex items-end gap-4">
+    <label class="label cursor-pointer gap-2">
+      <%= f.check_box :is_primary, class: "checkbox" %>
+      <span class="label-text">Primary</span>
+    </label>
+    <label class="label cursor-pointer gap-2">
+      <%= f.check_box :consent_sms, class: "checkbox" %>
+      <span class="label-text">SMS consent</span>
+    </label>
+  </div>
+
+  <div class="md:col-span-6 text-right">
+    <% if f.object.persisted? %>
+      <% uid = "phone_#{f.object.id}_destroy" %>
+      <%= f.check_box :_destroy, include_hidden: false, id: uid %>
+      <%= f.label :_destroy, "Remove", for: uid, class: "text-sm" %>
+    <% else %>
+      <%= f.hidden_field :_destroy, value: "0", id: nil %>
+      <button type="button" class="btn btn-ghost btn-sm" data-action="nested-form#remove">Remove</button>
+    <% end %>
   </div>
 </div>
 
@@ -6752,34 +6869,80 @@ end
     </div>
   </div>
 
-  <%# Phones (no reveal needed) %>
-  <div class="card bg-base-100 shadow">
-    <div class="card-body">
-      <h2 class="card-title">Phones</h2>
-      <ul class="list-disc pl-6">
-        <% @party.phones.order(created_at: :desc).each do |ph| %>
-          <li><span class="font-mono"><%= ph.phone_e164 %></span> (<%= ph.phone_type_code %>)</li>
-        <% end %>
-      </ul>
-    </div>
-  </div>
-
-  <% @party.addresses.each do |addr| %>
-    <div class="bg-base-100 shadow p-3 flex items-center justify-between">
-      <div>
-        <div><%= addr.line1 %> <%= addr.line2 %></div>
-        <div><%= addr.locality %>, <%= addr.region_code %> <%= addr.postal_code %></div>
-        <div><%= addr.country_code %></div>
+<%# Phones %>
+<div class="card bg-base-100 shadow">
+  <div class="card-body">
+    <h2 class="card-title">Phones</h2>
+    <% if @party.phones.any? %>
+      <div class="overflow-x-auto">
+        <table class="table w-full">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Number</th>
+              <th>Ext</th>
+              <th>Primary</th>
+              <th>SMS OK</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @party.phones.order(is_primary: :desc, created_at: :asc).each do |ph| %>
+              <tr>
+                <td><%= ph.phone_type&.name || ph.phone_type_code || "(Unspecified)" %></td>
+                <td class="font-mono"><%= ph.phone_e164 %></td>
+                <td><%= ph.phone_ext.presence || "—" %></td>
+                <td><%= ph.is_primary? ? "Yes" : "No" %></td>
+                <td><%= ph.consent_sms? ? "Yes" : "No" %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
+    <% else %>
+      <p class="opacity-70">No phones</p>
+    <% end %>
+  </div>
+</div>
 
-      <%= button_to "Delete",
-            party_party_address_path(@party.public_id, addr),
-            method: :delete,
-            data: { turbo_confirm: "Delete this address?" },
-            class: "btn btn-outline btn-error bt-sm" %>
-    </div>
-  <% end %>
-    </div>
+<%# Addresses %>
+<div class="card bg-base-100 shadow">
+  <div class="card-body">
+    <h2 class="card-title">Addresses</h2>
+    <% if @party.addresses.any? %>
+      <div class="overflow-x-auto">
+        <table class="table table-zebra w-full">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Street 1</th>
+              <th>Street 2</th>
+              <th>City</th>
+              <th>Region</th>
+              <th>Postcode</th>
+              <th>Country</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @party.addresses.each do |a| %>
+              <tr>
+                <td>
+                  <%= a.address_type&.name || "(Unspecified)" %>
+                  <% if a.is_primary? %><span class="badge badge-sm ml-2">Primary</span><% end %>
+                </td>
+                <td><%= a.line1 %></td>
+                <td><%= a.line2 %></td>
+                <td><%= a.locality %></td>
+                <td><%= a.region_code %></td>
+                <td><%= a.postal_code %></td>
+                <td><%= a.country&.name || a.country_code %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <p class="opacity-70">No addresses</p>
+    <% end %>
   </div>
 </div>
 
@@ -7334,12 +7497,11 @@ end
 ===== END:config/environments/test.rb =====
 
 ===== BEGIN:config/importmap.rb =====
-# Pin npm packages by running ./bin/importmap
-
 pin "application"
 pin "@hotwired/turbo-rails", to: "turbo.min.js"
 pin "@hotwired/stimulus", to: "stimulus.min.js"
 pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
+pin "controllers", to: "controllers/index.js"
 pin_all_from "app/javascript/controllers", under: "controllers"
 
 ===== END:config/importmap.rb =====
@@ -7357,6 +7519,7 @@ cfg.key_derivation_salt = ENV["ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT"]
 
 # Version of your assets, change this if you want to expire all your assets.
 Rails.application.config.assets.version = "1.0"
+Rails.application.config.assets.paths << Rails.root.join("app/javascript")
 
 # Add additional assets to the asset load path.
 # Rails.application.config.assets.paths << Emoji.images_path
