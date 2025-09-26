@@ -29,38 +29,40 @@
   </head>
 
   <body>
-    <div class="container mx-auto flex items-center justify-between p-3">
-      <a href="<%= root_path %>" class="flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="225" height="50" viewBox="0 0 160 40" role="img" aria-label="BankEncoRRe"></svg>
-      </a>
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-6 py-3">
+      <%= link_to root_path, class: "flex items-center gap-2" do %>
+        <svg ... aria-label="BankEncoRRe"></svg>
+      <% end %>
 
-      <div class="flex items-center gap-2">
-        <nav class="hidden md:flex space-x-2">
-          <%= link_to "Home", root_path, class: "btn btn-ghost btn-sm" %>
-          <%= link_to "Parties", party_parties_path, class: "btn btn-ghost btn-sm" %>
-          <%= link_to "Cases", "#", class: "btn btn-ghost btn-sm" %>
-          <%= link_to "Reports", "#", class: "btn btn-ghost btn-sm" %>
-        </nav>
+      <nav class="hidden md:flex items-center space-x-2" role="navigation" aria-label="Main">
+        <%= link_to "Home", root_path, class: "btn btn-ghost btn-sm" %>
+        <%= link_to "Parties", party_parties_path, class: "btn btn-ghost btn-sm" %>
+        <%= link_to "Cases", "#", class: "btn btn-ghost btn-sm" %>
+        <%= link_to "Reports", "#", class: "btn btn-ghost btn-sm" %>
+      </nav>
 
-        <form action="#" method="get" class="flex-1 max-w-xs">
-          <label class="input w-full">
-            <input type="search" name="q" placeholder="Search…" aria-label="Search" />
-          </label>
-        </form>
+      <div class="flex items-center gap-3">
+        <%= form_with url: party_parties_path, method: :get, local: true, class: "join" do %>
+          <input name="q" aria-label="Search parties" class="input input-bordered join-item w-64 md:w-80" placeholder="Search by name, email, or #" />
+          <button class="btn join-item" type="submit">Search</button>
+        <% end %>
+
+        <%= link_to "New Party", new_party_party_path, class: "btn btn-primary btn-sm hidden md:inline-flex" %>
 
         <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-sm">User</div>
+          <button tabindex="0" class="btn btn-ghost btn-circle avatar btn-sm" aria-label="User menu">
+            <div class="w-8 rounded-full bg-base-300"></div>
+          </button>
           <div tabindex="0" class="dropdown-content z-10 bg-base-100 rounded-box shadow p-3 w-64">
-            <div class="mb-2 text-sm font-semibold">Theme</div>
+            <div class="mb-2 text-sm font-semibold">Appearance</div>
             <div class="grid grid-cols-2 gap-2 text-sm">
-              <% ["corporate","business","light","dark","lofi","emerald","retro","autumn","caramellate"].each do |t| %>
+              <% ["corporate","business","light","dark","emerald","retro"].each do |t| %>
                 <label class="label cursor-pointer justify-start gap-2">
                   <input type="radio" name="theme" value="<%= t %>" class="theme-controller" />
                   <span><%= t.capitalize %></span>
                 </label>
               <% end %>
             </div>
-
             <div class="divider my-2"></div>
             <ul class="menu">
               <li><a href="#">Profile</a></li>

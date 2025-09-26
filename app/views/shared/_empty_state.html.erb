@@ -1,0 +1,6 @@
+<div class="text-center p-10 border border-dashed rounded-box">
+  <div class="text-3xl mb-2">📄</div>
+  <div class="font-medium mb-1"><%= title || "No results" %></div>
+  <p class="opacity-70 mb-3"><%= subtitle || "Try a different search term." %></p>
+  <%= cta if defined?(cta) && cta %>
+</div>

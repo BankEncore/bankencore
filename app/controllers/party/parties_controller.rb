@@ -5,8 +5,33 @@ module Party
     before_action :load_ref_options, only: [:new, :edit, :create, :update]
     rescue_from ActionController::ParameterMissing, with: :handle_bad_params
 
+    # LIST + SEARCH
     def index
-      @parties = ::Party::Party.includes(:person, :organization, :emails).order(created_at: :desc)
+      scope = ::Party::Party
+        .includes(:person, :organization, :emails)
+        .order(created_at: :desc)
+
+      if params[:q].present?
+        q     = "%#{params[:q].strip}%"
+        ppl   = ::Party::Person.table_name         # "party_people"
+        orgs  = ::Party::Organization.table_name   # "party_organizations"
+        emls  = ::Party::Email.table_name          # "party_emails"
+        parts = ::Party::Party.table_name          # "parties"
+
+        scope = scope.joins(<<~SQL.squish)
+          LEFT JOIN #{ppl}  ON #{ppl}.party_id  = #{parts}.id
+          LEFT JOIN #{orgs} ON #{orgs}.party_id = #{parts}.id
+          LEFT JOIN #{emls} ON #{emls}.party_id = #{parts}.id
+        SQL
+
+        scope = scope.where(
+          "#{ppl}.first_name LIKE :q OR #{ppl}.middle_name LIKE :q OR #{ppl}.last_name LIKE :q
+          OR #{orgs}.legal_name LIKE :q OR #{emls}.email LIKE :q OR #{parts}.customer_number LIKE :q",
+          q: q
+        ).distinct
+      end
+
+      @parties = scope.to_a
     end
 
     def show; end
@@ -29,7 +54,7 @@ module Party
     end
 
     def create
-      return add_row_and_render(:new)  if params[:add_address] || params[:add_email] || params[:add_phone]
+      return add_row_and_render(:new) if params[:add_address] || params[:add_email] || params[:add_phone]
 
       attrs = scrub_email_params(scrub_address_params(party_params)).dup
       attrs.delete(:tax_id) if attrs[:tax_id].blank?
@@ -45,8 +70,7 @@ module Party
     def update
       return add_row_and_render(:edit) if params[:add_address] || params[:add_email] || params[:add_phone]
 
-      raw   = party_params
-      attrs = scrub_email_params(scrub_address_params(raw)).dup
+      attrs = scrub_email_params(scrub_address_params(party_params)).dup
       attrs.delete(:tax_id) if attrs[:tax_id].blank?
 
       if @party.update(attrs)
@@ -61,7 +85,9 @@ module Party
       redirect_to party_parties_path, notice: "Party deleted"
     end
 
+    # JSON reveal for Tax ID
     def reveal_tax_id
+      response.set_header("Cache-Control", "no-store")
       render json: { value: @party.tax_id }
     end
 
@@ -73,7 +99,7 @@ module Party
 
     def party_params
       params.require(:party_party).permit(
-        :party_type, :customer_number, :tax_id,
+        :party_type, :tax_id, # :customer_number intentionally omitted
         person_attributes: [
           :id, :first_name, :middle_name, :last_name,
           :name_suffix, :courtesy_title, :date_of_birth, :_destroy
@@ -117,10 +143,9 @@ module Party
       @party.addresses.build(country_code: "US") if params[:add_address]
       @party.emails.build                        if params[:add_email]
       @party.phones.build(country_alpha2: "US")  if params[:add_phone]
-      render view, status: :unprocessable_entity and return
+      render view, status: :unprocessable_entity
     end
 
-    # Drop blank NEW email rows; keep existing rows
     def scrub_email_params(attrs)
       attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_unsafe_h : attrs
       attrs = attrs.deep_dup
@@ -134,7 +159,6 @@ module Party
       attrs
     end
 
-    # Drop blank NEW address rows; keep existing rows
     def scrub_address_params(attrs)
       attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_unsafe_h : attrs
       attrs = attrs.deep_dup

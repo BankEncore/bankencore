@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   root "home#index"
 
   namespace :party do
-    resources :parties, param: :public_id do
+    resources :parties, param: :public_id, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
       member { get :reveal_tax_id }  # /party/parties/:public_id/reveal_tax_id
       post :reveal_tax_id   # new POST for the Stimulus controller
 

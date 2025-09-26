@@ -1,8 +1,10 @@
 <%# Tailwind + DaisyUI list %>
-<div class="p-6">
-  <h1 class="text-2xl font-bold mb-4">Parties</h1>
-  <%= link_to "New Party", new_party_party_path, class: "btn btn-primary btn-sm" %>
-
+  <% if @parties.blank? %>
+  <%= render "shared/empty_state",
+      title: "No parties found",
+      subtitle: "Search by name, email, or customer #.",
+      cta: link_to("New Party", new_party_party_path, class: "btn btn-primary btn-sm") %>
+  <% else %>
   <div class="overflow-x-auto">
     <table class="table table-zebra">
       <thead>
@@ -32,3 +34,4 @@
     </table>
   </div>
 </div>
+<% end %>
