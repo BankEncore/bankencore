@@ -152,7 +152,7 @@
             <% @party.phones.sort_by { |p| p.is_primary ? 0 : 1 }.each do |p| %>
               <li class="py-2 text-sm">
                 <div>
-                  <span><%= p.phone_e164.presence || p.number_raw %></span>
+                  <span class="font-mono"><%= p.international_pretty || p.number_raw %></span>
                   <button
                     class="btn btn-ghost btn-xs ml-2 focus-visible:outline focus-visible:outline-2"
                     data-controller="copy"

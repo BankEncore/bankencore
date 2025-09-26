@@ -1,37 +1,41 @@
-<%# Tailwind + DaisyUI list %>
-  <% if @parties.blank? %>
+<%# app/views/party/parties/index.html.erb %>
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-semibold">Parties</h1>
+  <%= link_to "New Party", new_party_party_path, class: "btn btn-primary btn-sm" %>
+</div>
+
+<% if @parties.blank? %>
   <%= render "shared/empty_state",
       title: "No parties found",
       subtitle: "Search by name, email, or customer #.",
       cta: link_to("New Party", new_party_party_path, class: "btn btn-primary btn-sm") %>
-  <% else %>
+<% else %>
   <div class="overflow-x-auto">
     <table class="table table-zebra">
-      <thead>
-        <tr>
-          <th>Party Name</th>
-          <th>Customer #
-          <th>Public ID</th>
-          <th>Type</th>
-          <th>Created</th>
-          <th></th>
-        </tr>
-      </thead>
+    <thead>
+      <tr>
+        <th class="w-8"></th>
+        <th><%= sort_link("Name", :name) %></th>
+        <th><%= sort_link("Customer #", :customer_number) %></th>
+        <th>Phone</th>
+        <th><%= sort_link("City, Region", :updated_at) %></th> <!-- change later if you add sortable city -->
+        <th class="w-0"></th>
+      </tr>
+    </thead>
       <tbody>
         <% @parties.each do |p| %>
+          <% addr  = p.primary_address %>
+          <% phone = p.primary_phone %>
           <tr>
-            <td class="font-semibold"><%= p.display_name %></td>
-            <td class="font-mono"><%= p.customer_number %></td>
-            <td class="font-mono"><%= p.public_id %></td>
-            <td><%= p.party_type %></td>
-            <td><%= l(p.created_at, format: :short) %></td>
-            <td>
-              <%= link_to "View", party_party_path(p.public_id), class: "btn btn-xs btn-neutral" %>
-            </td>
+            <td class="align-middle"><%= party_type_icon(p, size: 20) %></td>
+            <td><%= link_to p.display_name, party_party_path(p), class: "link" %></td>
+            <td class="font-mono"><%= p.customer_number.presence || "—" %></td>
+            <td class="font-mono"><%= phone&.international_pretty || "—" %></td>
+            <td><%= [addr&.locality, addr&.region_code].compact_blank.join(", ").presence || "—" %></td>
+            <td class="text-right"><%= link_to "View", party_party_path(p), class: "btn btn-ghost btn-xs" %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
   </div>
-</div>
 <% end %>
