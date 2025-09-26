@@ -6,17 +6,29 @@
     <h1 class="text-2xl md:text-3xl font-semibold"><%= @party.display_name %></h1>
     <div class="mt-2 flex flex-wrap gap-2 text-sm">
       <span class="badge badge-outline"><%= @party.party_type %></span>
-      <% if @party.customer_number.present? %>
-        <span class="badge badge-outline">Customer # <%= @party.customer_number %></span>
-      <% end %>
+        <% if @party.customer_number.present? %>
+          <span class="badge badge-outline">
+            Customer # <%= @party.customer_number %>
+          </span>
+          <button
+            class="btn btn-ghost btn-xs focus-visible:outline focus-visible:outline-2"
+            data-controller="copy"
+            data-copy-text-value="<%= @party.customer_number %>"
+            data-action="copy#copy"
+            aria-label="Copy customer number">
+            Copy
+          </button>
+        <% end %>
       <span class="badge badge-ghost">Updated <%= l(@party.updated_at, format: :short) %></span>
     </div>
   </div>
   <div class="flex gap-2">
     <%= link_to "Edit", edit_party_party_path(@party), class: "btn btn-ghost btn-sm" %>
-    <%= link_to "Delete", party_party_path(@party),
-          data: { turbo_method: :delete, turbo_confirm: "Delete this party?" },
-          class: "btn btn-error btn-soft btn-sm" %>
+      <button class="btn btn-error btn-soft btn-sm"
+            onclick="document.getElementById('confirm-delete').showModal()"
+            aria-label="Delete party">
+            Delete
+      </button>
     <%= link_to "Back", party_parties_path, class: "btn btn-ghost btn-sm" %>
   </div>
 </div>
@@ -140,7 +152,15 @@
             <% @party.phones.sort_by { |p| p.is_primary ? 0 : 1 }.each do |p| %>
               <li class="py-2 text-sm">
                 <div>
-                  <span class="font-mono"><%= p.phone_e164.presence || p.number_raw %></span>
+                  <span><%= p.phone_e164.presence || p.number_raw %></span>
+                  <button
+                    class="btn btn-ghost btn-xs ml-2 focus-visible:outline focus-visible:outline-2"
+                    data-controller="copy"
+                    data-copy-text-value="<%= p.phone_e164.presence || p.number_raw %>"
+                    data-action="copy#copy"
+                    aria-label="Copy phone">
+                    Copy
+                  </button>
                   <% if p.is_primary %><span class="badge badge-primary ml-2">Primary</span><% end %>
                   <% if p.consent_sms %><span class="badge badge-success ml-2">SMS OK</span><% end %>
                 </div>
@@ -167,6 +187,14 @@
               <li class="py-2 text-sm">
                 <div>
                   <span><%= e.email %></span>
+                    <button
+                      class="btn btn-ghost btn-xs ml-2 focus-visible:outline focus-visible:outline-2"
+                      data-controller="copy"
+                      data-copy-text-value="<%= e.email %>"
+                      data-action="copy#copy"
+                      aria-label="Copy email">
+                      Copy
+                    </button>
                   <% if e.is_primary %><span class="badge badge-primary ml-2">Primary</span><% end %>
                 </div>
                 <div class="opacity-70"><%= e.email_type_code %></div>
@@ -180,3 +208,24 @@
     </div>
   </div>
 </div>
+<dialog id="confirm-delete" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Delete party?</h3>
+    <p class="py-2">This cannot be undone.</p>
+    <div class="modal-action">
+      <form method="dialog">
+        <button class="btn btn-ghost">Cancel</button>
+      </form>
+      <%= button_to "Delete",
+            party_party_path(@party),
+            method: :delete,
+            form: { class: "inline" },
+            class: "btn btn-error",
+            data: { turbo_confirm: nil }, # disable double confirm
+            aria: { label: "Confirm delete" } %>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button aria-label="Close modal">close</button>
+  </form>
+</dialog>

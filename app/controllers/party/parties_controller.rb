@@ -94,7 +94,9 @@ module Party
     private
 
     def set_party
-      @party = ::Party::Party.find_by!(public_id: params[:public_id])
+      pid = params[:public_id] || params[:party_public_id] || params[:id]
+      raise ActiveRecord::RecordNotFound, "missing public_id" if pid.blank?
+      @party = ::Party::Party.find_by!(public_id: pid)
     end
 
     def party_params
