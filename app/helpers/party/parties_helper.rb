@@ -13,9 +13,16 @@ module Party::PartiesHelper
       ).html_safe
     when "organization"
       %Q(
-        <svg class="#{cls}" width="#{size}" height="#{size}" viewBox="0 0 24 24" role="img" aria-label="Organization">
+        <svg class="#{cls}" width="#{size}" height="#{size}" viewBox="0 0 24 24"
+            role="img" aria-label="Organization"
+            fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
           <title>Organization</title>
-          <path fill="currentColor" d="M3 21V8l9-5l9 5v13h-7v-6H10v6H3Zm9-13.5L6 10v9h2v-6h8v6h2v-9l-6-2.5Z"/>
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"/>
+          <path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"/>
+          <path d="M12 12l0 .01"/>
+          <path d="M3 13a20 20 0 0 0 18 0"/>
         </svg>
       ).html_safe
     else

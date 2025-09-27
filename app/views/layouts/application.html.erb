@@ -43,7 +43,7 @@
 
       <div class="flex items-center gap-3">
         <%= form_with url: party_parties_path, method: :get, local: true, class: "join" do %>
-          <input name="q" aria-label="Search parties" class="input input-bordered join-item w-64 md:w-80" placeholder="Search by name, email, or #" />
+          <input name="q" aria-label="Search parties" class="input input-bordered join-item w-64 md:w-80" placeholder="Search by name or customer #" />
           <button class="btn join-item" type="submit">Search</button>
         <% end %>
 
@@ -56,7 +56,7 @@
           <div tabindex="0" class="dropdown-content z-10 bg-base-100 rounded-box shadow p-3 w-64">
             <div class="mb-2 text-sm font-semibold">Appearance</div>
             <div class="grid grid-cols-2 gap-2 text-sm">
-              <% ["corporate","business","light","dark","emerald","retro","autumn","wireframe"].each do |t| %>
+              <% ["bankLight","bankDark"].each do |t| %>
                 <label class="label cursor-pointer justify-start gap-2">
                   <input type="radio" name="theme" value="<%= t %>" class="theme-controller" />
                   <span><%= t.capitalize %></span>

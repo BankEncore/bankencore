@@ -56,7 +56,7 @@
           <% if @party.person.date_of_birth.present? %>
             <div class="py-2 grid grid-cols-3 gap-2">
               <dt class="opacity-70">DOB</dt>
-              <dd class="col-span-2"><%= l(@party.person.date_of_birth) %></dd>
+              <dd class="col-span-2"><%= @party.person&.date_of_birth&.to_fs(:mmm_d_yyyy) %></dd>
             </div>
           <% end %>
         <% elsif @party.organization %>
@@ -79,7 +79,7 @@
           <% if @party.organization.formation_date.present? %>
             <div class="py-2 grid grid-cols-3 gap-2">
               <dt class="opacity-70">Formed</dt>
-              <dd class="col-span-2"><%= l(@party.organization.formation_date) %></dd>
+              <dd class="col-span-2"><%= (@party.organization.formation_date&.to_fs(:mmm_d_yyyy)) %></dd>
             </div>
           <% end %>
         <% else %>

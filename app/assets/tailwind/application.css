@@ -4,7 +4,82 @@
 @source "../../../app/helpers/**/*.rb";
 @source "../../../app/javascript/**/*.js";
 
-/* your other plugins... */
-@plugin "daisyui" {
-  themes: all;              /* or: themes: corporate --default; */
+/* Light theme */
+@plugin "daisyui/theme" {
+  name: "bankLight";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: #F7F8FA;
+  --color-base-200: #EEF1F4;
+  --color-base-300: #E2E7ED;
+  --color-base-content: #1A1D21;
+  --color-primary: #133A5E;
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #5A6B7D;
+  --color-secondary-content: #FFFFFF;
+  --color-accent: #C8A85A;
+  --color-accent-content: #1A1A1A;
+  --color-neutral: #2A2F36;
+  --color-neutral-content: #FFFFFF;
+  --color-info: #2A6AA9;
+  --color-info-content: oklch(96% 0.059 95.617);
+  --color-success: #2E6F4E;
+  --color-success-content: oklch(96% 0.059 95.617);
+  --color-warning: #9C6B1C;
+  --color-warning-content: oklch(96% 0.059 95.617);
+  --color-error: #8E3B3B;
+  --color-error-content: oklch(96% 0.059 95.617);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+/* Dark theme */
+@plugin "daisyui/theme" {
+  name: "bankDark";
+  default: false;
+  prefersdark: true;
+  color-scheme: "dark";
+
+  /* Bases */
+  --color-base-100: #0E1216;
+  --color-base-200: #151A21;
+  --color-base-300: #1E252E;
+  --color-base-content: #E6E9EE;
+
+  /* Brand */
+  --color-primary: #2A6AA9;            /* lighter navy for dark bg */
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #7A8A9B;          /* slate, softened */
+  --color-secondary-content: #0E1216;
+  --color-accent: #D0B36A;             /* muted gold */
+  --color-accent-content: #0E1216;
+  --color-neutral: #2B3138;
+  --color-neutral-content: #E6E9EE;
+
+  /* States (conservative) */
+  --color-info: #4A8DC0;
+  --color-info-content: #0E1216;
+  --color-success: #4A8F73;
+  --color-success-content: #0E1216;
+  --color-warning: #B4893B;
+  --color-warning-content: #0E1216;
+  --color-error: #A75A5A;
+  --color-error-content: #0E1216;
+
+  /* Shape and depth */
+  --radius-selector: 0.5rem;
+  --radius-field: 1rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
 }
