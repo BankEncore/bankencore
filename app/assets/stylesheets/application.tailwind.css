@@ -5,7 +5,7 @@
 
 /* Light theme */
 @plugin "daisyui/theme" {
-  name: "bankLight";
+  name: "blueLight";
   default: true;
   prefersdark: false;
   color-scheme: "light";
@@ -41,7 +41,7 @@
 
 /* Dark theme */
 @plugin "daisyui/theme" {
-  name: "bankDark";
+  name: "blueDark";
   default: false;
   prefersdark: true;
   color-scheme: "dark";
@@ -73,6 +73,94 @@
   --color-error-content: #0E1216;
 
   /* Shape and depth */
+  --radius-selector: 0.5rem;
+  --radius-field: 1rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* BankLight Merlot */
+@plugin "daisyui/theme" {
+  name: "merlotLight";
+  default: false;
+  prefersdark: false;
+  color-scheme: "light";
+
+  --color-base-100: #F9F5F0;
+  --color-base-200: #EFE8DF;
+  --color-base-300: #E3D9CD;
+  --color-base-content: #1A1D21;
+
+  /* Brand */
+  --color-primary: #8E3B3B;           /* merlot */
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #5A6B7D;         /* slate */
+  --color-secondary-content: #FFFFFF;
+  --color-accent: #CCB06A;            /* muted gold */
+  --color-accent-content: #1A1A1A;
+  --color-neutral: #2A2F36;
+  --color-neutral-content: #FFFFFF;
+
+  /* States (keep conservative; separate from primary red) */
+  --color-info: #2A6AA9;
+  --color-info-content: oklch(96% 0.059 95.617);
+  --color-success: #2E6F4E;
+  --color-success-content: oklch(96% 0.059 95.617);
+  --color-warning: #9C6B1C;
+  --color-warning-content: oklch(96% 0.059 95.617);
+  --color-error: #6C2A2A;             /* darker, distinct from primary */
+  --color-error-content: oklch(96% 0.059 95.617);
+
+  /* Shape/depth (match other themes) */
+  --radius-selector: 0.5rem;
+  --radius-field: 1rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+
+/* Merlot Dark */
+@plugin "daisyui/theme" {
+  name: "merlotDark";
+  default: false;
+  prefersdark: true;
+  color-scheme: "dark";
+
+  /* Warm dark bases */
+  --color-base-100: #121013;  /* near-black, warm */
+  --color-base-200: #1A171B;
+  --color-base-300: #232026;
+  --color-base-content: #EAE7E5;
+
+  /* Brand */
+  --color-primary: #8E3B3B;     /* merlot */
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #7E8892;   /* softened slate for dark */
+  --color-secondary-content: #0E1216;
+  --color-accent: #CCB06A;      /* warmer gold to match bases */
+  --color-accent-content: #0E1216;
+  --color-neutral: #2B262C;     /* warm graphite */
+  --color-neutral-content: #EAE7E5;
+
+  /* States (conservative, distinct from primary) */
+  --color-info: #4A8DC0;
+  --color-info-content: #0E1216;
+  --color-success: #4A8F73;
+  --color-success-content: #0E1216;
+  --color-warning: #B4893B;
+  --color-warning-content: #0E1216;
+  --color-error: #B46868;       /* deeper than primary to avoid confusion */
+  --color-error-content: #0E1216;
+
+  /* Shape/depth */
   --radius-selector: 0.5rem;
   --radius-field: 1rem;
   --radius-box: 0.5rem;
