@@ -36,9 +36,11 @@ module Party
     # Display helpers
     def display_name
       if person
-        [person.first_name, person.middle_name, person.last_name, person.name_suffix].compact_blank.join(" ")
+        [person.first_name, person.middle_name, person.last_name, person.name_suffix]
+          .compact_blank
+          .join(" ")
       elsif organization
-        organization.legal_name.to_s
+        organization.display_name
       else
         "(Unnamed Party)"
       end

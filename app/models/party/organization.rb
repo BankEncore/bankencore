@@ -18,7 +18,7 @@ module Party
 
     def display_name
       return legal_name.to_s if operating_name.blank?
-      "#{legal_name} d/b/a #{operating_name}"
+      "#{legal_name} [d/b/a #{operating_name}]"
     end
   end
 end
