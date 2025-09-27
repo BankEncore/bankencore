@@ -38,4 +38,12 @@ module Party::PartiesHelper
                 url_for(params.permit!.to_h.merge(sort: key, dir: nextdir, only_path: true)),
                 class: "link link-hover"
     end
-end
+
+      # Returns [["Pennsylvania","PA"], ...] for a given country_code or []
+      def regions_for(country_code)
+        return [] if country_code.blank?
+        Ref::Region.where(country_code: country_code)
+                  .order(:name)
+                  .pluck(:name, :code)
+      end
+    end

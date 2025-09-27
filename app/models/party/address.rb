@@ -3,21 +3,31 @@ module Party
     self.table_name = "party_addresses"
     include SinglePrimary
 
-    belongs_to :party, class_name: "Party::Party", foreign_key: :party_id, inverse_of: :addresses
+    belongs_to :party, class_name: "Party::Party", inverse_of: :addresses
 
     belongs_to :address_type, class_name: "Ref::AddressType",
                foreign_key: :address_type_code, primary_key: :code
 
-    belongs_to :country, class_name: "Ref::Country", foreign_key: "country_code", primary_key: "code"
-    belongs_to :region,  class_name: "Ref::Region",  foreign_key: "region_code",  primary_key: "code", optional: true
+    belongs_to :country, class_name: "Ref::Country",
+               foreign_key: :country_code,  primary_key: :code
 
-    before_validation { self.country_code ||= "US" }
-    before_validation { Rails.logger.info("addr cc=#{country_code.inspect} rc=#{region_code.inspect}") }
-    before_validation do
-      self.country_code = country_code&.upcase&.strip
-      self.region_code  = region_code&.upcase&.strip
-    end
-    validates :country_code, presence: true
+    # scope region by country_code to match the FK
+    belongs_to :region, ->(addr) { where(country_code: addr.country_code) },
+               class_name: "Ref::Region",
+               foreign_key: :region_code, primary_key: :code, optional: true
+
+    # normalize before validations
+    before_validation { self.country_code = (country_code.presence || "US").to_s.upcase.strip }
+    before_validation { self.region_code  = region_code.to_s.upcase.strip }
+    before_validation :normalize_codes
+
+    validates :country_code,      presence: true
     validates :address_type_code, presence: true
+
+    private
+
+    def normalize_codes
+      self.region_code = nil if region_code.blank?
+    end
   end
 end
