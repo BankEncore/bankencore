@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="blueLight">
   <head>
-    <title><%= content_for?(:title) ? yield(:title) : "YourApp" %></title>
+    <title><%= content_for?(:title) ? yield(:title) : "BankEncoRRe" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -25,6 +25,22 @@
         });
       })();
     </script>
+    <!-- SVG (preferred) -->
+    <link rel="icon" type="image/svg+xml" href="<%= asset_path('favicon.svg') %>">
+
+    <!-- PNG fallbacks -->
+    <link rel="icon" sizes="32x32"  type="image/png" href="<%= asset_path('favicon-32.png') %>">
+    <link rel="icon" sizes="192x192" type="image/png" href="<%= asset_path('favicon-192.png') %>">
+    <link rel="icon" sizes="512x512" type="image/png" href="<%= asset_path('favicon-512.png') %>">
+
+    <!-- iOS/Android home screen -->
+    <link rel="apple-touch-icon" sizes="180x180" href="<%= asset_path('favicon-180.png') %>">
+
+    <!-- Safari pinned tab (optional) -->
+    <link rel="mask-icon" href="<%= asset_path('mask-icon.svg') %>" color="#8E3B3B">
+
+    <!-- Address bar color (optional) -->
+    <meta name="theme-color" content="#F9F5F0">
   </head>
 
   <body class="min-h-screen">

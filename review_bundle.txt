@@ -2890,8 +2890,14 @@
     width: var(--size);
     height: var(--size);
   }
+  .h-5 {
+    height: calc(var(--spacing) * 5);
+  }
   .h-6 {
     height: calc(var(--spacing) * 6);
+  }
+  .h-8 {
+    height: calc(var(--spacing) * 8);
   }
   .h-24 {
     height: calc(var(--spacing) * 24);
@@ -2913,6 +2919,9 @@
   }
   .w-0 {
     width: calc(var(--spacing) * 0);
+  }
+  .w-5 {
+    width: calc(var(--spacing) * 5);
   }
   .w-6 {
     width: calc(var(--spacing) * 6);
@@ -2955,6 +2964,9 @@
   }
   .flex-shrink {
     flex-shrink: 1;
+  }
+  .shrink-0 {
+    flex-shrink: 0;
   }
   .flex-grow {
     flex-grow: 1;
@@ -3020,8 +3032,14 @@
   .flex-col {
     flex-direction: column;
   }
+  .flex-row {
+    flex-direction: row;
+  }
   .flex-wrap {
     flex-wrap: wrap;
+  }
+  .place-items-center {
+    place-items: center;
   }
   .items-center {
     align-items: center;
@@ -3251,6 +3269,9 @@
   .py-3 {
     padding-block: calc(var(--spacing) * 3);
   }
+  .py-6 {
+    padding-block: calc(var(--spacing) * 6);
+  }
   .pt-1 {
     padding-top: calc(var(--spacing) * 1);
   }
@@ -3317,6 +3338,12 @@
   }
   .whitespace-pre-line {
     white-space: pre-line;
+  }
+  .text-accent {
+    color: var(--color-accent);
+  }
+  .text-base-100 {
+    color: var(--color-base-100);
   }
   .text-base-content {
     color: var(--color-base-content);
@@ -3513,6 +3540,10 @@
     --btn-color: var(--color-success);
     --btn-fg: var(--color-success-content);
   }
+  .select-none {
+    -webkit-user-select: none;
+    user-select: none;
+  }
   .focus-visible\:outline {
     &:focus-visible {
       outline-style: var(--tw-outline-style);
@@ -3608,6 +3639,11 @@
   .md\:grid-cols-12 {
     @media (width >= 48rem) {
       grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+  }
+  .md\:flex-nowrap {
+    @media (width >= 48rem) {
+      flex-wrap: nowrap;
     }
   }
   .md\:px-6 {
@@ -4931,6 +4967,208 @@
     background-position-x: -115%;
   }
 }
+@layer base {
+  :where(:root),:root:has(input.theme-controller[value=blueLight]:checked),[data-theme="blueLight"] {
+    color-scheme: light;
+    --color-base-100: #F7F8FA;
+    --color-base-200: #EEF1F4;
+    --color-base-300: #E2E7ED;
+    --color-base-content: #1A1D21;
+    --color-primary: #133A5E;
+    --color-primary-content: #FFFFFF;
+    --color-secondary: #5A6B7D;
+    --color-secondary-content: #FFFFFF;
+    --color-accent: #C8A85A;
+    --color-accent-content: #1A1A1A;
+    --color-neutral: #2A2F36;
+    --color-neutral-content: #FFFFFF;
+    --color-info: #2A6AA9;
+    --color-info-content: oklch(96% 0.059 95.617);
+    --color-success: #2E6F4E;
+    --color-success-content: oklch(96% 0.059 95.617);
+    --color-warning: #9C6B1C;
+    --color-warning-content: oklch(96% 0.059 95.617);
+    --color-error: #8E3B3B;
+    --color-error-content: oklch(96% 0.059 95.617);
+    --radius-selector: 0.5rem;
+    --radius-field: 0.5rem;
+    --radius-box: 0.5rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 1;
+    --noise: 0;
+  }
+}
+@layer base {
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+      color-scheme: dark;
+      --color-base-100: #0E1216;
+      --color-base-200: #151A21;
+      --color-base-300: #1E252E;
+      --color-base-content: #E6E9EE;
+      --color-primary: #2A6AA9;
+      --color-primary-content: #FFFFFF;
+      --color-secondary: #7A8A9B;
+      --color-secondary-content: #0E1216;
+      --color-accent: #D0B36A;
+      --color-accent-content: #0E1216;
+      --color-neutral: #2B3138;
+      --color-neutral-content: #E6E9EE;
+      --color-info: #4A8DC0;
+      --color-info-content: #0E1216;
+      --color-success: #4A8F73;
+      --color-success-content: #0E1216;
+      --color-warning: #B4893B;
+      --color-warning-content: #0E1216;
+      --color-error: #A75A5A;
+      --color-error-content: #0E1216;
+      --radius-selector: 0.5rem;
+      --radius-field: 1rem;
+      --radius-box: 0.5rem;
+      --size-selector: 0.25rem;
+      --size-field: 0.25rem;
+      --border: 1px;
+      --depth: 0;
+      --noise: 0;
+    }
+  }
+}
+@layer base {
+  :root:has(input.theme-controller[value=blueDark]:checked),[data-theme="blueDark"] {
+    color-scheme: dark;
+    --color-base-100: #0E1216;
+    --color-base-200: #151A21;
+    --color-base-300: #1E252E;
+    --color-base-content: #E6E9EE;
+    --color-primary: #2A6AA9;
+    --color-primary-content: #FFFFFF;
+    --color-secondary: #7A8A9B;
+    --color-secondary-content: #0E1216;
+    --color-accent: #D0B36A;
+    --color-accent-content: #0E1216;
+    --color-neutral: #2B3138;
+    --color-neutral-content: #E6E9EE;
+    --color-info: #4A8DC0;
+    --color-info-content: #0E1216;
+    --color-success: #4A8F73;
+    --color-success-content: #0E1216;
+    --color-warning: #B4893B;
+    --color-warning-content: #0E1216;
+    --color-error: #A75A5A;
+    --color-error-content: #0E1216;
+    --radius-selector: 0.5rem;
+    --radius-field: 1rem;
+    --radius-box: 0.5rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 0;
+    --noise: 0;
+  }
+}
+@layer base {
+  :root:has(input.theme-controller[value=merlotLight]:checked),[data-theme="merlotLight"] {
+    color-scheme: light;
+    --color-base-100: #F9F5F0;
+    --color-base-200: #EFE8DF;
+    --color-base-300: #E3D9CD;
+    --color-base-content: #1A1D21;
+    --color-primary: #8E3B3B;
+    --color-primary-content: #FFFFFF;
+    --color-secondary: #5A6B7D;
+    --color-secondary-content: #FFFFFF;
+    --color-accent: #CCB06A;
+    --color-accent-content: #1A1A1A;
+    --color-neutral: #2A2F36;
+    --color-neutral-content: #FFFFFF;
+    --color-info: #2A6AA9;
+    --color-info-content: oklch(96% 0.059 95.617);
+    --color-success: #2E6F4E;
+    --color-success-content: oklch(96% 0.059 95.617);
+    --color-warning: #9C6B1C;
+    --color-warning-content: oklch(96% 0.059 95.617);
+    --color-error: #6C2A2A;
+    --color-error-content: oklch(96% 0.059 95.617);
+    --radius-selector: 0.5rem;
+    --radius-field: 1rem;
+    --radius-box: 0.5rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 0;
+    --noise: 0;
+  }
+}
+@layer base {
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+      color-scheme: dark;
+      --color-base-100: #121013;
+      --color-base-200: #1A171B;
+      --color-base-300: #232026;
+      --color-base-content: #EAE7E5;
+      --color-primary: #8E3B3B;
+      --color-primary-content: #FFFFFF;
+      --color-secondary: #7E8892;
+      --color-secondary-content: #0E1216;
+      --color-accent: #CCB06A;
+      --color-accent-content: #0E1216;
+      --color-neutral: #2B262C;
+      --color-neutral-content: #EAE7E5;
+      --color-info: #4A8DC0;
+      --color-info-content: #0E1216;
+      --color-success: #4A8F73;
+      --color-success-content: #0E1216;
+      --color-warning: #B4893B;
+      --color-warning-content: #0E1216;
+      --color-error: #B46868;
+      --color-error-content: #0E1216;
+      --radius-selector: 0.5rem;
+      --radius-field: 1rem;
+      --radius-box: 0.5rem;
+      --size-selector: 0.25rem;
+      --size-field: 0.25rem;
+      --border: 1px;
+      --depth: 0;
+      --noise: 0;
+    }
+  }
+}
+@layer base {
+  :root:has(input.theme-controller[value=merlotDark]:checked),[data-theme="merlotDark"] {
+    color-scheme: dark;
+    --color-base-100: #121013;
+    --color-base-200: #1A171B;
+    --color-base-300: #232026;
+    --color-base-content: #EAE7E5;
+    --color-primary: #8E3B3B;
+    --color-primary-content: #FFFFFF;
+    --color-secondary: #7E8892;
+    --color-secondary-content: #0E1216;
+    --color-accent: #CCB06A;
+    --color-accent-content: #0E1216;
+    --color-neutral: #2B262C;
+    --color-neutral-content: #EAE7E5;
+    --color-info: #4A8DC0;
+    --color-info-content: #0E1216;
+    --color-success: #4A8F73;
+    --color-success-content: #0E1216;
+    --color-warning: #B4893B;
+    --color-warning-content: #0E1216;
+    --color-error: #B46868;
+    --color-error-content: #0E1216;
+    --radius-selector: 0.5rem;
+    --radius-field: 1rem;
+    --radius-box: 0.5rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 0;
+    --noise: 0;
+  }
+}
 @property --tw-rotate-x {
   syntax: "*";
   inherits: false;
@@ -5161,6 +5399,175 @@
 @plugin "daisyui" {
   themes: all;              /* or: themes: corporate --default; */
 }
+
+/* Light theme */
+@plugin "daisyui/theme" {
+  name: "blueLight";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: #F7F8FA;
+  --color-base-200: #EEF1F4;
+  --color-base-300: #E2E7ED;
+  --color-base-content: #1A1D21;
+  --color-primary: #133A5E;
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #5A6B7D;
+  --color-secondary-content: #FFFFFF;
+  --color-accent: #C8A85A;
+  --color-accent-content: #1A1A1A;
+  --color-neutral: #2A2F36;
+  --color-neutral-content: #FFFFFF;
+  --color-info: #2A6AA9;
+  --color-info-content: oklch(96% 0.059 95.617);
+  --color-success: #2E6F4E;
+  --color-success-content: oklch(96% 0.059 95.617);
+  --color-warning: #9C6B1C;
+  --color-warning-content: oklch(96% 0.059 95.617);
+  --color-error: #8E3B3B;
+  --color-error-content: oklch(96% 0.059 95.617);
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+/* Dark theme */
+@plugin "daisyui/theme" {
+  name: "blueDark";
+  default: false;
+  prefersdark: true;
+  color-scheme: "dark";
+
+  /* Bases */
+  --color-base-100: #0E1216;
+  --color-base-200: #151A21;
+  --color-base-300: #1E252E;
+  --color-base-content: #E6E9EE;
+
+  /* Brand */
+  --color-primary: #2A6AA9;            /* lighter navy for dark bg */
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #7A8A9B;          /* slate, softened */
+  --color-secondary-content: #0E1216;
+  --color-accent: #D0B36A;             /* muted gold */
+  --color-accent-content: #0E1216;
+  --color-neutral: #2B3138;
+  --color-neutral-content: #E6E9EE;
+
+  /* States (conservative) */
+  --color-info: #4A8DC0;
+  --color-info-content: #0E1216;
+  --color-success: #4A8F73;
+  --color-success-content: #0E1216;
+  --color-warning: #B4893B;
+  --color-warning-content: #0E1216;
+  --color-error: #A75A5A;
+  --color-error-content: #0E1216;
+
+  /* Shape and depth */
+  --radius-selector: 0.5rem;
+  --radius-field: 1rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* BankLight Merlot */
+@plugin "daisyui/theme" {
+  name: "merlotLight";
+  default: false;
+  prefersdark: false;
+  color-scheme: "light";
+
+  --color-base-100: #F9F5F0;
+  --color-base-200: #EFE8DF;
+  --color-base-300: #E3D9CD;
+  --color-base-content: #1A1D21;
+
+  /* Brand */
+  --color-primary: #8E3B3B;           /* merlot */
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #5A6B7D;         /* slate */
+  --color-secondary-content: #FFFFFF;
+  --color-accent: #CCB06A;            /* muted gold */
+  --color-accent-content: #1A1A1A;
+  --color-neutral: #2A2F36;
+  --color-neutral-content: #FFFFFF;
+
+  /* States (keep conservative; separate from primary red) */
+  --color-info: #2A6AA9;
+  --color-info-content: oklch(96% 0.059 95.617);
+  --color-success: #2E6F4E;
+  --color-success-content: oklch(96% 0.059 95.617);
+  --color-warning: #9C6B1C;
+  --color-warning-content: oklch(96% 0.059 95.617);
+  --color-error: #6C2A2A;             /* darker, distinct from primary */
+  --color-error-content: oklch(96% 0.059 95.617);
+
+  /* Shape/depth (match other themes) */
+  --radius-selector: 0.5rem;
+  --radius-field: 1rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+
+/* Merlot Dark */
+@plugin "daisyui/theme" {
+  name: "merlotDark";
+  default: false;
+  prefersdark: true;
+  color-scheme: "dark";
+
+  /* Warm dark bases */
+  --color-base-100: #121013;  /* near-black, warm */
+  --color-base-200: #1A171B;
+  --color-base-300: #232026;
+  --color-base-content: #EAE7E5;
+
+  /* Brand */
+  --color-primary: #8E3B3B;     /* merlot */
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #7E8892;   /* softened slate for dark */
+  --color-secondary-content: #0E1216;
+  --color-accent: #CCB06A;      /* warmer gold to match bases */
+  --color-accent-content: #0E1216;
+  --color-neutral: #2B262C;     /* warm graphite */
+  --color-neutral-content: #EAE7E5;
+
+  /* States (conservative, distinct from primary) */
+  --color-info: #4A8DC0;
+  --color-info-content: #0E1216;
+  --color-success: #4A8F73;
+  --color-success-content: #0E1216;
+  --color-warning: #B4893B;
+  --color-warning-content: #0E1216;
+  --color-error: #B46868;       /* deeper than primary to avoid confusion */
+  --color-error-content: #0E1216;
+
+  /* Shape/depth */
+  --radius-selector: 0.5rem;
+  --radius-field: 1rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
 ===== END:app/assets/stylesheets/application.tailwind.css =====
 
 ===== BEGIN:app/assets/tailwind/application.css =====
@@ -5174,6 +5581,7 @@
 @plugin "daisyui" {
   themes: all;              /* or: themes: corporate --default; */
 }
+
 ===== END:app/assets/tailwind/application.css =====
 
 ===== BEGIN:app/controllers/application_controller.rb =====
@@ -5825,9 +6233,16 @@ module Party::PartiesHelper
       ).html_safe
     when "organization"
       %Q(
-        <svg class="#{cls}" width="#{size}" height="#{size}" viewBox="0 0 24 24" role="img" aria-label="Organization">
+        <svg class="#{cls}" width="#{size}" height="#{size}" viewBox="0 0 24 24"
+            role="img" aria-label="Organization"
+            fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
           <title>Organization</title>
-          <path fill="currentColor" d="M3 21V8l9-5l9 5v13h-7v-6H10v6H3Zm9-13.5L6 10v9h2v-6h8v6h2v-9l-6-2.5Z"/>
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"/>
+          <path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"/>
+          <path d="M12 12l0 .01"/>
+          <path d="M3 13a20 20 0 0 0 18 0"/>
         </svg>
       ).html_safe
     else
@@ -6378,7 +6793,7 @@ module Party
 
     def display_name
       return legal_name.to_s if operating_name.blank?
-      "#{legal_name} d/b/a #{operating_name}"
+      "#{legal_name} [d/b/a #{operating_name}]"
     end
   end
 end
@@ -6424,9 +6839,11 @@ module Party
     # Display helpers
     def display_name
       if person
-        [person.first_name, person.middle_name, person.last_name, person.name_suffix].compact_blank.join(" ")
+        [person.first_name, person.middle_name, person.last_name, person.name_suffix]
+          .compact_blank
+          .join(" ")
       elsif organization
-        organization.legal_name.to_s
+        organization.display_name
       else
         "(Unnamed Party)"
       end
@@ -6812,9 +7229,9 @@ end
 
 ===== BEGIN:app/views/layouts/application.html.erb =====
 <!DOCTYPE html>
-<html lang="en" data-theme="corporate">
+<html lang="en" data-theme="blueLight">
   <head>
-    <title><%= content_for?(:title) ? yield(:title) : "YourApp" %></title>
+    <title><%= content_for?(:title) ? yield(:title) : "BankEncoRRe" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -6822,71 +7239,99 @@ end
     <%= javascript_importmap_tags %>
     <script>
       (function(){
-        const KEY='daisy-theme',root=document.documentElement,saved=localStorage.getItem(KEY);
-        if(saved) root.setAttribute('data-theme',saved);
-        document.addEventListener('change',function(e){
+        const KEY="daisy-theme",root=document.documentElement;
+        const saved=localStorage.getItem(KEY);
+        if(saved) root.setAttribute("data-theme",saved);
+        document.addEventListener("change",e=>{
           const t=e.target;
-          if(t && t.classList && t.classList.contains('theme-controller')){
-            const val=t.value; root.setAttribute('data-theme',val);
-            try{localStorage.setItem(KEY,val);}catch(_){}
+          if(t?.classList?.contains("theme-controller")){
+            root.setAttribute("data-theme",t.value);
+            try{localStorage.setItem(KEY,t.value);}catch(_){}
           }
         });
-        document.addEventListener('DOMContentLoaded',function(){
-          const current=root.getAttribute('data-theme')||'corporate';
-          document.querySelectorAll('.theme-controller').forEach(function(el){
-            el.checked=(el.value===current);
-          });
+        document.addEventListener("DOMContentLoaded",()=>{
+          const current=root.getAttribute("data-theme")||"blueLight";
+          document.querySelectorAll(".theme-controller").forEach(el=>{el.checked=(el.value===current);});
         });
       })();
     </script>
+    <!-- SVG (preferred) -->
+    <link rel="icon" type="image/svg+xml" href="<%= asset_path('favicon.svg') %>">
+
+    <!-- PNG fallbacks -->
+    <link rel="icon" sizes="32x32"  type="image/png" href="<%= asset_path('favicon-32.png') %>">
+    <link rel="icon" sizes="192x192" type="image/png" href="<%= asset_path('favicon-192.png') %>">
+    <link rel="icon" sizes="512x512" type="image/png" href="<%= asset_path('favicon-512.png') %>">
+
+    <!-- iOS/Android home screen -->
+    <link rel="apple-touch-icon" sizes="180x180" href="<%= asset_path('favicon-180.png') %>">
+
+    <!-- Safari pinned tab (optional) -->
+    <link rel="mask-icon" href="<%= asset_path('mask-icon.svg') %>" color="#8E3B3B">
+
+    <!-- Address bar color (optional) -->
+    <meta name="theme-color" content="#F9F5F0">
   </head>
 
-  <body>
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-6 py-3">
-      <%= link_to root_path, class: "flex items-center gap-2" do %>
-        <svg ... aria-label="BankEncoRRe"></svg>
-      <% end %>
+  <body class="min-h-screen">
+    <header class="bg-base-100 border-b">
+      <div class="max-w-7xl mx-auto flex flex-row flex-wrap md:flex-nowrap items-center justify-between gap-3 px-4 md:px-6 py-3">
 
-      <nav class="hidden md:flex items-center space-x-2" role="navigation" aria-label="Main">
-        <%= link_to "Home", root_path, class: "btn btn-ghost btn-sm" %>
-        <%= link_to "Parties", party_parties_path, class: "btn btn-ghost btn-sm" %>
-        <%= link_to "Cases", "#", class: "btn btn-ghost btn-sm" %>
-        <%= link_to "Reports", "#", class: "btn btn-ghost btn-sm" %>
-      </nav>
-
-      <div class="flex items-center gap-3">
-        <%= form_with url: party_parties_path, method: :get, local: true, class: "join" do %>
-          <input name="q" aria-label="Search parties" class="input input-bordered join-item w-64 md:w-80" placeholder="Search by name, email, or #" />
-          <button class="btn join-item" type="submit">Search</button>
+        <!-- left: logo -->
+        <%= link_to root_path, class: "flex items-center gap-2 shrink-0" do %>
+          <%= render "shared/logo" %>
         <% end %>
 
-        <%= link_to "New Party", new_party_party_path, class: "btn btn-primary btn-sm hidden md:inline-flex" %>
+        <!-- center: nav -->
+        <nav class="hidden md:flex flex-1 justify-center items-center gap-2" role="navigation" aria-label="Main">
+          <%= link_to "Home", root_path, class: "btn btn-ghost btn-sm" %>
+          <%= link_to "Parties", party_parties_path, class: "btn btn-ghost btn-sm" %>
+          <%= link_to "Cases", "#", class: "btn btn-ghost btn-sm" %>
+          <%= link_to "Reports", "#", class: "btn btn-ghost btn-sm" %>
+        </nav>
 
-        <div class="dropdown dropdown-end">
-          <button tabindex="0" class="btn btn-ghost btn-circle avatar btn-sm" aria-label="User menu">
-            <div class="w-8 rounded-full bg-base-300"></div>
-          </button>
-          <div tabindex="0" class="dropdown-content z-10 bg-base-100 rounded-box shadow p-3 w-64">
-            <div class="mb-2 text-sm font-semibold">Appearance</div>
-            <div class="grid grid-cols-2 gap-2 text-sm">
-              <% ["corporate","business","light","dark","emerald","retro","autumn","wireframe"].each do |t| %>
-                <label class="label cursor-pointer justify-start gap-2">
-                  <input type="radio" name="theme" value="<%= t %>" class="theme-controller" />
-                  <span><%= t.capitalize %></span>
-                </label>
-              <% end %>
+        <!-- right: actions -->
+        <div class="flex items-center gap-3 shrink-0">
+          <%= form_with url: party_parties_path, method: :get, local: true, class: "join hidden md:flex" do %>
+            <input name="q" aria-label="Search parties" class="input input-bordered join-item w-64 md:w-80" placeholder="Search by name or customer #">
+            <button class="btn join-item" type="submit">Search</button>
+          <% end %>
+
+          <%= link_to "New Party", new_party_party_path, class: "btn btn-primary btn-sm hidden md:inline-flex" %>
+
+          <div class="dropdown dropdown-end">
+              <button tabindex="0" class="btn btn-ghost btn-circle btn-sm" aria-label="User menu">
+                <span class="w-8 h-8 rounded-full bg-base-300 text-base-content grid place-items-center">
+                  <svg class="w-5 h-5 block" viewBox="0 0 24 24" aria-label="User">
+                    <title>User</title>
+                    <path fill="currentColor"
+                      d="M12 14c-3.9 0-7 1.8-7 4v1h14v-1c0-2.2-3.1-4-7-4Zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/>
+                  </svg>
+                </span>
+              </button>
+            <div tabindex="0" class="dropdown-content z-10 bg-base-100 rounded-box shadow p-3 w-64">
+              <div class="mb-2 text-sm font-semibold">Appearance</div>
+              <div class="grid grid-cols-2 gap-2 text-sm">
+                <% ["blueLight","merlotLight","blueDark","merlotDark"].each do |t| %>
+                  <label class="label cursor-pointer justify-start gap-2">
+                    <input type="radio" name="theme" value="<%= t %>" class="theme-controller">
+                    <span><%= t.gsub(/([a-z])([A-Z])/,'\1 \2').split.map(&:capitalize).join(' ') %></span>
+                  </label>
+                <% end %>
+              </div>
+              <div class="divider my-2"></div>
+              <ul class="menu">
+                <li><a href="#">Profile</a></li>
+                <li><a href="#">Sign out</a></li>
+              </ul>
             </div>
-            <div class="divider my-2"></div>
-            <ul class="menu">
-              <li><a href="#">Profile</a></li>
-              <li><a href="#">Sign out</a></li>
-            </ul>
           </div>
         </div>
-      </div>
-    </div>
 
-    <main class="container mx-auto p-6">
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 md:px-6 py-6">
       <% flash.each do |type, msg| %>
         <% tone = { notice: "info", alert: "warning", error: "error", success: "success" }[type.to_sym] || "info" %>
         <div class="alert alert-<%= tone %> mb-3"><%= msg %></div>
@@ -6895,7 +7340,7 @@ end
     </main>
 
     <footer class="border-t">
-      <div class="container mx-auto p-4 text-sm opacity-70">
+      <div class="max-w-7xl mx-auto p-4 text-sm opacity-70">
         © <%= Time.current.year %> YourApp · <a href="#" class="link">Privacy</a>
       </div>
     </footer>
@@ -7582,7 +8027,7 @@ end
           <% if @party.person.date_of_birth.present? %>
             <div class="py-2 grid grid-cols-3 gap-2">
               <dt class="opacity-70">DOB</dt>
-              <dd class="col-span-2"><%= l(@party.person.date_of_birth) %></dd>
+              <dd class="col-span-2"><%= @party.person&.date_of_birth&.to_fs(:mmm_d_yyyy) %></dd>
             </div>
           <% end %>
         <% elsif @party.organization %>
@@ -7605,7 +8050,7 @@ end
           <% if @party.organization.formation_date.present? %>
             <div class="py-2 grid grid-cols-3 gap-2">
               <dt class="opacity-70">Formed</dt>
-              <dd class="col-span-2"><%= l(@party.organization.formation_date) %></dd>
+              <dd class="col-span-2"><%= (@party.organization.formation_date&.to_fs(:mmm_d_yyyy)) %></dd>
             </div>
           <% end %>
         <% else %>
@@ -7840,6 +8285,51 @@ end
 <% end %>
 
 ===== END:app/views/shared/_flash.html.erb =====
+
+===== BEGIN:app/views/shared/_logo.html.erb =====
+<!-- app/views/shared/_logo.html.erb -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 32"
+     class="h-8 w-auto select-none" role="img" aria-label="BankEncoRRe">
+  <title>BankEncoRRe</title>
+
+  <!-- Mark (shield) uses primary -->
+  <g class="text-primary" fill="currentColor">
+    <!-- shield -->
+    <path d="M16 2c5 2 10 2 14 3v9c0 8-8 13-14 16C10 27 2 22 2 14V5c4-1 9-1 14-3Z"/>
+    <!-- columns (cutouts) -->
+    <g class="text-base-100" fill="currentColor">
+      <rect x="10" y="9" width="2.5" height="11" rx="1"/>
+      <rect x="15" y="7.5" width="2.5" height="12.5" rx="1"/>
+      <rect x="20" y="9" width="2.5" height="11" rx="1"/>
+    </g>
+    <!-- accent stripe -->
+    <rect x="8" y="6" width="17" height="1.6" rx="0.8" class="text-accent" fill="currentColor"/>
+  </g>
+
+  <!-- Wordmark uses base-content -->
+  <g class="text-base-content" fill="currentColor" transform="translate(40,2)">
+    <!-- simple, legible geometric wordmark -->
+    <text x="0" y="22" font-family="ui-sans-serif, system-ui, sans-serif"
+          font-size="16" font-weight="700" letter-spacing="0.5">
+      BankEncoRRe
+    </text>
+  </g>
+</svg>
+===== END:app/views/shared/_logo.html.erb =====
+
+===== BEGIN:app/views/shared/_logo_mark_only.hrml.erb =====
+<!-- app/views/shared/_logo_mark_only.html.erb -->
+<svg viewBox="0 0 32 32" class="h-8 w-8 text-primary" aria-label="BankEncoRRe mark">
+  <title>BankEncoRRe</title>
+  <path d="M16 2c5 2 10 2 14 3v9c0 8-8 13-14 16C10 27 2 22 2 14V5c4-1 9-1 14-3Z" fill="currentColor"/>
+  <g class="text-base-100" fill="currentColor">
+    <rect x="10" y="9" width="2.5" height="11" rx="1"/>
+    <rect x="15" y="7.5" width="2.5" height="12.5" rx="1"/>
+    <rect x="20" y="9" width="2.5" height="11" rx="1"/>
+  </g>
+  <rect x="8" y="6" width="17" height="1.6" rx="0.8" class="text-accent" fill="currentColor"/>
+</svg>
+===== END:app/views/shared/_logo_mark_only.hrml.erb =====
 
 ===== BEGIN:app/views/shared/_user_menu.html.erb =====
 <div class="dropdown dropdown-end">
@@ -8383,6 +8873,13 @@ cfg.key_derivation_salt = ENV["ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT"]
 # end
 
 ===== END:config/initializers/content_security_policy.rb =====
+
+===== BEGIN:config/initializers/date_formats.rb =====
+# config/initializers/date_formats.rb
+Date::DATE_FORMATS[:mmm_d_yyyy] = "%b %-d, %Y"   # e.g., Sep 5, 2025
+Time::DATE_FORMATS[:mmm_d_yyyy] = "%b %-d, %Y"
+
+===== END:config/initializers/date_formats.rb =====
 
 ===== BEGIN:config/initializers/filter_parameter_logging.rb =====
 # Be sure to restart your server when you modify this file.

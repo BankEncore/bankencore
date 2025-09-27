@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-  <circle cx="24" cy="24" r="22" fill="#1f3c88"/>
-  <text x="24" y="29" text-anchor="middle" style="font:700 20px ui-sans-serif,system-ui; fill:#fff">B</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#F9F5F0"/>
+  <path fill="#8E3B3B" d="M16 3c4 2 8 2 11 3v8c0 7-6 11-11 13C11 25 5 21 5 14V6c3-1 7-1 11-3Z"/>
+  <rect x="10" y="11" width="2" height="8" rx="1" fill="#F9F5F0"/>
+  <rect x="15" y="10" width="2" height="9" rx="1" fill="#F9F5F0"/>
+  <rect x="20" y="11" width="2" height="8" rx="1" fill="#F9F5F0"/>
+  <rect x="9" y="8" width="14" height="1.6" rx="0.8" fill="#CCB06A"/>
 </svg>
