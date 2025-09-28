@@ -22,7 +22,7 @@ module Party
     }
     accepts_nested_attributes_for :emails, allow_destroy: true, reject_if: ->(h) { h["email"].to_s.strip.blank? }
     accepts_nested_attributes_for :phones, allow_destroy: true, reject_if: ->(h) {
-      h['id'].blank? && h['number_raw'].to_s.strip.blank? && h['phone_e164'].to_s.strip.blank? && h['phone_ext'].to_s.strip.blank?
+      h["id"].blank? && h["number_raw"].to_s.strip.blank? && h["phone_e164"].to_s.strip.blank? && h["phone_ext"].to_s.strip.blank?
     }
 
     # Callbacks
@@ -37,7 +37,7 @@ module Party
     # Display helpers
     def display_name
       if person
-        [person.first_name, person.middle_name, person.last_name, person.name_suffix]
+        [ person.first_name, person.middle_name, person.last_name, person.name_suffix ]
           .compact_blank
           .join(" ")
       elsif organization

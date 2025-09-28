@@ -11,6 +11,6 @@ class CreatePartyLinks < ActiveRecord::Migration[8.0]
 
     add_foreign_key :party_links, :ref_party_link_types, column: :party_link_type_code, primary_key: :code
 
-    add_index :party_links, [:source_party_id, :target_party_id, :party_link_type_code], unique: true, name: "index_party_links_on_parties_and_type"
+    add_index :party_links, [ :source_party_id, :target_party_id, :party_link_type_code ], unique: true, name: "index_party_links_on_parties_and_type"
   end
 end

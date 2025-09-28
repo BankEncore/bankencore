@@ -40,7 +40,7 @@ module Party
     def destroy
       @email.destroy
       respond_to do |f|
-        f.turbo_stream { render turbo_stream: [replace_list] }
+        f.turbo_stream { render turbo_stream: [ replace_list ] }
         f.html { redirect_to party_party_path(@party.public_id), notice: "Email deleted" }
       end
     end
@@ -51,7 +51,7 @@ module Party
         @email.update!(is_primary: true)
       end
       respond_to do |f|
-        f.turbo_stream { render turbo_stream: [replace_list] }
+        f.turbo_stream { render turbo_stream: [ replace_list ] }
         f.html { redirect_back fallback_location: party_party_path(@party.public_id) }
       end
     end
@@ -89,7 +89,7 @@ module Party
     end
 
     def refresh_list_and_close
-      [replace_list, turbo_stream.replace("comm_modal_frame", partial: "shared/close_modal")]
+      [ replace_list, turbo_stream.replace("comm_modal_frame", partial: "shared/close_modal") ]
     end
   end
 end

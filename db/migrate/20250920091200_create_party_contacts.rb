@@ -17,7 +17,7 @@ class CreatePartyContacts < ActiveRecord::Migration[8.0]
     end
 
     add_foreign_key :party_emails, :ref_email_types, column: :email_type_code, primary_key: :code
-    add_index :party_emails, [:party_id, :email_bidx], unique: true
+    add_index :party_emails, [ :party_id, :email_bidx ], unique: true
 
     # Phones
     create_table :party_phones do |t|
@@ -31,7 +31,7 @@ class CreatePartyContacts < ActiveRecord::Migration[8.0]
     end
 
     add_foreign_key :party_phones, :ref_phone_types, column: :phone_type_code, primary_key: :code
-    add_index :party_phones, [:party_id, :phone_e164, :phone_ext], unique: true
+    add_index :party_phones, [ :party_id, :phone_e164, :phone_ext ], unique: true
 
     # Addresses
     create_table :party_addresses do |t|

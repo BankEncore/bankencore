@@ -9,13 +9,13 @@ class AddEmailBidxToPartyEmails < ActiveRecord::Migration[8.0]
     normalize_email_bidx!
 
     # 3) Ensure composite index exists
-    unless index_exists?(:party_emails, [:party_id, :email_bidx], name: "index_party_emails_on_party_and_bidx")
-      add_index :party_emails, [:party_id, :email_bidx], unique: true, name: "index_party_emails_on_party_and_bidx"
+    unless index_exists?(:party_emails, [ :party_id, :email_bidx ], name: "index_party_emails_on_party_and_bidx")
+      add_index :party_emails, [ :party_id, :email_bidx ], unique: true, name: "index_party_emails_on_party_and_bidx"
     end
   end
 
   def down
-    remove_index :party_emails, name: "index_party_emails_on_party_and_bidx" if index_exists?(:party_emails, [:party_id, :email_bidx], name: "index_party_emails_on_party_and_bidx")
+    remove_index :party_emails, name: "index_party_emails_on_party_and_bidx" if index_exists?(:party_emails, [ :party_id, :email_bidx ], name: "index_party_emails_on_party_and_bidx")
     remove_column :party_emails, :email_bidx if column_exists?(:party_emails, :email_bidx)
   end
 

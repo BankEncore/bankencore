@@ -18,19 +18,19 @@ class FixRefRegionsCompositeFk < ActiveRecord::Migration[8.0]
     # 1) Make ref_regions composite-unique (and drop old PK/unique on code)
     execute "ALTER TABLE ref_regions DROP PRIMARY KEY" rescue nil
     remove_index :ref_regions, column: :code, unique: true rescue nil
-    add_index :ref_regions, [:country_code, :code],
+    add_index :ref_regions, [ :country_code, :code ],
               unique: true, name: "uniq_ref_regions_country_code" unless
-      index_exists?(:ref_regions, [:country_code, :code], unique: true, name: "uniq_ref_regions_country_code")
+      index_exists?(:ref_regions, [ :country_code, :code ], unique: true, name: "uniq_ref_regions_country_code")
 
     # 2) Ensure referencing composite index exists
-    add_index :party_addresses, [:country_code, :region_code],
+    add_index :party_addresses, [ :country_code, :region_code ],
               name: "idx_party_addresses_country_region" unless
-      index_exists?(:party_addresses, [:country_code, :region_code], name: "idx_party_addresses_country_region")
+      index_exists?(:party_addresses, [ :country_code, :region_code ], name: "idx_party_addresses_country_region")
 
     # 3) Add composite FK with a fresh, schema-unique name
     add_foreign_key :party_addresses, :ref_regions,
-      column:      [:country_code, :region_code],
-      primary_key: [:country_code, :code],
+      column:      [ :country_code, :region_code ],
+      primary_key: [ :country_code, :code ],
       name:        "fk_pa_ref_regions_ccode_rcode",
       on_delete:   :restrict
   end

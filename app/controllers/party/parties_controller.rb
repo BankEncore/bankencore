@@ -1,8 +1,8 @@
 # app/controllers/party/parties_controller.rb
 module Party
   class PartiesController < ApplicationController
-    before_action :set_party, only: [:show, :edit, :update, :destroy, :reveal_tax_id]
-    before_action :load_ref_options, only: [:new, :edit, :create, :update]
+    before_action :set_party, only: [ :show, :edit, :update, :destroy, :reveal_tax_id ]
+    before_action :load_ref_options, only: [ :new, :edit, :create, :update ]
     rescue_from ActionController::ParameterMissing, with: :handle_bad_params
     helper ::Party::PartiesHelper
 
@@ -182,7 +182,7 @@ module Party
       cleaned = ehash.values.map { |h| h.symbolize_keys }
       cleaned.each { |h| h.delete(:email) if h[:id].present? && h[:email].to_s.strip.blank? }
       cleaned.select! { |h| h[:id].present? || h[:email].to_s.strip.present? }
-      attrs[:emails_attributes] = cleaned.each_with_index.to_h { |h, i| [i.to_s, h] }
+      attrs[:emails_attributes] = cleaned.each_with_index.to_h { |h, i| [ i.to_s, h ] }
       attrs
     end
 
@@ -195,7 +195,7 @@ module Party
       cleaned = ahash.values.map { |h| h.symbolize_keys }
       content_keys = %i[line1 line2 line3 locality region_code postal_code country_code address_type_code is_primary]
       cleaned.select! { |h| h[:id].present? || content_keys.any? { |k| h[k].to_s.strip.present? } }
-      attrs[:addresses_attributes] = cleaned.each_with_index.to_h { |h, i| [i.to_s, h] }
+      attrs[:addresses_attributes] = cleaned.each_with_index.to_h { |h, i| [ i.to_s, h ] }
       attrs
     end
 

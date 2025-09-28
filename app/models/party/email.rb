@@ -41,7 +41,7 @@ module Party
       return raw if local.blank? || dom.blank?
       first = local[0]
       last  = local[-1]
-      stars = "*" * [local.length - 2, 0].max
+      stars = "*" * [ local.length - 2, 0 ].max
       "#{first}#{stars}#{last}@#{dom}"
     end
 

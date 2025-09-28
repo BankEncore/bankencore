@@ -7,6 +7,6 @@ class CreatePartyGroupMemberships < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :party_group_memberships, [:party_id, :group_id], unique: true, name: "index_group_memberships_uniquely"
+    add_index :party_group_memberships, [ :party_id, :group_id ], unique: true, name: "index_group_memberships_uniquely"
   end
 end

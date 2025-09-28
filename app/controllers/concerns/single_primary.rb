@@ -4,7 +4,7 @@ module SinglePrimary
 
   included do
     before_save :enforce_single_primary
-    validates :is_primary, inclusion: { in: [true, false] }
+    validates :is_primary, inclusion: { in: [ true, false ] }
   end
 
   private
