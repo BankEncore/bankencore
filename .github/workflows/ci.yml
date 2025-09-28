@@ -8,105 +8,65 @@ on:
 jobs:
   scan_ruby:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
-
-      - name: Scan for common Rails security vulnerabilities using static analysis
-        run: bin/brakeman --no-pager
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with: { ruby-version: .ruby-version, bundler-cache: true }
+      - run: bin/brakeman --no-pager
 
   scan_js:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
-
-      - name: Scan for security vulnerabilities in JavaScript dependencies
-        run: bin/importmap audit
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with: { ruby-version: .ruby-version, bundler-cache: true }
+      - run: bin/importmap audit
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with: { ruby-version: .ruby-version, bundler-cache: true }
+      - run: bin/rubocop -f github
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+  test:                      # <-- was top-level; now under jobs
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: bankencore_test
+        ports: [ "3306:3306" ]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: mysql2://root:root@127.0.0.1:3306/bankencore_test
+      DISABLE_SPRING: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with: { ruby-version: .ruby-version, bundler-cache: true }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: browser-actions/setup-chrome@v1
+      - name: System deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            build-essential git libyaml-dev pkg-config default-mysql-client
+      - name: JS deps + build CSS
+        run: |
+          npm ci
+          npm run build:css
+      - run: bin/rails db:prepare
+      - run: bin/rails test test:system
+      - if: failure()
+        uses: actions/upload-artifact@v4
         with:
-          ruby-version: .ruby-version
-          bundler-cache: true
-
-      - name: Lint code for consistent style
-        run: bin/rubocop -f github
-
-test:
-  runs-on: ubuntu-latest
-
-  services:
-    mysql:
-      image: mysql:8
-      env:
-        MYSQL_ROOT_PASSWORD: root
-        MYSQL_DATABASE: bankencore_test
-      ports: ["3306:3306"]
-      options: >-
-        --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
-        --health-interval=10s --health-timeout=5s --health-retries=10
-
-  env:
-    RAILS_ENV: test
-    DATABASE_URL: mysql2://root:root@127.0.0.1:3306/bankencore_test
-    DISABLE_SPRING: 1
-
-  steps:
-    - uses: actions/checkout@v4
-
-    - uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: .ruby-version
-        bundler-cache: true
-
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 20
-
-    - uses: browser-actions/setup-chrome@v1
-
-    - name: System deps
-      run: |
-        sudo apt-get update
-        sudo apt-get install --no-install-recommends -y \
-          build-essential git libyaml-dev pkg-config default-mysql-client
-
-    - name: JS deps + build CSS
-      run: |
-        npm ci
-        npm run build:css
-
-    - name: DB prepare
-      run: bin/rails db:prepare
-
-    - name: Run tests
-      run: bin/rails test test:system
-
-    - name: Keep screenshots from failed system tests
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: screenshots
-        path: ${{ github.workspace }}/tmp/screenshots
-        if-no-files-found: ignore
+          name: screenshots
+          path: ${{ github.workspace }}/tmp/screenshots
+          if-no-files-found: ignore
