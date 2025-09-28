@@ -28,6 +28,7 @@ module Party
     # Callbacks
     before_validation :ensure_public_id
     before_validation :ensure_customer_number
+    before_validation :canonicalize_tax_id
 
     # Validations
     validates :public_id,       presence: true, uniqueness: true
@@ -80,6 +81,10 @@ module Party
         fallback = "C#{Time.current.strftime('%y%m%d')}#{format('%06d', SecureRandom.random_number(1_000_000))}"
         break(self.customer_number = fallback) unless self.class.exists?(customer_number: fallback)
       end
+    end
+
+    def canonicalize_tax_id
+      self.tax_id = tax_id.to_s.gsub(/\D/, "") if tax_id.present?
     end
   end
 end

@@ -8,22 +8,68 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
     <script>
-      (function(){
-        const KEY="daisy-theme",root=document.documentElement;
-        const saved=localStorage.getItem(KEY);
-        if(saved) root.setAttribute("data-theme",saved);
-        document.addEventListener("change",e=>{
-          const t=e.target;
-          if(t?.classList?.contains("theme-controller")){
-            root.setAttribute("data-theme",t.value);
-            try{localStorage.setItem(KEY,t.value);}catch(_){}
+    (function(){
+      const KEY="daisy-theme", root=document.documentElement;
+      const saved=localStorage.getItem(KEY);
+      if(saved) root.setAttribute("data-theme",saved);
+
+      document.addEventListener("change", e=>{
+        const t=e.target;
+        if(t?.classList?.contains("theme-controller")){
+          root.setAttribute("data-theme",t.value);
+          try{ localStorage.setItem(KEY,t.value); }catch(_){}
+        }
+      });
+
+      const syncUI=()=>{
+        const current=root.getAttribute("data-theme")||"blueLight";
+        document.querySelectorAll(".theme-controller").forEach(el=>{ el.checked=(el.value===current); });
+
+        const sel=document.getElementById("party-search-type");
+        const q  =document.getElementById("party-search-q");
+        const eye=document.getElementById("party-search-reveal");
+        if(!sel||!q) return;
+
+        // remember previous mode
+        q.dataset.prevMode = q.dataset.prevMode || sel.value;
+
+        const setSearchUI=()=>{
+          const tax = sel.value==="tax_id";
+
+          // CLEAR when switching modes
+          if(q.dataset.prevMode !== sel.value){ q.value=""; }
+          q.dataset.prevMode = sel.value;
+
+          q.type        = tax ? "password" : "text";
+          q.placeholder = tax ? "Search by tax ID" : "Search by name or customer #";
+          q.inputMode   = tax ? "numeric" : "text";
+          q.removeAttribute("pattern");
+
+          if(eye){
+            eye.classList.toggle("hidden", !tax);
+            eye.setAttribute("aria-label", q.type==="password" ? "Show tax ID" : "Hide tax ID");
           }
-        });
-        document.addEventListener("DOMContentLoaded",()=>{
-          const current=root.getAttribute("data-theme")||"blueLight";
-          document.querySelectorAll(".theme-controller").forEach(el=>{el.checked=(el.value===current);});
-        });
-      })();
+        };
+
+        sel.removeEventListener("change", setSearchUI);
+        sel.addEventListener("change", setSearchUI);
+
+        if(eye){
+          const toggle=()=>{
+            if(q.type==="password"){ q.type="text";  eye.setAttribute("aria-label","Hide tax ID"); }
+            else                   { q.type="password"; eye.setAttribute("aria-label","Show tax ID"); }
+            q.focus();
+          };
+          eye.removeEventListener("click", toggle);
+          eye.addEventListener("click", toggle);
+        }
+
+        setSearchUI();
+      };
+
+      document.addEventListener("turbo:load",   syncUI);
+      document.addEventListener("turbo:render", syncUI);
+    })();
     </script>
     <!-- SVG (preferred) -->
     <link rel="icon" type="image/svg+xml" href="<%= asset_path('favicon.svg') %>">
@@ -62,10 +108,32 @@
 
         <!-- right: actions -->
         <div class="flex items-center gap-3 shrink-0">
-          <%= form_with url: party_parties_path, method: :get, local: true, class: "join hidden md:flex" do %>
-            <input name="q" aria-label="Search parties" class="input input-bordered join-item w-64 md:w-80" placeholder="Search by name or customer #">
-            <button class="btn join-item" type="submit">Search</button>
-          <% end %>
+        <%= form_with url: party_parties_path, method: :get, local: true, class: "join hidden md:flex" do %>
+          <%= select_tag :search_type,
+                options_for_select([["ID/Name","id_name"],["Tax ID","tax_id"]],
+                                  params[:search_type].presence || "id_name"),
+                id: "party-search-type",
+                class: "select select-bordered select-sm join-item" %>
+
+          <div class="join">
+            <%= text_field_tag :q, params[:q],
+                  id: "party-search-q",
+                  aria: { label: "Search parties" },
+                  class: "input input-bordered input-sm join-item w-64 md:w-80",
+                  placeholder: "Search by name or customer #" %>
+
+            <!-- reveal toggle appears only in tax-id mode -->
+            <button id="party-search-reveal"
+                    type="button"
+                    class="btn btn-sm join-item hidden"
+                    aria-label="Show tax ID">
+              👁
+            </button>
+          </div>
+
+          <button class="btn btn-sm join-item" type="submit">Search</button>
+        <% end %>
+
 
           <%= link_to "New Party", new_party_party_path, class: "btn btn-primary btn-sm hidden md:inline-flex" %>
 
