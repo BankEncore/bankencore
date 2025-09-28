@@ -1,31 +1,36 @@
+require_relative "seeds/support" if File.exist?(Rails.root.join("db/seeds/support.rb"))
 require 'countries'
+
+Rails.application.eager_load!
+
+return if Rails.env.test? || ENV["SKIP_SEEDS"] == "1"
 
 puts "🌱 Seeding started at #{Time.current}"
 
 timestamp = Time.current
 
 SEED_CONFIG = {
-  RefEmailType => [
+  Ref::EmailType => [
     { code: "personal", name: "Personal" },
     { code: "work",     name: "Work" },
     { code: "billing",  name: "Billing" },
     { code: "other",    name: "Other" }
   ],
-  RefPhoneType => [
+  Ref::PhoneType => [
     { code: "mobile", name: "Mobile" },
     { code: "home",   name: "Home" },
     { code: "work",   name: "Work" },
     { code: "fax",    name: "Fax" },
     { code: "other",  name: "Other" }
   ],
-  RefAddressType => [
+  Ref::AddressType => [
     { code: "residential",       name: "Residential" },
     { code: "mailing",           name: "Mailing" },
     { code: "business",          name: "Business" },
     { code: "registered_agent",  name: "Registered Agent" },
     { code: "former",            name: "Former" }
   ],
-  RefOrganizationType => [
+  Ref::OrganizationType => [
     { code: "sole_proprietor", name: "Sole Proprietor" },
     { code: "corp",            name: "Corporation" },
     { code: "s_corp",          name: "S Corporation" },
@@ -34,7 +39,7 @@ SEED_CONFIG = {
     { code: "nonprofit",       name: "Non-Profit" },
     { code: "government",      name: "Government" }
   ],
-  RefPartyLinkType => [
+  Ref::PartyLinkType => [
     { code: "spouse_of",    name: "Spouse Of",    symmetric: true },
     { code: "parent_of",    name: "Parent Of",    inverse_code: "child_of" },
     { code: "child_of",     name: "Child Of",     inverse_code: "parent_of" },
@@ -44,7 +49,7 @@ SEED_CONFIG = {
     { code: "director_of",     name: "Director Of",    inverse_code: "organization_for_director" },
     { code: "organization_for_director", name: "Organization for Director", inverse_code: "director_of" }
   ],
-  RefPartyGroupType => [
+  Ref::PartyGroupType => [
     { code: "household",   name: "Household" },
     { code: "affiliation", name: "Affiliation" },
     { code: "committee",   name: "Committee" }
