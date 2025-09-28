@@ -53,3 +53,5 @@ config/credentials/*.yml.enc
 /vendor/bundle
 /.byebug_history
 /.bundle
+
+/review_bundle.txt

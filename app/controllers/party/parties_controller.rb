@@ -8,44 +8,56 @@ module Party
 
     # LIST + SEARCH
     def index
-      ppl   = ::Party::Person.table_name         # "party_people"
-      orgs  = ::Party::Organization.table_name   # "party_organizations"
-      emls  = ::Party::Email.table_name          # "party_emails"
-      parts = ::Party::Party.table_name          # "parties"
+      ppl   = ::Party::Person.table_name
+      orgs  = ::Party::Organization.table_name
+      emls  = ::Party::Email.table_name
+      parts = ::Party::Party.table_name
 
       name_sql = "COALESCE(#{orgs}.legal_name, CONCAT_WS(' ', #{ppl}.first_name, #{ppl}.middle_name, #{ppl}.last_name))"
 
-      scope = ::Party::Party
-        .includes(:person, :organization, :emails, :phones, :addresses)
-        .joins(<<~SQL.squish)
-          LEFT JOIN #{ppl}  ON #{ppl}.party_id  = #{parts}.id
-          LEFT JOIN #{orgs} ON #{orgs}.party_id = #{parts}.id
-          LEFT JOIN #{emls} ON #{emls}.party_id = #{parts}.id
-        SQL
-        .distinct
+      mode = params[:search_type].presence || "id_name"
 
-      if params[:q].present?
-        q = "%#{params[:q].strip}%"
-        scope = scope.where(
-          "#{ppl}.first_name LIKE :q OR #{ppl}.middle_name LIKE :q OR #{ppl}.last_name LIKE :q
-          OR #{orgs}.legal_name LIKE :q OR #{emls}.email LIKE :q OR #{parts}.customer_number LIKE :q",
-          q: q
-        )
-      end
+      base = ::Party::Party.includes(:person, :organization, :emails, :phones, :addresses)
+
+      scope =
+        if mode == "tax_id" && params[:q].present?
+          # equality only; blind_index handles hashing of the predicate
+          base.where(tax_id: normalize_tax_id(params[:q]))
+        else
+          base.joins(<<~SQL.squish)
+            LEFT JOIN #{ppl}  ON #{ppl}.party_id  = #{parts}.id
+            LEFT JOIN #{orgs} ON #{orgs}.party_id = #{parts}.id
+            LEFT JOIN #{emls} ON #{emls}.party_id = #{parts}.id
+          SQL
+          .distinct
+          .yield_self { |rel|
+            if params[:q].present?
+              q = "%#{params[:q].strip}%"
+              rel.where(
+                "#{ppl}.first_name LIKE :q OR #{ppl}.middle_name LIKE :q OR #{ppl}.last_name LIKE :q
+                OR #{orgs}.legal_name LIKE :q OR #{emls}.email LIKE :q OR #{parts}.customer_number LIKE :q",
+                q: q
+              )
+            else
+              rel
+            end
+          }
+        end
 
       sort = params[:sort].to_s
       dir  = %w[asc desc].include?(params[:dir]) ? params[:dir] : "asc"
 
       order_sql =
         case sort
-        when "name"             then "#{name_sql} #{dir}"
-        when "customer_number"  then "#{parts}.customer_number #{dir}"
-        when "updated_at"       then "#{parts}.updated_at #{dir}"
-        else                          "#{parts}.updated_at DESC" # default
+        when "name"            then "#{name_sql} #{dir}"
+        when "customer_number" then "#{parts}.customer_number #{dir}"
+        when "updated_at"      then "#{parts}.updated_at #{dir}"
+        else                         "#{parts}.updated_at DESC"
         end
 
       @parties = scope.reorder(Arel.sql(order_sql)).to_a
     end
+
 
     def show; end
 
@@ -185,6 +197,10 @@ module Party
       cleaned.select! { |h| h[:id].present? || content_keys.any? { |k| h[k].to_s.strip.present? } }
       attrs[:addresses_attributes] = cleaned.each_with_index.to_h { |h, i| [i.to_s, h] }
       attrs
+    end
+
+    def normalize_tax_id(v)
+      v.to_s.gsub(/\D/, "") # align with your storage/normalization
     end
   end
 end

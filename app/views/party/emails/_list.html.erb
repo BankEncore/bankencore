@@ -4,7 +4,7 @@
       <%= link_to "Add",
         new_party_party_email_path(party.public_id, from: :show),
         data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
-        class: "btn btn-secondary btn-xs" %>
+        class: "btn btn-secondary btn-soft btn-xs" %>
   </div>
 
   <ul class="menu menu-sm bg-base-100 rounded-box w-full">
@@ -14,7 +14,7 @@
           <div class="text-sm">
             <div>
               <%= email.email %>
-              <% if email.is_primary %><span class="badge badge-primary badge-sm ml-2 align-middle">Primary</span><% end %>
+              <% if email.is_primary %><span class="badge badge-primary badge-soft badge-sm button-xs ml-2 align-middle">Primary</span><% end %>
             </div>
             <div class="opacity-70"><%= email.email_type_code %></div>
           </div>
