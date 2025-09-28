@@ -10,6 +10,10 @@ default: &default
 development:
   <<: *default
   database: <%= ENV.fetch("DB_NAME", "bankencorre_development") %>
+  host: <%= ENV.fetch("DB_HOST", "127.0.0.1") %>
+  port: <%= ENV.fetch("DB_PORT", 3306) %>
+  username: <%= ENV.fetch("DB_USER", "bankencorre") %>
+  password: <%= ENV.fetch("DB_PASSWORD", "") %>
 
 test:
   url: <%= ENV["DATABASE_URL"] %>
