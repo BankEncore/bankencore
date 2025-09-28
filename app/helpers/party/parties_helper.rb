@@ -35,17 +35,18 @@ module Party::PartiesHelper
     end
   end
 
-    def sort_link(label, key)
-        current = params[:sort].to_s
-        dir     = params[:dir].to_s
-        nextdir = (current == key.to_s && dir == "asc") ? "desc" : "asc"
-        arrow   = current == key.to_s ? (dir == "asc" ? "▲" : "▼") : ""
+      def sort_link(label, key, keep: %i[q search search_type page per filter])
+        preserved = params.permit(*keep).to_h
+
+        current  = params[:sort].to_s
+        dir      = params[:dir].to_s
+        nextdir  = (current == key.to_s && dir == "asc") ? "desc" : "asc"
+        arrow    = current == key.to_s ? (dir == "asc" ? "▲" : "▼") : ""
 
         link_to "#{label} #{arrow}".strip,
-                url_for(params.permit!.to_h.merge(sort: key, dir: nextdir, only_path: true)),
+                url_for(**preserved.merge(sort: key, dir: nextdir, only_path: true)),
                 class: "link link-hover"
-    end
-
+      end
       # Returns [["Pennsylvania","PA"], ...] for a given country_code or []
       def regions_for(country_code)
         return [] if country_code.blank?

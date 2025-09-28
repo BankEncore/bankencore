@@ -8,31 +8,33 @@ module Party
 
     # LIST + SEARCH
     def index
+      qp    = params.permit(:q, :search_type, :sort, :dir, :page, :per)
       ppl   = ::Party::Person.table_name
       orgs  = ::Party::Organization.table_name
       emls  = ::Party::Email.table_name
       parts = ::Party::Party.table_name
 
       name_sql = "COALESCE(#{orgs}.legal_name, CONCAT_WS(' ', #{ppl}.first_name, #{ppl}.middle_name, #{ppl}.last_name))"
+      sort     = qp[:sort].to_s
+      dir      = %w[asc desc].include?(qp[:dir]) ? qp[:dir] : "asc"
+      mode     = qp[:search_type].presence || "id_name"
 
-      mode = params[:search_type].presence || "id_name"
-
-      base = ::Party::Party.includes(:person, :organization, :emails, :phones, :addresses)
+      base = ::Party::Party
+        .includes(:person, :organization, :emails, :phones, :addresses)
+        .joins(<<~SQL.squish) # always join so ORDER BY works
+          LEFT JOIN #{ppl}  ON #{ppl}.party_id  = #{parts}.id
+          LEFT JOIN #{orgs} ON #{orgs}.party_id = #{parts}.id
+          LEFT JOIN #{emls} ON #{emls}.party_id = #{parts}.id
+        SQL
+        .distinct
 
       scope =
-        if mode == "tax_id" && params[:q].present?
-          # equality only; blind_index handles hashing of the predicate
-          base.where(tax_id: normalize_tax_id(params[:q]))
+        if mode == "tax_id" && qp[:q].present?
+          base.where(tax_id: normalize_tax_id(qp[:q]))
         else
-          base.joins(<<~SQL.squish)
-            LEFT JOIN #{ppl}  ON #{ppl}.party_id  = #{parts}.id
-            LEFT JOIN #{orgs} ON #{orgs}.party_id = #{parts}.id
-            LEFT JOIN #{emls} ON #{emls}.party_id = #{parts}.id
-          SQL
-          .distinct
-          .yield_self { |rel|
-            if params[:q].present?
-              q = "%#{params[:q].strip}%"
+          base.yield_self { |rel|
+            if qp[:q].present?
+              q = "%#{qp[:q].strip}%"
               rel.where(
                 "#{ppl}.first_name LIKE :q OR #{ppl}.middle_name LIKE :q OR #{ppl}.last_name LIKE :q
                 OR #{orgs}.legal_name LIKE :q OR #{emls}.email LIKE :q OR #{parts}.customer_number LIKE :q",
@@ -43,9 +45,6 @@ module Party
             end
           }
         end
-
-      sort = params[:sort].to_s
-      dir  = %w[asc desc].include?(params[:dir]) ? params[:dir] : "asc"
 
       order_sql =
         case sort
@@ -201,6 +200,10 @@ module Party
 
     def normalize_tax_id(v)
       v.to_s.gsub(/\D/, "") # align with your storage/normalization
+    end
+
+    def list_params
+      params.permit(:q, :search_type, :sort, :dir, :page, :per)
     end
   end
 end
