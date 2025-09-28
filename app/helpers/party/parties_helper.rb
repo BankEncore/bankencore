@@ -2,7 +2,7 @@
 module Party::PartiesHelper
   def party_type_icon(party, size: 20)
     t = party.party_type.to_s.downcase
-    cls = "inline-block align-middle text-base-content" # visible color
+    cls = "inline-block align-middle text-base-content"
     case t
     when "person"
       %Q(
@@ -35,23 +35,53 @@ module Party::PartiesHelper
     end
   end
 
-      def sort_link(label, key, keep: %i[q search search_type page per filter])
-        preserved = params.permit(*keep).to_h
+  def sort_link(label, key, keep: %i[q search search_type page per filter])
+    current = params[:sort].to_s
+    dir     = params[:dir].to_s
+    nextdir = (current == key.to_s && dir == "asc") ? "desc" : "asc"
+    arrow   = current == key.to_s ? (dir == "asc" ? "▲" : "▼") : ""
 
-        current  = params[:sort].to_s
-        dir      = params[:dir].to_s
-        nextdir  = (current == key.to_s && dir == "asc") ? "desc" : "asc"
-        arrow    = current == key.to_s ? (dir == "asc" ? "▲" : "▼") : ""
+    # Build a sanitized query hash instead of passing params through.
+    preserved = {}
 
-        link_to "#{label} #{arrow}".strip,
-                url_for(**preserved.merge(sort: key, dir: nextdir, only_path: true)),
-                class: "link link-hover"
-      end
-      # Returns [["Pennsylvania","PA"], ...] for a given country_code or []
-      def regions_for(country_code)
-        return [] if country_code.blank?
-        Ref::Region.where(country_code: country_code)
-                  .order(:name)
-                  .pluck(:name, :code)
-      end
+    if keep.include?(:q) || keep.include?(:search)
+      q = (params[:q] || params[:search]).to_s.strip
+      preserved[:q] = q[0, 200] if q.present?
+    end
+
+    if keep.include?(:search_type)
+      st = params[:search_type].to_s
+      preserved[:search_type] = st if %w[id_name tax_id].include?(st)
+    end
+
+    if keep.include?(:page)
+      pg = params[:page].to_i
+      preserved[:page] = pg if pg.positive?
+    end
+
+    if keep.include?(:per)
+      pr = params[:per].to_i
+      preserved[:per] = pr if pr.between?(1, 200)
+    end
+
+    if keep.include?(:filter)
+      f = params[:filter].to_s
+      preserved[:filter] = f[0, 50] if f.present?
+    end
+
+    safe_sort = key.to_s
+    safe_dir  = %w[asc desc].include?(nextdir) ? nextdir : "asc"
+
+    href = url_for(only_path: true, **preserved.merge(sort: safe_sort, dir: safe_dir))
+
+    link_to "#{label} #{arrow}".strip, href, class: "link link-hover"
+  end
+
+  # Returns [["Pennsylvania","PA"], ...] for a given country_code or []
+  def regions_for(country_code)
+    return [] if country_code.blank?
+    Ref::Region.where(country_code: country_code)
+               .order(:name)
+               .pluck(:name, :code)
+  end
 end
