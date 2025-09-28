@@ -25,8 +25,8 @@ ISO3166::Country.all.each do |country|
     country.subdivisions.each do |sub_code, sub_data|
       RefRegion.upsert(
         {
-          code: sub_code[0,10],  # Truncate to 10 chars max
-          name: sub_data['name'][0,255], # Truncate just in case
+          code: sub_code[0, 10],  # Truncate to 10 chars max
+          name: sub_data['name'][0, 255], # Truncate just in case
           country_code: country.alpha2,
           created_at: timestamp,
           updated_at: timestamp

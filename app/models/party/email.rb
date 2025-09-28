@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Party
   class Email < ApplicationRecord
     include SinglePrimary

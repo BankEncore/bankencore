@@ -1,5 +1,6 @@
 # app/services/phone_normalizer.rb
 # frozen_string_literal: true
+
 class PhoneNormalizer
   class << self
     # returns { e164: "+15555551234", raw: "555-555-1234", alpha2: "US", ext: "123" }
@@ -39,7 +40,7 @@ class PhoneNormalizer
     end
 
     def default_cc(alpha2)
-      { "US"=>"1","CA"=>"1","FR"=>"33","GB"=>"44","DE"=>"49","AU"=>"61","NZ"=>"64","IN"=>"91" }[alpha2] || "1"
+      { "US"=>"1", "CA"=>"1", "FR"=>"33", "GB"=>"44", "DE"=>"49", "AU"=>"61", "NZ"=>"64", "IN"=>"91" }[alpha2] || "1"
     end
   end
 end

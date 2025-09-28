@@ -174,7 +174,7 @@ module Party
     end
 
     def scrub_email_params(attrs)
-      attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_unsafe_h : attrs
+      attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_h : attrs
       attrs = attrs.deep_dup
       ehash = attrs[:emails_attributes]
       return attrs unless ehash.is_a?(Hash)
@@ -187,7 +187,7 @@ module Party
     end
 
     def scrub_address_params(attrs)
-      attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_unsafe_h : attrs
+      attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_h : attrs
       attrs = attrs.deep_dup
       ahash = attrs[:addresses_attributes]
       return attrs unless ahash.is_a?(Hash)

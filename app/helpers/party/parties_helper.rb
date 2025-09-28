@@ -53,4 +53,4 @@ module Party::PartiesHelper
                   .order(:name)
                   .pluck(:name, :code)
       end
-    end
+end

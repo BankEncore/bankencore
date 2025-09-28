@@ -12,7 +12,7 @@ gem "bootsnap", require: false
 
 # == Database ==
 # Swapped sqlite3 for mysql2 to support MariaDB
-gem "mysql2"
+gem "mysql2", "~> 0.5"
 
 # == Security ==
 gem "devise"                # For authentication (internal users and customers) [cite: 482]

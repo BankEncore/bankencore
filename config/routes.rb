@@ -38,5 +38,4 @@ Rails.application.routes.draw do
   def index
     redirect_to party_party_path(@party.public_id, anchor: "addresses")
   end
-
 end

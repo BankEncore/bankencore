@@ -70,9 +70,9 @@ ISO3166::Country.all.each do |country|
   next unless country.alpha2 && country.subdivisions.present?
 
   country.subdivisions.each do |region_code, data|
-    RefRegion.find_or_initialize_by(code: region_code[0,10]).tap do |region|
+    RefRegion.find_or_initialize_by(code: region_code[0, 10]).tap do |region|
       region.country_code = country.alpha2
-      region.name = data["name"][0,255]
+      region.name = data["name"][0, 255]
       region.updated_at = timestamp
       region.created_at ||= timestamp
       region.save!

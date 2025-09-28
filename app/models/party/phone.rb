@@ -68,6 +68,5 @@ module Party
       self.phone_e164 = parsed.e164
       self.phone_ext  = ext.presence || phone_ext.to_s.strip.presence
     end
-
   end
 end

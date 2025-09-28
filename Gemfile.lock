@@ -442,7 +442,7 @@ DEPENDENCIES
   importmap-rails
   kamal
   letter_opener_web
-  mysql2
+  mysql2 (~> 0.5)
   phonelib (~> 0.10)
   propshaft
   pry-rails

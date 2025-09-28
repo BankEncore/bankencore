@@ -12,8 +12,10 @@ development:
   database: <%= ENV.fetch("DB_NAME", "bankencorre_development") %>
 
 test:
-  <<: *default
-  database: <%= ENV.fetch("DB_NAME_TEST", "bankencorre_test") %>
+  url: <%= ENV["DATABASE_URL"] %>
+  pool: 5
+  variables:
+    sql_mode: STRICT_ALL_TABLES
 
 production:
   <<: *default
