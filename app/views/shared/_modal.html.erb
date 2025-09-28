@@ -1,0 +1,11 @@
+<!-- app/views/shared/_modal.html.erb -->
+<dialog id="comm-modal" class="modal">
+  <div class="modal-box">
+    <turbo-frame id="comm_modal_frame"
+                 data-action="turbo:frame-load->modal#open">
+    </turbo-frame>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button aria-label="Close">close</button>
+  </form>
+</dialog>

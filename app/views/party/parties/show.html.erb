@@ -1,46 +1,43 @@
 <%# app/views/party/parties/show.html.erb %>
 
+<%# Modal host for Turbo-loaded forms %>
+<div data-controller="modal" data-modal-id-value="comm-modal">
+  <%= render "shared/modal" %>
+</div>
+
 <%# ===== Page header ===== %>
 <div class="flex items-center justify-between mb-6">
   <div>
     <h1 class="text-2xl md:text-3xl font-semibold"><%= @party.display_name %></h1>
     <div class="mt-2 flex flex-wrap gap-2 text-sm">
       <span class="badge badge-outline"><%= @party.party_type %></span>
-        <% if @party.customer_number.present? %>
-          <span class="badge badge-outline">
-            Customer # <%= @party.customer_number %>
-          </span>
-          <button
-            class="btn btn-ghost btn-xs focus-visible:outline focus-visible:outline-2"
-            data-controller="copy"
-            data-copy-text-value="<%= @party.customer_number %>"
-            data-action="copy#copy"
-            aria-label="Copy customer number">
-            Copy
-          </button>
-        <% end %>
+      <% if @party.customer_number.present? %>
+        <span class="badge badge-outline">Customer # <%= @party.customer_number %></span>
+        <button
+          class="btn btn-ghost btn-xs focus-visible:outline focus-visible:outline-2"
+          data-controller="copy"
+          data-copy-text-value="<%= @party.customer_number %>"
+          data-action="copy#copy"
+          aria-label="Copy customer number">Copy</button>
+      <% end %>
       <span class="badge badge-ghost">Updated <%= l(@party.updated_at, format: :short) %></span>
     </div>
   </div>
   <div class="flex gap-2">
     <%= link_to "Edit", edit_party_party_path(@party), class: "btn btn-ghost btn-sm" %>
-      <button class="btn btn-error btn-soft btn-sm"
+    <button class="btn btn-error btn-soft btn-sm"
             onclick="document.getElementById('confirm-delete').showModal()"
-            aria-label="Delete party">
-            Delete
-      </button>
+            aria-label="Delete party">Delete</button>
     <%= link_to "Back", party_parties_path, class: "btn btn-ghost btn-sm" %>
   </div>
 </div>
 
 <%# ===== Two-column layout ===== %>
 <div class="grid md:grid-cols-2 gap-4">
-  <%# --- Left: Identity card --- %>
+  <%# --- Left: Identity --- %>
   <div class="card bg-base-100 shadow">
     <div class="card-body">
       <h2 class="card-title text-base">Identity</h2>
-
-      <%# Person or Organization summary as a definition list %>
       <dl class="divide-y divide-base-200">
         <% if @party.person %>
           <div class="py-2 grid grid-cols-3 gap-2">
@@ -56,7 +53,7 @@
           <% if @party.person.date_of_birth.present? %>
             <div class="py-2 grid grid-cols-3 gap-2">
               <dt class="opacity-70">DOB</dt>
-              <dd class="col-span-2"><%= @party.person&.date_of_birth&.to_fs(:mmm_d_yyyy) %></dd>
+              <dd class="col-span-2"><%= @party.person.date_of_birth.to_fs(:mmm_d_yyyy) %></dd>
             </div>
           <% end %>
         <% elsif @party.organization %>
@@ -79,22 +76,19 @@
           <% if @party.organization.formation_date.present? %>
             <div class="py-2 grid grid-cols-3 gap-2">
               <dt class="opacity-70">Formed</dt>
-              <dd class="col-span-2"><%= (@party.organization.formation_date&.to_fs(:mmm_d_yyyy)) %></dd>
+              <dd class="col-span-2"><%= @party.organization.formation_date.to_fs(:mmm_d_yyyy) %></dd>
             </div>
           <% end %>
         <% else %>
           <div class="py-2 text-sm opacity-70">No identity details</div>
         <% end %>
 
-        <%# Tax ID with Reveal %>
         <div class="py-2 grid grid-cols-3 gap-2 items-center"
              data-controller="reveal"
-             data-reveal-url-value="<%= reveal_tax_id_party_party_path(@party) %>">
+             data-reveal-url-value="<%= reveal_tax_id_party_party_path(@party.public_id) %>">
           <dt class="opacity-70">Tax ID</dt>
           <dd class="col-span-2">
-            <span class="font-mono" data-reveal-target="text" aria-live="polite">
-              <%= mask_tax_id(@party.tax_id) %>
-            </span>
+            <span class="font-mono" data-reveal-target="text" aria-live="polite"><%= mask_tax_id(@party.tax_id) %></span>
             <button class="btn btn-xs btn-outline ml-2" data-reveal-target="button" data-action="reveal#reveal">Reveal</button>
             <span class="loading loading-spinner loading-xs hidden align-middle ml-2" data-reveal-target="spinner"></span>
           </dd>
@@ -103,125 +97,26 @@
     </div>
   </div>
 
-  <%# --- Right: Contacts stack --- %>
-  <div class="flex flex-col gap-4">
-    <%# Addresses %>
-    <div class="card bg-base-100 shadow">
-      <div class="card-body">
-        <div class="flex items-center justify-between">
-          <h2 class="card-title text-base">Addresses</h2>
-          <%= link_to "Edit", edit_party_party_path(@party), class: "btn btn-ghost btn-xs" %>
-        </div>
-        <% if @party.addresses.any? %>
-          <ul class="divide-y divide-base-200">
-            <% @party.addresses.sort_by { |a| a.is_primary ? 0 : 1 }.each do |a| %>
-              <li class="py-2">
-                <div class="flex items-start justify-between">
-                  <div class="text-sm">
-                    <div>
-                      <span class="opacity-70"><%= a.address_type_code %></span>
-                      <% if a.is_primary %><span class="badge badge-primary ml-2">Primary</span><% end %>
-                    </div>
-                    <div>
-                      <%= [a.line1, a.line2, a.line3].reject(&:blank?).join(", ") %>
-                      <% if a.locality.present? || a.region_code.present? || a.postal_code.present? %>
-                        · <%= [a.locality, [a.region_code, a.postal_code].reject(&:blank?).join(" ")].reject(&:blank?).join(", ") %>
-                      <% end %>
-                      <% if a.country_code.present? %> · <%= a.country_code %><% end %>
-                    </div>
-                  </div>
-                </div>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <div class="text-sm opacity-70">No addresses</div>
-        <% end %>
-      </div>
-    </div>
-
-    <%# Phones %>
-    <div class="card bg-base-100 shadow">
-      <div class="card-body">
-        <div class="flex items-center justify-between">
-          <h2 class="card-title text-base">Phones</h2>
-          <%= link_to "Edit", edit_party_party_path(@party), class: "btn btn-ghost btn-xs" %>
-        </div>
-        <% if @party.phones.any? %>
-          <ul class="divide-y divide-base-200">
-            <% @party.phones.sort_by { |p| p.is_primary ? 0 : 1 }.each do |p| %>
-              <li class="py-2 text-sm">
-                <div>
-                  <span class="font-mono"><%= p.international_pretty || p.number_raw %></span>
-                  <button
-                    class="btn btn-ghost btn-xs ml-2 focus-visible:outline focus-visible:outline-2"
-                    data-controller="copy"
-                    data-copy-text-value="<%= p.phone_e164.presence || p.number_raw %>"
-                    data-action="copy#copy"
-                    aria-label="Copy phone">
-                    Copy
-                  </button>
-                  <% if p.is_primary %><span class="badge badge-primary ml-2">Primary</span><% end %>
-                  <% if p.consent_sms %><span class="badge badge-success ml-2">SMS OK</span><% end %>
-                </div>
-                <div class="opacity-70"><%= p.phone_type_code %></div>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <div class="text-sm opacity-70">No phones</div>
-        <% end %>
-      </div>
-    </div>
-
-    <%# Emails %>
-    <div class="card bg-base-100 shadow">
-      <div class="card-body">
-        <div class="flex items-center justify-between">
-          <h2 class="card-title text-base">Emails</h2>
-          <%= link_to "Edit", edit_party_party_path(@party), class: "btn btn-ghost btn-xs" %>
-        </div>
-        <% if @party.emails.any? %>
-          <ul class="divide-y divide-base-200">
-            <% @party.emails.sort_by { |e| e.is_primary ? 0 : 1 }.each do |e| %>
-              <li class="py-2 text-sm">
-                <div>
-                  <span><%= e.email %></span>
-                    <button
-                      class="btn btn-ghost btn-xs ml-2 focus-visible:outline focus-visible:outline-2"
-                      data-controller="copy"
-                      data-copy-text-value="<%= e.email %>"
-                      data-action="copy#copy"
-                      aria-label="Copy email">
-                      Copy
-                    </button>
-                  <% if e.is_primary %><span class="badge badge-primary ml-2">Primary</span><% end %>
-                </div>
-                <div class="opacity-70"><%= e.email_type_code %></div>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <div class="text-sm opacity-70">No emails</div>
-        <% end %>
-      </div>
-    </div>
+  <%# --- Right: Communications --- %>
+  <div class="flex flex-col gap-6">
+    <%= render "party/addresses/list", party: @party %>
+    <%= render "party/phones/list",    party: @party %>
+    <%= render "party/emails/list",    party: @party %>
   </div>
 </div>
+
 <dialog id="confirm-delete" class="modal">
   <div class="modal-box">
     <h3 class="font-bold text-lg">Delete party?</h3>
     <p class="py-2">This cannot be undone.</p>
     <div class="modal-action">
-      <form method="dialog">
-        <button class="btn btn-ghost">Cancel</button>
-      </form>
+      <form method="dialog"><button class="btn btn-ghost">Cancel</button></form>
       <%= button_to "Delete",
             party_party_path(@party),
             method: :delete,
             form: { class: "inline" },
             class: "btn btn-error",
-            data: { turbo_confirm: nil }, # disable double confirm
+            data: { turbo_confirm: nil },
             aria: { label: "Confirm delete" } %>
     </div>
   </div>

@@ -1,0 +1,25 @@
+<div class="card card-border p-3 flex items-center justify-between">
+  <div>
+    <div class="opacity-80"><%= email.email %></div>
+    <% if email.is_primary %><span class="badge badge-primary mt-1">Primary</span><% end %>
+  </div>
+
+  <div class="flex gap-2">
+    <%= button_to "Primary",
+      primary_party_party_email_path(party.public_id, email),
+      method: :patch,
+      form: { data: { turbo_frame: dom_id(party, :emails_list) } },
+      class: "btn btn-soft btn-sm" %>
+
+    <%= link_to "Edit",
+      edit_party_party_email_path(party.public_id, email, from: :show),
+      data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
+      class: "btn btn-soft btn-sm" %>
+
+    <%= button_to "Delete",
+      party_party_email_path(party.public_id, email),
+      method: :delete,
+      form: { data: { turbo_confirm: "Delete this email?" } },
+      class: "btn btn-error btn-soft btn-sm" %>
+  </div>
+</div>

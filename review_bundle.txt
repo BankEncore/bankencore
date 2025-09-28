@@ -2726,6 +2726,12 @@
       background-image: none;
     }
   }
+  .card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: calc(0.25rem * 2);
+  }
   .card-title {
     display: flex;
     align-items: center;
@@ -3074,6 +3080,9 @@
   .gap-6 {
     gap: calc(var(--spacing) * 6);
   }
+  .gap-8 {
+    gap: calc(var(--spacing) * 8);
+  }
   .space-y-1 {
     :where(& > :not(:last-child)) {
       --tw-space-y-reverse: 0;
@@ -3275,6 +3284,9 @@
   .pt-1 {
     padding-top: calc(var(--spacing) * 1);
   }
+  .pt-6 {
+    padding-top: calc(var(--spacing) * 6);
+  }
   .pl-6 {
     padding-left: calc(var(--spacing) * 6);
   }
@@ -3388,6 +3400,9 @@
   }
   .opacity-70 {
     opacity: 70%;
+  }
+  .opacity-80 {
+    opacity: 80%;
   }
   .shadow {
     --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
@@ -3619,11 +3634,6 @@
   .md\:grid-cols-3 {
     @media (width >= 48rem) {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-  .md\:grid-cols-4 {
-    @media (width >= 48rem) {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
   .md\:grid-cols-5 {
@@ -5621,43 +5631,77 @@ end
 ===== END:app/controllers/home_controller.rb =====
 
 ===== BEGIN:app/controllers/party/addresses_controller.rb =====
+# app/controllers/party/addresses_controller.rb
 module Party
   class AddressesController < ApplicationController
     before_action :set_party
-    before_action :set_address, only: [:update, :destroy]
+    before_action :set_address, only: %i[edit update destroy primary]
+    before_action :load_ref_options, only: %i[index new edit create update]
 
     def index
-      render json: @party.addresses.order(created_at: :desc)
+      redirect_to party_party_path(@party.public_id, anchor: "addresses")
+    end
+
+    def new
+      @address = @party.addresses.new(country_code: "US")
+      render layout: false
+    end
+
+    def edit
+      render layout: false
     end
 
     def create
-      addr = @party.addresses.new(address_params)
-      if addr.save
-        render json: addr, status: :created
+      @address = @party.addresses.new(address_params)
+      if @address.save
+        respond_to do |f|
+          f.turbo_stream { render turbo_stream: refresh_list_and_close }
+          f.html { redirect_to party_party_path(@party.public_id), notice: "Address added" }
+        end
       else
-        render json: { errors: addr.errors.full_messages }, status: :unprocessable_entity
+        render :new, status: :unprocessable_entity, layout: false
       end
     end
 
     def update
       if @address.update(address_params)
-        render json: @address
+        respond_to do |f|
+          f.turbo_stream { render turbo_stream: refresh_list_and_close }
+          f.html { redirect_to party_party_path(@party.public_id), notice: "Address updated" }
+        end
       else
-        render json: { errors: @address.errors.full_messages }, status: :unprocessable_entity
+        render :edit, status: :unprocessable_entity, layout: false
       end
     end
 
     def destroy
-      party = Party.find_by!(public_id: params[:party_public_id])
-      addr  = party.addresses.find(params[:id])
-      addr.destroy
-      redirect_to party_party_path(party.public_id), notice: "Address deleted"
+      @address.destroy
+      respond_to do |f|
+        f.turbo_stream { render turbo_stream: [replace_list] }
+        f.html { redirect_to party_party_path(@party.public_id), notice: "Address deleted" }
+      end
+    end
+
+    def primary
+      ::Party::Address.transaction do
+        @party.addresses.update_all(is_primary: false)
+        @address.update!(is_primary: true)
+      end
+      respond_to do |f|
+        f.turbo_stream { render turbo_stream: [replace_list] }
+        f.html { redirect_back fallback_location: party_party_path(@party.public_id) }
+      end
     end
 
     private
 
     def set_party
-      @party = Party::Party.find_by!(public_id: params[:party_public_id])
+      pid = params[:party_party_id] ||
+            params[:party_party_public_id] ||
+            params[:party_public_id] ||
+            params[:public_id] ||
+            params[:party_id]
+      @party = ::Party::Party.find_by!(public_id: pid)
     end
 
     def set_address
@@ -5665,10 +5709,27 @@ module Party
     end
 
     def address_params
-      params.require(:address).permit(
-        :address_type_code, :line1, :line2, :line3, :locality,
-        :region_code, :postal_code, :country_code, :is_primary
+      params.require(:party_address).permit(
+        :address_type_code, :line1, :line2, :locality, :region_code, :postal_code, :country_code, :is_primary
       )
+    end
+
+    def replace_list
+      @party.reload
+      turbo_stream.replace(
+        view_context.dom_id(@party, :addresses_section),
+        partial: "party/addresses/list",
+        locals: { party: @party }
+      )
+    end
+
+    def refresh_list_and_close
+      [replace_list, turbo_stream.replace("comm_modal_frame", partial: "shared/close_modal")]
+    end
+
+    def load_ref_options
+      @address_types = Ref::AddressType.order(:name)
+      @countries     = defined?(Ref::Country) ? Ref::Country.order(:name) : []
     end
   end
 end
@@ -5677,54 +5738,90 @@ end
 
 ===== BEGIN:app/controllers/party/emails_controller.rb =====
 # app/controllers/party/emails_controller.rb
-module Party
-  class EmailsController < ApplicationController
-    before_action :set_party
-    before_action :set_email, only: [:update, :destroy, :reveal]
+class Party::EmailsController < ApplicationController
+  before_action :set_party
+  before_action :set_email, only: [:edit, :update, :destroy, :primary]
 
-    def index
-      @emails = @party.emails.order(is_primary: :desc, created_at: :asc)
-    end
+  def new
+    @email = @party.emails.new
+    render layout: false
+  end
 
-    def create
-      email = @party.emails.build(email_params)
-      if email.save
-        redirect_to party_party_path(@party.public_id), notice: "Email added"
-      else
-        redirect_to party_party_path(@party.public_id), alert: email.errors.full_messages.to_sentence
+  def edit
+    render layout: false
+  end
+
+  def create
+    @email = @party.emails.new(email_params)
+    if @email.save
+      respond_to do |f|
+        f.turbo_stream { render turbo_stream: refresh_list_and_close }
+        f.html { redirect_to party_party_path(@party.public_id), notice: "Email added" }
       end
+    else
+      render :new, status: :unprocessable_entity, layout: false
     end
+  end
 
-    def update
-      if @email.update(email_params)
-        redirect_to party_party_path(@party.public_id), notice: "Email updated"
-      else
-        redirect_to party_party_path(@party.public_id), alert: @email.errors.full_messages.to_sentence
+  def update
+    if @email.update(email_params)
+      respond_to do |f|
+        f.turbo_stream { render turbo_stream: refresh_list_and_close }
+        f.html { redirect_to party_party_path(@party.public_id), notice: "Email updated" }
       end
+    else
+      render :edit, status: :unprocessable_entity, layout: false
     end
+  end
 
-    def destroy
-      @email.destroy
-      redirect_to party_party_path(@party.public_id), notice: "Email deleted"
+  def destroy
+    @email.destroy
+    respond_to do |f|
+      f.turbo_stream { render turbo_stream: [replace_list] }
+      f.html { redirect_to party_party_path(@party.public_id), notice: "Email deleted" }
     end
+  end
 
-    def reveal
-      render json: { value: @email.email }
+  def primary
+    ::Party::Email.transaction do
+      @party.emails.update_all(is_primary: false)
+      @email.update!(is_primary: true)
     end
-
-    private
-
-    def set_party
-      @party = ::Party::Party.find_by!(public_id: params[:party_public_id])
+    respond_to do |f|
+      f.turbo_stream { render turbo_stream: [replace_list] }
+      f.html { redirect_back fallback_location: party_party_path(@party.public_id) }
     end
+  end
 
-    def set_email
-      @email = @party.emails.find(params[:id])
-    end
+  private
 
-    def email_params
-      params.require(:email).permit(:email, :email_type_code, :is_primary, :_destroy)
-    end
+  def set_party
+    pid = params[:party_party_id] ||
+          params[:party_party_public_id] ||
+          params[:party_public_id] ||
+          params[:public_id] ||
+          params[:party_id]
+    @party = ::Party::Party.find_by!(public_id: pid)
+  end
+
+  def set_email
+    @email = @party.emails.find(params[:id])
+  end
+
+  def email_params
+    params.require(:party_email).permit(:email, :email_type_code, :is_primary)
+  end
+
+  def replace_list
+    turbo_stream.replace(
+      view_context.dom_id(@party, :emails_list),
+      partial: "party/emails/list",
+      locals: { party: @party }
+    )
+  end
+
+  def refresh_list_and_close
+    [replace_list, turbo_stream.replace("comm_modal_frame", partial: "shared/close_modal")]
   end
 end
 
@@ -6108,41 +6205,72 @@ end
 ===== END:app/controllers/party/people_controller.rb =====
 
 ===== BEGIN:app/controllers/party/phones_controller.rb =====
+# app/controllers/party/phones_controller.rb
 module Party
   class PhonesController < ApplicationController
     before_action :set_party
-    before_action :set_phone, only: [:update, :destroy]
+    before_action :set_phone, only: %i[edit update destroy primary]
 
-    def index
-      render json: @party.phones.order(created_at: :desc)
+    def new
+      @phone = @party.phones.new
+      render layout: false
+    end
+
+    def edit
+      render layout: false
     end
 
     def create
-      phone = @party.phones.new(phone_params)
-      if phone.save
-        render json: phone, status: :created
+      @phone = @party.phones.new(phone_params)
+      if @phone.save
+        respond_to do |f|
+          f.turbo_stream { render turbo_stream: refresh_list_and_close }
+          f.html { redirect_to party_party_path(@party.public_id), notice: "Phone added" }
+        end
       else
-        render json: { errors: phone.errors.full_messages }, status: :unprocessable_entity
+        render :new, status: :unprocessable_entity, layout: false
       end
     end
 
     def update
       if @phone.update(phone_params)
-        render json: @phone
+        respond_to do |f|
+          f.turbo_stream { render turbo_stream: refresh_list_and_close }
+          f.html { redirect_to party_party_path(@party.public_id), notice: "Phone updated" }
+        end
       else
-        render json: { errors: @phone.errors.full_messages }, status: :unprocessable_entity
+        render :edit, status: :unprocessable_entity, layout: false
       end
     end
 
     def destroy
       @phone.destroy
-      head :no_content
+      respond_to do |f|
+        f.turbo_stream { render turbo_stream: [replace_list] }
+        f.html { redirect_to party_party_path(@party.public_id), notice: "Phone deleted" }
+      end
+    end
+
+    def primary
+      ::Party::Phone.transaction do
+        @party.phones.update_all(is_primary: false)
+        @phone.update!(is_primary: true)
+      end
+      respond_to do |f|
+        f.turbo_stream { render turbo_stream: [replace_list] }
+        f.html { redirect_back fallback_location: party_party_path(@party.public_id) }
+      end
     end
 
     private
 
     def set_party
-      @party = Party::Party.find_by!(public_id: params[:party_public_id])
+      pid = params[:party_party_public_id] ||
+            params[:party_party_id] ||
+            params[:party_public_id] ||
+            params[:public_id] ||
+            params[:party_id]
+      @party = ::Party::Party.find_by!(public_id: pid)
     end
 
     def set_phone
@@ -6150,7 +6278,20 @@ module Party
     end
 
     def phone_params
-      params.require(:phone).permit(:phone_type_code, :phone_e164, :phone_ext, :is_primary, :consent_sms)
+      params.require(:party_phone).permit(:phone_type_code, :phone_e164, :phone_ext, :consent_sms, :is_primary)
+    end
+
+    def replace_list
+      @party.reload
+      turbo_stream.replace(
+        view_context.dom_id(@party, :phones_section),
+        partial: "party/phones/list",
+        locals: { party: @party }
+      )
+    end
+
+    def refresh_list_and_close
+      [replace_list, turbo_stream.replace("comm_modal_frame", partial: "shared/close_modal")]
     end
   end
 end
@@ -6384,6 +6525,17 @@ export default class extends Controller {
 import { application } from "controllers/application"
 ===== END:app/javascript/controllers/index.js =====
 
+===== BEGIN:app/javascript/controllers/modal_controller.js =====
+// app/javascript/controllers/modal_controller.js
+import { Controller } from "@hotwired/stimulus"
+export default class extends Controller {
+  static values = { id: String }
+  open()  { document.getElementById(this.idValue)?.showModal?.() }
+  close() { document.getElementById(this.idValue)?.close?.() }
+}
+
+===== END:app/javascript/controllers/modal_controller.js =====
+
 ===== BEGIN:app/javascript/controllers/nested_form_controller.js =====
 // app/javascript/controllers/nested_form_controller.js
 import { Controller } from "@hotwired/stimulus"
@@ -6586,6 +6738,21 @@ end
 
 ===== END:app/models/application_record.rb =====
 
+===== BEGIN:app/models/concerns/single_primary.rb =====
+# app/models/concerns/single_primary.rb
+module SinglePrimary
+  extend ActiveSupport::Concern
+  included { before_save :enforce_single_primary }
+
+  private
+  def enforce_single_primary
+    return unless will_save_change_to_is_primary? && is_primary
+    self.class.where(party_id: party_id).where.not(id: id).update_all(is_primary: false)
+  end
+end
+
+===== END:app/models/concerns/single_primary.rb =====
+
 ===== BEGIN:app/models/customer_number_counter.rb =====
 # app/models/customer_number_counter.rb
 class CustomerNumberCounter < ApplicationRecord
@@ -6606,6 +6773,7 @@ end
 ===== BEGIN:app/models/party/address.rb =====
 module Party
   class Address < ApplicationRecord
+    include SinglePrimary
     self.table_name = "party_addresses"
     include SinglePrimary
 
@@ -6644,7 +6812,7 @@ end
 # frozen_string_literal: true
 module Party
   class Email < ApplicationRecord
-    include SinglePrimary 
+    include SinglePrimary
     self.table_name = "party_emails"
 
     belongs_to :party, class_name: "Party::Party", inverse_of: :emails
@@ -6943,6 +7111,15 @@ module Party
     end
 
     private
+
+    def set_party
+      pid = params[:party_party_id] ||
+            params[:party_party_public_id] ||
+            params[:party_public_id] ||
+            params[:public_id] ||
+            params[:party_id]
+      @party = ::Party::Party.find_by!(public_id: pid)
+    end
 
     def row_has_content?
       number_raw.to_s.strip.present? || phone_ext.to_s.strip.present? || phone_type_code.to_s.strip.present?
@@ -7371,6 +7548,235 @@ end
 
 ===== END:app/views/layouts/mailer.text.erb =====
 
+===== BEGIN:app/views/party/addresses/_card.html.erb =====
+<div class="card card-border p-3 flex items-center justify-between">
+  <div class="opacity-80">
+    <div><%= address.address_type_code&.titleize %></div>
+    <div><%= address.line1 %><% if address.line2.present? %>, <%= address.line2 %><% end %></div>
+    <div><%= [address.locality, address.region_code, address.postal_code].compact.join(", ") %></div>
+    <div><%= address.country_code %></div>
+    <% if address.is_primary %><span class="badge badge-primary mt-1">Primary</span><% end %>
+  </div>
+  <div class="flex gap-2">
+    <%= button_to "Primary",
+      primary_party_party_phone_path(party.public_id, phone),
+      method: :patch,
+      form: { data: { turbo_frame: dom_id(party, :phones_section) } },
+      class: "btn btn-soft btn-sm" %>
+  </div>
+  <div class="card-actions">
+    <%= link_to "Edit",
+      edit_party_party_address_path(party.public_id, address, from: :show),
+      data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
+      class: "btn btn-soft btn-xsm" %>
+
+    <%= button_to "Delete",
+      party_party_address_path(party.public_id, address),
+      method: :delete,
+      form: { data: { turbo_confirm: "Delete this address?" } },
+      class: "btn btn-error btn-soft btn-xsm" %>
+  </div>
+</div>
+
+===== END:app/views/party/addresses/_card.html.erb =====
+
+===== BEGIN:app/views/party/addresses/edit.html.erb =====
+<!-- app/views/party/emails/edit.html.erb -->
+<turbo-frame id="comm_modal_frame">
+  <%= render "form" %>
+</turbo-frame>
+
+===== END:app/views/party/addresses/edit.html.erb =====
+
+===== BEGIN:app/views/party/addresses/_form.html.erb =====
+<!-- app/views/party/addresses/_form.html.erb -->
+<%= form_with model: @address,
+      scope: :party_address,
+      url: (@address.persisted? ?
+              party_party_address_path(@party.public_id, @address) :
+              party_party_addresses_path(@party.public_id)),
+      data: { turbo_frame: "comm_modal_frame" } do |f| %>
+
+  <div class="grid gap-3"
+       data-controller="region-select"
+       data-region-select-url-value="<%= ref_regions_path(format: :json) %>">
+
+    <!-- Address Type -->
+    <div class="select">
+      <%= f.collection_select :address_type_code, @address_types, :code, :name,
+            { include_blank: true }, {} %>
+    </div>
+
+    <!-- Country -->
+    <div class="select">
+      <% if @countries.present? %>
+        <%= f.collection_select :country_code, @countries, :code, :name,
+              { include_blank: true },
+              { data: { region_select_target: "country", action: "change->region-select#refresh" } } %>
+      <% else %>
+        <%= f.select :country_code,
+              options_for_select([["United States","US"],["Canada","CA"]], @address.country_code || "US"),
+              { include_blank: true },
+              { data: { region_select_target: "country", action: "change->region-select#refresh" } } %>
+      <% end %>
+    </div>
+
+    <!-- Street 1 -->
+    <div class="input">
+      <%= f.text_field :line1, required: true, placeholder: "Address line 1" %>
+    </div>
+
+    <!-- Street 2 -->
+    <div class="input">
+      <%= f.text_field :line2, placeholder: "Address line 2" %>
+    </div>
+
+    <!-- Locality / City -->
+    <div class="input">
+      <%= f.text_field :locality, required: true, placeholder: "Locality / City" %>
+    </div>
+
+    <!-- State / Region -->
+    <div class="select">
+      <%= f.select :region_code,
+            options_for_select(regions_for(@address.country_code), @address.region_code),
+            { include_blank: true },
+            { data: { region_select_target: "region" },
+              disabled: @address.country_code.blank? } %>
+    </div>
+
+    <!-- Postal Code -->
+    <div class="input">
+      <%= f.text_field :postal_code, placeholder: "Postal code" %>
+    </div>
+
+    <label class="flex items-center gap-2">
+      <%= f.check_box :is_primary %> Primary
+    </label>
+  </div>
+
+  <div class="mt-4 flex justify-end gap-2">
+    <button type="button" class="btn btn-soft" data-action="modal#close">Cancel</button>
+    <%= f.submit "Save", class: "btn btn-primary" %>
+  </div>
+<% end %>
+
+===== END:app/views/party/addresses/_form.html.erb =====
+
+===== BEGIN:app/views/party/addresses/_list.html.erb =====
+<section id="<%= dom_id(party, :phones_section) %>">
+  <div class="flex items-center justify-between mb-2">
+    <h3 class="text-lg font-semibold">Phones</h3>
+    <%= link_to "Add",
+      new_party_party_phone_path(party.public_id, from: :show),
+      data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
+      class: "btn btn-primary btn-sm" %>
+  </div>
+
+  <div class="grid gap-3">
+    <% party.phones.each do |phone| %>
+      <%= render "party/phones/card", party: party, phone: phone %>
+    <% end %>
+  </div>
+</section>
+
+===== END:app/views/party/addresses/_list.html.erb =====
+
+===== BEGIN:app/views/party/addresses/new.html.erb =====
+<!-- app/views/party/emails/new.html.erb -->
+<turbo-frame id="comm_modal_frame">
+  <%= render "form" %>
+</turbo-frame>
+
+
+===== END:app/views/party/addresses/new.html.erb =====
+
+===== BEGIN:app/views/party/emails/_card.html.erb =====
+<div class="card card-border p-3 flex items-center justify-between">
+  <div>
+    <div class="opacity-80"><%= email.email %></div>
+    <% if email.is_primary %><span class="badge badge-primary mt-1">Primary</span><% end %>
+  </div>
+
+  <div class="flex gap-2">
+    <%= button_to "Primary",
+      primary_party_party_email_path(party.public_id, email),
+      method: :patch,
+      form: { data: { turbo_frame: dom_id(party, :emails_list) } },
+      class: "btn btn-soft btn-sm" %>
+
+    <%= link_to "Edit",
+      edit_party_party_email_path(party.public_id, email, from: :show),
+      data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
+      class: "btn btn-soft btn-sm" %>
+
+    <%= button_to "Delete",
+      party_party_email_path(party.public_id, email),
+      method: :delete,
+      form: { data: { turbo_confirm: "Delete this email?" } },
+      class: "btn btn-error btn-soft btn-sm" %>
+  </div>
+</div>
+
+===== END:app/views/party/emails/_card.html.erb =====
+
+===== BEGIN:app/views/party/emails/edit.html.erb =====
+<!-- app/views/party/emails/edit.html.erb -->
+<turbo-frame id="comm_modal_frame">
+  <%= render "form", party: @party, email: @email %>
+</turbo-frame>
+===== END:app/views/party/emails/edit.html.erb =====
+
+===== BEGIN:app/views/party/emails/_form.html.erb =====
+<%= form_with scope: :party_email,
+      url: (@email.persisted? ?
+              party_party_email_path(@party.public_id, @email) :
+              party_party_emails_path(@party.public_id)),
+      data: { turbo_frame: "comm_modal_frame" } do |f| %>
+  <div class="space-y-3">
+    <div class="input"><%= f.email_field :email, required: true %></div>
+    <label class="flex items-center gap-2"><%= f.check_box :is_primary %> Primary</label>
+  </div>
+  <div class="mt-4 flex justify-end gap-2">
+    <button type="button" class="btn btn-soft" data-action="modal#close">Cancel</button>
+    <%= f.submit "Save", class: "btn btn-primary" %>
+  </div>
+<% end %>
+
+===== END:app/views/party/emails/_form.html.erb =====
+
+===== BEGIN:app/views/party/emails/_list.html.erb =====
+<!-- app/views/party/emails/_list.html.erb -->
+<section>
+  <div class="flex items-center justify-between mb-2">
+    <h3 class="text-lg font-semibold">Emails</h3>
+    <%= link_to "Add",
+      new_party_party_email_path(party.public_id, from: :show),
+      data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
+      class: "btn btn-primary btn-sm" %>
+  </div>
+  <div id="<%= dom_id(party, :emails_list) %>" class="grid gap-3">
+    <% party.emails.each do |email| %>
+      <%= render "party/emails/card", party: party, email: email %>
+    <% end %>
+  </div>
+</section>
+
+===== END:app/views/party/emails/_list.html.erb =====
+
+===== BEGIN:app/views/party/emails/new.html.erb =====
+<!-- app/views/party/emails/new.html.erb -->
+<turbo-frame id="comm_modal_frame">
+  <%= render "form", party: @party, email: @email %>
+</turbo-frame>
+
+<!-- app/views/party/emails/edit.html.erb -->
+<turbo-frame id="comm_modal_frame">
+  <%= render "form", party: @party, email: @email %>
+</turbo-frame>
+
+===== END:app/views/party/emails/new.html.erb =====
+
 ===== BEGIN:app/views/party/parties/_address_fields.html.erb =====
 <div class="grid md:grid-cols-6 gap-4">
   <div class="md:col-span-2">
@@ -7480,12 +7886,11 @@ end
 ===== END:app/views/party/parties/_email_fields.html.erb =====
 
 ===== BEGIN:app/views/party/parties/_form.html.erb =====
-<%# app/views/party/parties/_form.html.erb — DROP-IN FULL %>
+<%# app/views/party/parties/_form.html.erb — DROP-IN CLEAN %>
 <%= form_with model: @party,
       scope: :party_party,
-      url: (@party.persisted? ? party_party_path(@party) : party_parties_path),
+      url: (@party.persisted? ? party_party_path(@party.public_id) : party_parties_path),
       data: { turbo: false },
-      local: true,
       class: "space-y-6" do |f| %>
 
   <% if @party.errors.any? ||
@@ -7653,7 +8058,7 @@ end
                   </div>
 
                   <div class="md:col-span-4">
-                    <%= af.label :locality, "City", class: "label-text" %>
+                    <%= af.label :city, "City", class: "label-text" %>
                     <%= af.text_field :locality, class: "input input-bordered w-full",
                           autocomplete: "address-level2" %>
                   </div>
@@ -7694,34 +8099,30 @@ end
           <% @party.phones.each do |p| %>
             <li class="border rounded-box p-3">
               <%= f.fields_for :phones, p do |pf| %>
-                <div class="grid md:grid-cols-4 gap-3">
+                <div class="grid md:grid-cols-5 gap-3">
                   <div>
                     <%= pf.label :phone_type_code, "Phone type", class: "label-text" %>
                     <%= pf.collection_select :phone_type_code, @phone_types, :code, :name,
                           { include_blank: true }, { class: "select select-bordered w-full" } %>
                   </div>
-                  <div>
-                    <%= pf.label :country_alpha2, "Country", class: "label-text" %>
-                    <%= pf.collection_select :country_alpha2, @countries, :code, :name,
-                          { include_blank: true },
-                          { class: "select select-bordered w-full", autocomplete: "country" } %>
-                  </div>
-                  <div>
-                    <%= pf.label :number_raw, "Phone", class: "label-text" %>
-                    <%= pf.text_field :number_raw, class: "input input-bordered w-full",
-                          inputmode: "tel", autocomplete: "tel" %>
+                  <div class="md:col-span-2">
+                    <%= pf.label :phone_e164, "Phone", class: "label-text" %>
+                    <%= pf.telephone_field :phone_e164, class: "input input-bordered w-full",
+                          placeholder: "+15551234567", inputmode: "tel", autocomplete: "tel" %>
                   </div>
                   <div>
                     <%= pf.label :phone_ext, "Ext", class: "label-text" %>
                     <%= pf.text_field :phone_ext, class: "input input-bordered w-full", inputmode: "numeric" %>
                   </div>
+                  <div class="flex items-center gap-4 pt-6">
+                    <label class="label cursor-pointer gap-2">
+                      <%= pf.check_box :consent_sms, class: "checkbox" %><span class="label-text">SMS consent</span>
+                    </label>
+                  </div>
                 </div>
                 <div class="mt-3 flex items-center gap-4">
                   <label class="label cursor-pointer gap-2">
                     <%= pf.check_box :is_primary, class: "checkbox" %><span class="label-text">Primary</span>
-                  </label>
-                  <label class="label cursor-pointer gap-2">
-                    <%= pf.check_box :consent_sms, class: "checkbox" %><span class="label-text">SMS consent</span>
                   </label>
                   <label class="label cursor-pointer gap-2">
                     <%= pf.check_box :_destroy, class: "checkbox" %><span class="label-text">Remove</span>
@@ -7777,7 +8178,9 @@ end
 
   <%# === Actions ========================================================== %>
   <div class="flex items-center justify-end gap-2">
-    <%= link_to "Cancel", (@party.persisted? ? party_party_path(@party) : party_parties_path), class: "btn btn-ghost" %>
+    <%= link_to "Cancel",
+          (@party.persisted? ? party_party_path(@party.public_id) : party_parties_path),
+          class: "btn btn-ghost" %>
     <%= f.submit(@party.persisted? ? "Update" : "Create", class: "btn btn-primary") %>
   </div>
 <% end %>
@@ -7969,14 +8372,15 @@ end
 ===== END:app/views/party/parties/_phone_fields.html.erb =====
 
 ===== BEGIN:app/views/party/parties/show.html.erb =====
-<%# app/views/party/parties/show.html.erb %>
+<%# ===== Page header + modal mount ===== %>
+<div data-controller="modal" data-modal-id-value="comm-modal">
+  <%= render "shared/modal" %>
 
-<%# ===== Page header ===== %>
-<div class="flex items-center justify-between mb-6">
-  <div>
-    <h1 class="text-2xl md:text-3xl font-semibold"><%= @party.display_name %></h1>
-    <div class="mt-2 flex flex-wrap gap-2 text-sm">
-      <span class="badge badge-outline"><%= @party.party_type %></span>
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-semibold"><%= @party.display_name %></h1>
+      <div class="mt-2 flex flex-wrap gap-2 text-sm">
+        <span class="badge badge-outline"><%= @party.party_type %></span>
         <% if @party.customer_number.present? %>
           <span class="badge badge-outline">
             Customer # <%= @party.customer_number %>
@@ -7990,218 +8394,221 @@ end
             Copy
           </button>
         <% end %>
-      <span class="badge badge-ghost">Updated <%= l(@party.updated_at, format: :short) %></span>
+        <span class="badge badge-ghost">Updated <%= l(@party.updated_at, format: :short) %></span>
+      </div>
     </div>
-  </div>
-  <div class="flex gap-2">
-    <%= link_to "Edit", edit_party_party_path(@party), class: "btn btn-ghost btn-sm" %>
+    <div class="flex gap-2">
+      <%= link_to "Edit", edit_party_party_path(@party.public_id), class: "btn btn-ghost btn-sm" %>
       <button class="btn btn-error btn-soft btn-sm"
-            onclick="document.getElementById('confirm-delete').showModal()"
-            aria-label="Delete party">
-            Delete
+              onclick="document.getElementById('confirm-delete').showModal()"
+              aria-label="Delete party">
+        Delete
       </button>
-    <%= link_to "Back", party_parties_path, class: "btn btn-ghost btn-sm" %>
+      <%= link_to "Back", party_parties_path, class: "btn btn-ghost btn-sm" %>
+    </div>
   </div>
-</div>
 
-<%# ===== Two-column layout ===== %>
-<div class="grid md:grid-cols-2 gap-4">
-  <%# --- Left: Identity card --- %>
-  <div class="card bg-base-100 shadow">
-    <div class="card-body">
-      <h2 class="card-title text-base">Identity</h2>
+  <%# ===== Two-column layout ===== %>
+  <div class="grid md:grid-cols-2 gap-4">
+    <%# --- Left: Identity card --- %>
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h2 class="card-title text-base">Identity</h2>
 
-      <%# Person or Organization summary as a definition list %>
-      <dl class="divide-y divide-base-200">
-        <% if @party.person %>
-          <div class="py-2 grid grid-cols-3 gap-2">
-            <dt class="opacity-70">Name</dt>
-            <dd class="col-span-2"><%= [@party.person.first_name, @party.person.middle_name, @party.person.last_name, @party.person.name_suffix].compact_blank.join(" ") %></dd>
+        <dl class="divide-y divide-base-200">
+          <% if @party.person %>
+            <div class="py-2 grid grid-cols-3 gap-2">
+              <dt class="opacity-70">Name</dt>
+              <dd class="col-span-2">
+                <%= [@party.person.first_name, @party.person.middle_name, @party.person.last_name, @party.person.name_suffix].compact_blank.join(" ") %>
+              </dd>
+            </div>
+            <% if @party.person.courtesy_title.present? %>
+              <div class="py-2 grid grid-cols-3 gap-2">
+                <dt class="opacity-70">Title</dt>
+                <dd class="col-span-2"><%= @party.person.courtesy_title %></dd>
+              </div>
+            <% end %>
+            <% if @party.person.date_of_birth.present? %>
+              <div class="py-2 grid grid-cols-3 gap-2">
+                <dt class="opacity-70">DOB</dt>
+                <dd class="col-span-2"><%= @party.person&.date_of_birth&.to_fs(:mmm_d_yyyy) %></dd>
+              </div>
+            <% end %>
+          <% elsif @party.organization %>
+            <div class="py-2 grid grid-cols-3 gap-2">
+              <dt class="opacity-70">Legal name</dt>
+              <dd class="col-span-2"><%= @party.organization.legal_name %></dd>
+            </div>
+            <% if @party.organization.operating_name.present? %>
+              <div class="py-2 grid grid-cols-3 gap-2">
+                <dt class="opacity-70">DBA</dt>
+                <dd class="col-span-2"><%= @party.organization.operating_name %></dd>
+              </div>
+            <% end %>
+            <% if @party.organization.organization_type_code.present? %>
+              <div class="py-2 grid grid-cols-3 gap-2">
+                <dt class="opacity-70">Type</dt>
+                <dd class="col-span-2"><span class="badge badge-outline"><%= @party.organization.organization_type_code %></span></dd>
+              </div>
+            <% end %>
+            <% if @party.organization.formation_date.present? %>
+              <div class="py-2 grid grid-cols-3 gap-2">
+                <dt class="opacity-70">Formed</dt>
+                <dd class="col-span-2"><%= @party.organization.formation_date&.to_fs(:mmm_d_yyyy) %></dd>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="py-2 text-sm opacity-70">No identity details</div>
+          <% end %>
+
+          <%# Tax ID with Reveal %>
+          <div class="py-2 grid grid-cols-3 gap-2 items-center"
+               data-controller="reveal"
+               data-reveal-url-value="<%= reveal_tax_id_party_party_path(@party.public_id) %>">
+            <dt class="opacity-70">Tax ID</dt>
+            <dd class="col-span-2">
+              <span class="font-mono" data-reveal-target="text" aria-live="polite">
+                <%= mask_tax_id(@party.tax_id) %>
+              </span>
+              <button class="btn btn-xs btn-outline ml-2" data-reveal-target="button" data-action="reveal#reveal">Reveal</button>
+              <span class="loading loading-spinner loading-xs hidden align-middle ml-2" data-reveal-target="spinner"></span>
+            </dd>
           </div>
-          <% if @party.person.courtesy_title.present? %>
-            <div class="py-2 grid grid-cols-3 gap-2">
-              <dt class="opacity-70">Title</dt>
-              <dd class="col-span-2"><%= @party.person.courtesy_title %></dd>
-            </div>
-          <% end %>
-          <% if @party.person.date_of_birth.present? %>
-            <div class="py-2 grid grid-cols-3 gap-2">
-              <dt class="opacity-70">DOB</dt>
-              <dd class="col-span-2"><%= @party.person&.date_of_birth&.to_fs(:mmm_d_yyyy) %></dd>
-            </div>
-          <% end %>
-        <% elsif @party.organization %>
-          <div class="py-2 grid grid-cols-3 gap-2">
-            <dt class="opacity-70">Legal name</dt>
-            <dd class="col-span-2"><%= @party.organization.legal_name %></dd>
-          </div>
-          <% if @party.organization.operating_name.present? %>
-            <div class="py-2 grid grid-cols-3 gap-2">
-              <dt class="opacity-70">DBA</dt>
-              <dd class="col-span-2"><%= @party.organization.operating_name %></dd>
-            </div>
-          <% end %>
-          <% if @party.organization.organization_type_code.present? %>
-            <div class="py-2 grid grid-cols-3 gap-2">
-              <dt class="opacity-70">Type</dt>
-              <dd class="col-span-2"><span class="badge badge-outline"><%= @party.organization.organization_type_code %></span></dd>
-            </div>
-          <% end %>
-          <% if @party.organization.formation_date.present? %>
-            <div class="py-2 grid grid-cols-3 gap-2">
-              <dt class="opacity-70">Formed</dt>
-              <dd class="col-span-2"><%= (@party.organization.formation_date&.to_fs(:mmm_d_yyyy)) %></dd>
-            </div>
-          <% end %>
-        <% else %>
-          <div class="py-2 text-sm opacity-70">No identity details</div>
-        <% end %>
-
-        <%# Tax ID with Reveal %>
-        <div class="py-2 grid grid-cols-3 gap-2 items-center"
-             data-controller="reveal"
-             data-reveal-url-value="<%= reveal_tax_id_party_party_path(@party) %>">
-          <dt class="opacity-70">Tax ID</dt>
-          <dd class="col-span-2">
-            <span class="font-mono" data-reveal-target="text" aria-live="polite">
-              <%= mask_tax_id(@party.tax_id) %>
-            </span>
-            <button class="btn btn-xs btn-outline ml-2" data-reveal-target="button" data-action="reveal#reveal">Reveal</button>
-            <span class="loading loading-spinner loading-xs hidden align-middle ml-2" data-reveal-target="spinner"></span>
-          </dd>
-        </div>
-      </dl>
-    </div>
-  </div>
-
-  <%# --- Right: Contacts stack --- %>
-  <div class="flex flex-col gap-4">
-    <%# Addresses %>
-    <div class="card bg-base-100 shadow">
-      <div class="card-body">
-        <div class="flex items-center justify-between">
-          <h2 class="card-title text-base">Addresses</h2>
-          <%= link_to "Edit", edit_party_party_path(@party), class: "btn btn-ghost btn-xs" %>
-        </div>
-        <% if @party.addresses.any? %>
-          <ul class="divide-y divide-base-200">
-            <% @party.addresses.sort_by { |a| a.is_primary ? 0 : 1 }.each do |a| %>
-              <li class="py-2">
-                <div class="flex items-start justify-between">
-                  <div class="text-sm">
-                    <div>
-                      <span class="opacity-70"><%= a.address_type_code %></span>
-                      <% if a.is_primary %><span class="badge badge-primary ml-2">Primary</span><% end %>
-                    </div>
-                    <div>
-                      <%= [a.line1, a.line2, a.line3].reject(&:blank?).join(", ") %>
-                      <% if a.locality.present? || a.region_code.present? || a.postal_code.present? %>
-                        · <%= [a.locality, [a.region_code, a.postal_code].reject(&:blank?).join(" ")].reject(&:blank?).join(", ") %>
-                      <% end %>
-                      <% if a.country_code.present? %> · <%= a.country_code %><% end %>
-                    </div>
-                  </div>
-                </div>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <div class="text-sm opacity-70">No addresses</div>
-        <% end %>
+        </dl>
       </div>
     </div>
 
-    <%# Phones %>
-    <div class="card bg-base-100 shadow">
-      <div class="card-body">
-        <div class="flex items-center justify-between">
-          <h2 class="card-title text-base">Phones</h2>
-          <%= link_to "Edit", edit_party_party_path(@party), class: "btn btn-ghost btn-xs" %>
-        </div>
-        <% if @party.phones.any? %>
-          <ul class="divide-y divide-base-200">
-            <% @party.phones.sort_by { |p| p.is_primary ? 0 : 1 }.each do |p| %>
-              <li class="py-2 text-sm">
-                <div>
-                  <span class="font-mono"><%= p.international_pretty || p.number_raw %></span>
-                  <button
-                    class="btn btn-ghost btn-xs ml-2 focus-visible:outline focus-visible:outline-2"
-                    data-controller="copy"
-                    data-copy-text-value="<%= p.phone_e164.presence || p.number_raw %>"
-                    data-action="copy#copy"
-                    aria-label="Copy phone">
-                    Copy
-                  </button>
-                  <% if p.is_primary %><span class="badge badge-primary ml-2">Primary</span><% end %>
-                  <% if p.consent_sms %><span class="badge badge-success ml-2">SMS OK</span><% end %>
-                </div>
-                <div class="opacity-70"><%= p.phone_type_code %></div>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <div class="text-sm opacity-70">No phones</div>
-        <% end %>
-      </div>
-    </div>
-
-    <%# Emails %>
-    <div class="card bg-base-100 shadow">
-      <div class="card-body">
-        <div class="flex items-center justify-between">
-          <h2 class="card-title text-base">Emails</h2>
-          <%= link_to "Edit", edit_party_party_path(@party), class: "btn btn-ghost btn-xs" %>
-        </div>
-        <% if @party.emails.any? %>
-          <ul class="divide-y divide-base-200">
-            <% @party.emails.sort_by { |e| e.is_primary ? 0 : 1 }.each do |e| %>
-              <li class="py-2 text-sm">
-                <div>
-                  <span><%= e.email %></span>
-                    <button
-                      class="btn btn-ghost btn-xs ml-2 focus-visible:outline focus-visible:outline-2"
-                      data-controller="copy"
-                      data-copy-text-value="<%= e.email %>"
-                      data-action="copy#copy"
-                      aria-label="Copy email">
-                      Copy
-                    </button>
-                  <% if e.is_primary %><span class="badge badge-primary ml-2">Primary</span><% end %>
-                </div>
-                <div class="opacity-70"><%= e.email_type_code %></div>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <div class="text-sm opacity-70">No emails</div>
-        <% end %>
+    <%# --- Right: Communications via modal lists --- %>
+    <div class="flex flex-col gap-4">
+      <div class="grid gap-8">
+        <%= render "party/emails/list",    party: @party %>
+        <%= render "party/phones/list",    party: @party %>
+        <%= render "party/addresses/list", party: @party %>
       </div>
     </div>
   </div>
+
+  <%# ===== Delete dialog (unchanged) ===== %>
+  <dialog id="confirm-delete" class="modal">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg">Delete party?</h3>
+      <p class="py-2">This cannot be undone.</p>
+      <div class="modal-action">
+        <form method="dialog">
+          <button class="btn btn-ghost">Cancel</button>
+        </form>
+        <%= button_to "Delete",
+              party_party_path(@party.public_id),
+              method: :delete,
+              form: { class: "inline" },
+              class: "btn btn-error",
+              data: { turbo_confirm: nil },
+              aria: { label: "Confirm delete" } %>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button aria-label="Close modal">close</button>
+    </form>
+  </dialog>
 </div>
-<dialog id="confirm-delete" class="modal">
-  <div class="modal-box">
-    <h3 class="font-bold text-lg">Delete party?</h3>
-    <p class="py-2">This cannot be undone.</p>
-    <div class="modal-action">
-      <form method="dialog">
-        <button class="btn btn-ghost">Cancel</button>
-      </form>
-      <%= button_to "Delete",
-            party_party_path(@party),
-            method: :delete,
-            form: { class: "inline" },
-            class: "btn btn-error",
-            data: { turbo_confirm: nil }, # disable double confirm
-            aria: { label: "Confirm delete" } %>
-    </div>
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button aria-label="Close modal">close</button>
-  </form>
-</dialog>
 
 ===== END:app/views/party/parties/show.html.erb =====
+
+===== BEGIN:app/views/party/phones/_card.html.erb =====
+<div class="card card-border p-3 flex items-center justify-between">
+  <div>
+    <div class="font-medium"><%= phone.phone_type_code&.titleize %></div>
+    <div class="opacity-80">
+      <%= phone.phone_e164.presence || phone.number_raw %><%=
+        phone.phone_ext.present? ? " x#{phone.phone_ext}" : "" %>
+    </div>
+    <div class="flex gap-2 mt-1">
+      <% if phone.is_primary %><span class="badge badge-primary">Primary</span><% end %>
+      <% if phone.consent_sms %><span class="badge">SMS</span><% end %>
+    </div>
+  </div>
+
+  <div class="flex gap-2">
+    <%= button_to "Primary",
+      primary_party_party_phone_path(party.public_id, phone),
+      method: :patch,
+      class: "btn btn-soft btn-sm" %>
+
+    <%= link_to "Edit",
+      edit_party_party_phone_path(party.public_id, phone, from: :show),
+      data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
+      class: "btn btn-soft btn-sm" %>
+
+    <%= button_to "Delete",
+      party_party_phone_path(party.public_id, phone),
+      method: :delete,
+      form: { data: { turbo_confirm: "Delete this phone?" } },
+      class: "btn btn-error btn-soft btn-sm" %>
+  </div>
+</div>
+
+===== END:app/views/party/phones/_card.html.erb =====
+
+===== BEGIN:app/views/party/phones/edit.html.erb =====
+<!-- app/views/party/emails/edit.html.erb -->
+<turbo-frame id="comm_modal_frame">
+  <%= render "form", party: @party, phone: @phone %>
+</turbo-frame>
+===== END:app/views/party/phones/edit.html.erb =====
+
+===== BEGIN:app/views/party/phones/_form.html.erb =====
+<!-- app/views/party/phones/_form.html.erb -->
+<%= form_with scope: :party_phone,
+      url: (@phone.persisted? ?
+              party_party_phone_path(@party.public_id, @phone) :
+              party_party_phones_path(@party.public_id)),
+      data: { turbo_frame: "comm_modal_frame" } do |f| %>
+  <div class="grid gap-3">
+    <div class="select"><%= f.select :phone_type_code, options_for_select(%w[mobile home work fax other], phone.phone_type_code) %></div>
+    <div class="input"><%= f.telephone_field :phone_e164, placeholder: "+15551234567" %></div>
+    <div class="input"><%= f.text_field :phone_ext, placeholder: "ext" %></div>
+    <label class="flex items-center gap-2"><%= f.check_box :consent_sms %> SMS consent</label>
+    <label class="flex items-center gap-2"><%= f.check_box :is_primary %> Primary</label>
+  </div>
+  <div class="mt-4 flex justify-end gap-2">
+    <button type="button" class="btn btn-soft" data-action="modal#close">Cancel</button>
+    <%= f.submit "Save", class: "btn btn-primary" %>
+  </div>
+<% end %>
+===== END:app/views/party/phones/_form.html.erb =====
+
+===== BEGIN:app/views/party/phones/_list.html.erb =====
+<!-- app/views/party/phones/_list.html.erb -->
+<section>
+  <div class="flex items-center justify-between mb-2">
+    <h3 class="text-lg font-semibold">Phones</h3>
+    <%= link_to "Add",
+        new_party_party_phone_path(party.public_id, from: :show),
+        data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
+        class: "btn btn-primary btn-sm" %>
+  </div>
+  <div id="<%= dom_id(party, :phones_list) %>" class="grid gap-3">
+    <% party.phones.each do |phone| %>
+      <%= render "party/phones/card", party: party, phone: phone %>
+    <% end %>
+  </div>
+</section>
+
+===== END:app/views/party/phones/_list.html.erb =====
+
+===== BEGIN:app/views/party/phones/new.html.erb =====
+<!-- app/views/party/emails/new.html.erb -->
+<turbo-frame id="comm_modal_frame">
+  <%= render "form", party: @party, phone: @phone %>
+</turbo-frame>
+
+<!-- app/views/party/emails/edit.html.erb -->
+<turbo-frame id="comm_modal_frame">
+  <%= render "form", party: @party, phone: @phone %>
+</turbo-frame>
+
+===== END:app/views/party/phones/new.html.erb =====
 
 ===== BEGIN:app/views/pwa/manifest.json.erb =====
 {
@@ -8268,6 +8675,13 @@ end
 
 ===== END:app/views/shared/_brand.html.erb =====
 
+===== BEGIN:app/views/shared/_close_modal.turbo_stream.html.erb =====
+<!-- app/views/shared/_close_modal.turbo_stream.erb -->
+<turbo-stream action="remove" target="comm_modal_frame"></turbo-stream>
+<script>document.getElementById("comm-modal")?.close()</script>
+
+===== END:app/views/shared/_close_modal.turbo_stream.html.erb =====
+
 ===== BEGIN:app/views/shared/_empty_state.html.erb =====
 <div class="text-center p-10 border border-dashed rounded-box">
   <div class="text-3xl mb-2">📄</div>
@@ -8330,6 +8744,20 @@ end
   <rect x="8" y="6" width="17" height="1.6" rx="0.8" class="text-accent" fill="currentColor"/>
 </svg>
 ===== END:app/views/shared/_logo_mark_only.hrml.erb =====
+
+===== BEGIN:app/views/shared/_modal.html.erb =====
+<!-- app/views/shared/_modal.html.erb -->
+<dialog id="comm-modal" class="modal">
+  <div class="modal-box">
+    <turbo-frame id="comm_modal_frame"></turbo-frame>
+    <div class="mt-4 flex justify-end gap-2">
+      <form method="dialog"><button class="btn btn-soft">Close</button></form>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+
+===== END:app/views/shared/_modal.html.erb =====
 
 ===== BEGIN:app/views/shared/_user_menu.html.erb =====
 <div class="dropdown dropdown-end">
@@ -9042,25 +9470,25 @@ production:
 
 ===== BEGIN:config/routes.rb =====
 Rails.application.routes.draw do
-  # Health check
   get "up" => "rails/health#show", as: :rails_health_check
-
-  # Root
   root "home#index"
 
   namespace :party do
-    resources :parties, param: :public_id, only: [:index, :show, :new, :create, :edit, :update, :destroy] do
-      member { get :reveal_tax_id }  # /party/parties/:public_id/reveal_tax_id
-      post :reveal_tax_id   # new POST for the Stimulus controller
-
-      resource  :person,       only: %i[show create update destroy]
-      resource  :organization, only: %i[show create update destroy]
-
-      resources :emails, only: %i[index create update destroy] do
-        member { get :reveal } # /party/parties/:public_id/emails/:id/reveal
+    resources :parties, param: :public_id do
+      member do
+        get  :reveal_tax_id
+        post :reveal_tax_id
       end
-      resources :phones,    only: %i[index create update destroy]
-      resources :addresses, only: %i[index create update destroy]
+
+      resources :emails,    only: %i[new create edit update destroy] do
+        member { patch :primary; get :reveal }
+      end
+      resources :phones,    only: %i[new create edit update destroy] do
+        member { patch :primary }
+      end
+      resources :addresses, only: %i[index new create edit update destroy] do
+        member { patch :primary }
+      end
     end
 
     resources :groups do
@@ -9071,8 +9499,17 @@ Rails.application.routes.draw do
   end
 
   namespace :ref do
-    resources :regions, only: :index  # /ref/regions?country=US
+    resources :regions, only: :index
   end
+
+  namespace :ref do
+    resources :regions, only: :index
+  end
+
+  def index
+    redirect_to party_party_path(@party.public_id, anchor: "addresses")
+  end
+
 end
 
 ===== END:config/routes.rb =====

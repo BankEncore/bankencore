@@ -1,0 +1,31 @@
+<div class="card card-border p-3 flex items-center justify-between">
+  <div>
+    <div class="font-medium"><%= phone.phone_type_code&.titleize %></div>
+    <div class="opacity-80">
+      <%= phone.phone_e164.presence || phone.number_raw %><%=
+        phone.phone_ext.present? ? " x#{phone.phone_ext}" : "" %>
+    </div>
+    <div class="flex gap-2 mt-1">
+      <% if phone.is_primary %><span class="badge badge-primary">Primary</span><% end %>
+      <% if phone.consent_sms %><span class="badge">SMS</span><% end %>
+    </div>
+  </div>
+
+  <div class="flex gap-2">
+    <%= button_to "Primary",
+      primary_party_party_phone_path(party.public_id, phone),
+      method: :patch,
+      class: "btn btn-soft btn-sm" %>
+
+    <%= link_to "Edit",
+      edit_party_party_phone_path(party.public_id, phone, from: :show),
+      data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
+      class: "btn btn-soft btn-sm" %>
+
+    <%= button_to "Delete",
+      party_party_phone_path(party.public_id, phone),
+      method: :delete,
+      form: { data: { turbo_confirm: "Delete this phone?" } },
+      class: "btn btn-error btn-soft btn-sm" %>
+  </div>
+</div>

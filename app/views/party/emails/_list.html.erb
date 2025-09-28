@@ -1,0 +1,44 @@
+<section id="<%= dom_id(party, :emails_section) %>" class="space-y-2">
+  <div class="flex items-center justify-between">
+    <h3 class="font-semibold">Emails</h3>
+      <%= link_to "Add",
+        new_party_party_email_path(party.public_id, from: :show),
+        data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
+        class: "btn btn-secondary btn-xs" %>
+  </div>
+
+  <ul class="menu menu-sm bg-base-100 rounded-box w-full">
+    <% party.emails.each do |email| %>
+      <li class="py-0">
+        <div class="flex items-center justify-between">
+          <div class="text-sm">
+            <div>
+              <%= email.email %>
+              <% if email.is_primary %><span class="badge badge-primary badge-sm ml-2 align-middle">Primary</span><% end %>
+            </div>
+            <div class="opacity-70"><%= email.email_type_code %></div>
+          </div>
+
+          <div class="flex gap-1">
+            <%= button_to "Primary",
+              primary_party_party_email_path(party.public_id, email),
+              method: :patch,
+              form: { data: { turbo_frame: dom_id(party, :emails_section) } },
+              class: "btn btn-ghost btn-xs" %>
+
+            <%= link_to "Edit",
+              edit_party_party_email_path(party.public_id, email, from: :show),
+              data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
+              class: "btn btn-ghost btn-xs" %>
+
+            <%= button_to "Delete",
+              party_party_email_path(party.public_id, email),
+              method: :delete,
+              form: { data: { turbo_confirm: "Delete this email?" } },
+              class: "btn btn-ghost btn-xs text-error" %>
+          </div>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+</section>

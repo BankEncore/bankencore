@@ -36,6 +36,15 @@ module Party
 
     private
 
+    def set_party
+      pid = params[:party_party_id] ||
+            params[:party_party_public_id] ||
+            params[:party_public_id] ||
+            params[:public_id] ||
+            params[:party_id]
+      @party = ::Party::Party.find_by!(public_id: pid)
+    end
+
     def row_has_content?
       number_raw.to_s.strip.present? || phone_ext.to_s.strip.present? || phone_type_code.to_s.strip.present?
     end
