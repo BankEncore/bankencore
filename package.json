@@ -1,19 +1,16 @@
 {
-  "scripts": {
-    "build:css": "tailwindcss -i app/assets/stylesheets/application.tailwind.css -o app/assets/builds/application.css --watch"
-  },
-  "devDependencies": {
-    "@tailwindcss/cli": "^4.1.13",
-    "daisyui": "^5.1.13",
-    "tailwindcss": "^4.1.13"
-  },
   "name": "betest",
-  "description": "This README would normally document whatever steps are necessary to get the application up and running.",
   "version": "1.0.0",
+  "description": "This README would normally document whatever steps are necessary to get the application up and running.",
   "main": "index.js",
-  "directories": {
-    "lib": "lib",
-    "test": "test"
+  "directories": { "lib": "lib", "test": "test" },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "build:css": "tailwindcss -i app/assets/stylesheets/application.tailwind.css -o app/assets/builds/application.css",
+    "watch:css": "tailwindcss -i app/assets/stylesheets/application.tailwind.css -o app/assets/builds/application.css --watch",
+    "pretest": "npm run build:css"
   },
   "dependencies": {
     "camelcase-css": "^2.0.1",
@@ -27,7 +24,9 @@
     "postcss-js": "^4.1.0",
     "source-map-js": "^1.2.1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.13",
+    "daisyui": "^5.1.13",
+    "tailwindcss": "^4.1.13"
+  }
 }
