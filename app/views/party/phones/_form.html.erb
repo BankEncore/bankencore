@@ -1,0 +1,37 @@
+<%= form_with model: @phone,
+      scope: :party_phone,
+      url: (@phone.persisted? ? party_party_phone_path(@party.public_id, @phone)
+                              : party_party_phones_path(@party.public_id)),
+      method: (@phone.persisted? ? :patch : :post),
+      data: { turbo_frame: "comm_modal_frame" } do |f| %>
+
+  <div class="grid gap-3">
+    <div class="select">
+      <%= f.collection_select :phone_type_code, @phone_types, :code, :name, { include_blank: true }, {} %>
+    </div>
+
+    <div class="select">
+      <%= f.collection_select :country_alpha2, @countries, :code, :name, { include_blank: true }, {} %>
+    </div>
+
+    <div class="input">
+      <%= f.text_field :number_raw, required: true, inputmode: "tel" %>
+    </div>
+
+    <div class="input">
+      <%= f.text_field :phone_ext, inputmode: "numeric", placeholder: "Ext" %>
+    </div>
+
+    <label class="flex items-center gap-2">
+      <%= f.check_box :is_primary %> Primary
+    </label>
+    <label class="flex items-center gap-2">
+      <%= f.check_box :consent_sms %> SMS consent
+    </label>
+  </div>
+
+  <div class="mt-4 flex justify-end gap-2">
+    <button type="button" class="btn btn-ghost" data-action="modal#close">Cancel</button>
+    <%= f.submit "Save", class: "btn btn-primary" %>
+  </div>
+<% end %>

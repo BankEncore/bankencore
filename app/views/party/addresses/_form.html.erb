@@ -1,0 +1,72 @@
+<!-- app/views/party/addresses/_form.html.erb -->
+<%= form_with model: @address,
+      scope: :party_address,
+      url: (@address.persisted? ?
+              party_party_address_path(@party.public_id, @address) :
+              party_party_addresses_path(@party.public_id)),
+      data: { turbo_frame: "comm_modal_frame" } do |f| %>
+
+  <div class="grid gap-3"
+       data-controller="region-select"
+       data-region-select-url-value="<%= ref_regions_path(format: :json) %>">
+
+    <!-- Address Type -->
+    <div class="select">
+      <%= f.collection_select :address_type_code, @address_types, :code, :name,
+            { include_blank: true }, {} %>
+    </div>
+
+    <!-- Street 1 -->
+    <div class="input">
+      <%= f.text_field :line1, required: true, placeholder: "Address line 1" %>
+    </div>
+
+    <!-- Street 2 -->
+    <div class="input">
+      <%= f.text_field :line2, placeholder: "Address line 2" %>
+    </div>
+
+    <!-- Locality / City -->
+    <div class="input">
+      <%= f.text_field :locality, required: true, placeholder: "Locality / City" %>
+    </div>
+
+    <!-- Country -->
+    <div class="select">
+      <% if @countries.present? %>
+        <%= f.collection_select :country_code, @countries, :code, :name,
+              { include_blank: true },
+              { data: { region_select_target: "country", action: "change->region-select#refresh" } } %>
+      <% else %>
+        <%= f.select :country_code,
+              options_for_select([["United States","US"],["Canada","CA"]], @address.country_code || "US"),
+              { include_blank: true },
+              { data: { region_select_target: "country", action: "change->region-select#refresh" } } %>
+      <% end %>
+    </div>
+
+
+    <!-- State / Region -->
+    <div class="select">
+      <%= f.select :region_code,
+            options_for_select(regions_for(@address.country_code), @address.region_code),
+            { include_blank: true },
+            { data: { region_select_target: "region" },
+              disabled: @address.country_code.blank? } %>
+    </div>
+
+    <!-- Postal Code -->
+    <div class="input">
+      <%= f.text_field :postal_code, placeholder: "Postal code" %>
+    </div>
+
+    <label class="flex items-center gap-2">
+      <%= f.check_box :is_primary %> Primary
+    </label>
+  </div>
+
+  <div class="mt-4 flex justify-end gap-2">
+    <button type="button" class="btn btn-soft" data-action="modal#close">Cancel</button>
+    <%= f.submit "Save", class: "btn btn-primary" %>
+  </div>
+<% end %>

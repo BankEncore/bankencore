@@ -1,0 +1,28 @@
+<div class="card card-border p-3 flex items-center justify-between">
+  <div class="opacity-80">
+    <div><%= address.address_type_code&.titleize %></div>
+    <div><%= address.line1 %><% if address.line2.present? %>, <%= address.line2 %><% end %></div>
+    <div><%= [address.locality, address.region_code, address.postal_code].compact.join(", ") %></div>
+    <div><%= address.country_code %></div>
+    <% if address.is_primary %><span class="badge badge-primary mt-1">Primary</span><% end %>
+  </div>
+  <div class="flex gap-2">
+    <%= button_to "Primary",
+      primary_party_party_phone_path(party.public_id, phone),
+      method: :patch,
+      form: { data: { turbo_frame: dom_id(party, :phones_section) } },
+      class: "btn btn-soft btn-sm" %>
+  </div>
+  <div class="card-actions">
+    <%= link_to "Edit",
+      edit_party_party_address_path(party.public_id, address, from: :show),
+      data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
+      class: "btn btn-soft btn-xsm" %>
+
+    <%= button_to "Delete",
+      party_party_address_path(party.public_id, address),
+      method: :delete,
+      form: { data: { turbo_confirm: "Delete this address?" } },
+      class: "btn btn-error btn-soft btn-xsm" %>
+  </div>
+</div>

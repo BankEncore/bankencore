@@ -1,5 +1,6 @@
 module Party
   class Address < ApplicationRecord
+    include SinglePrimary
     self.table_name = "party_addresses"
     include SinglePrimary
 

@@ -1,9 +1,8 @@
-<%# app/views/party/parties/_form.html.erb — DROP-IN FULL %>
+<%# app/views/party/parties/_form.html.erb — DROP-IN CLEAN %>
 <%= form_with model: @party,
       scope: :party_party,
-      url: (@party.persisted? ? party_party_path(@party) : party_parties_path),
+      url: (@party.persisted? ? party_party_path(@party.public_id) : party_parties_path),
       data: { turbo: false },
-      local: true,
       class: "space-y-6" do |f| %>
 
   <% if @party.errors.any? ||
@@ -171,7 +170,7 @@
                   </div>
 
                   <div class="md:col-span-4">
-                    <%= af.label :locality, "City", class: "label-text" %>
+                    <%= af.label :city, "City", class: "label-text" %>
                     <%= af.text_field :locality, class: "input input-bordered w-full",
                           autocomplete: "address-level2" %>
                   </div>
@@ -212,34 +211,30 @@
           <% @party.phones.each do |p| %>
             <li class="border rounded-box p-3">
               <%= f.fields_for :phones, p do |pf| %>
-                <div class="grid md:grid-cols-4 gap-3">
+                <div class="grid md:grid-cols-5 gap-3">
                   <div>
                     <%= pf.label :phone_type_code, "Phone type", class: "label-text" %>
                     <%= pf.collection_select :phone_type_code, @phone_types, :code, :name,
                           { include_blank: true }, { class: "select select-bordered w-full" } %>
                   </div>
-                  <div>
-                    <%= pf.label :country_alpha2, "Country", class: "label-text" %>
-                    <%= pf.collection_select :country_alpha2, @countries, :code, :name,
-                          { include_blank: true },
-                          { class: "select select-bordered w-full", autocomplete: "country" } %>
-                  </div>
-                  <div>
-                    <%= pf.label :number_raw, "Phone", class: "label-text" %>
-                    <%= pf.text_field :number_raw, class: "input input-bordered w-full",
-                          inputmode: "tel", autocomplete: "tel" %>
+                  <div class="md:col-span-2">
+                    <%= pf.label :phone_e164, "Phone", class: "label-text" %>
+                    <%= pf.telephone_field :phone_e164, class: "input input-bordered w-full",
+                          placeholder: "+15551234567", inputmode: "tel", autocomplete: "tel" %>
                   </div>
                   <div>
                     <%= pf.label :phone_ext, "Ext", class: "label-text" %>
                     <%= pf.text_field :phone_ext, class: "input input-bordered w-full", inputmode: "numeric" %>
                   </div>
+                  <div class="flex items-center gap-4 pt-6">
+                    <label class="label cursor-pointer gap-2">
+                      <%= pf.check_box :consent_sms, class: "checkbox" %><span class="label-text">SMS consent</span>
+                    </label>
+                  </div>
                 </div>
                 <div class="mt-3 flex items-center gap-4">
                   <label class="label cursor-pointer gap-2">
                     <%= pf.check_box :is_primary, class: "checkbox" %><span class="label-text">Primary</span>
-                  </label>
-                  <label class="label cursor-pointer gap-2">
-                    <%= pf.check_box :consent_sms, class: "checkbox" %><span class="label-text">SMS consent</span>
                   </label>
                   <label class="label cursor-pointer gap-2">
                     <%= pf.check_box :_destroy, class: "checkbox" %><span class="label-text">Remove</span>
@@ -295,7 +290,9 @@
 
   <%# === Actions ========================================================== %>
   <div class="flex items-center justify-end gap-2">
-    <%= link_to "Cancel", (@party.persisted? ? party_party_path(@party) : party_parties_path), class: "btn btn-ghost" %>
+    <%= link_to "Cancel",
+          (@party.persisted? ? party_party_path(@party.public_id) : party_parties_path),
+          class: "btn btn-ghost" %>
     <%= f.submit(@party.persisted? ? "Update" : "Create", class: "btn btn-primary") %>
   </div>
 <% end %>

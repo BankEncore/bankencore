@@ -1,0 +1,26 @@
+<%= form_with model: @email,
+      scope: :party_email,
+      url: (@email.persisted? ? party_party_email_path(@party.public_id, @email)
+                              : party_party_emails_path(@party.public_id)),
+      method: (@email.persisted? ? :patch : :post),
+      data: { turbo_frame: "comm_modal_frame" } do |f| %>
+
+  <div class="grid gap-3">
+    <div class="select">
+      <%= f.collection_select :email_type_code, @email_types, :code, :name, { include_blank: true }, {} %>
+    </div>
+
+    <div class="input">
+      <%= f.email_field :email, required: true, autocomplete: "email" %>
+    </div>
+
+    <label class="flex items-center gap-2">
+      <%= f.check_box :is_primary %> Primary
+    </label>
+  </div>
+
+  <div class="mt-4 flex justify-end gap-2">
+    <button type="button" class="btn btn-ghost" data-action="modal#close">Cancel</button>
+    <%= f.submit "Save", class: "btn btn-primary" %>
+  </div>
+<% end %>

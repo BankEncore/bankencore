@@ -1,62 +1,66 @@
-<div class="grid md:grid-cols-6 gap-4">
-  <div class="md:col-span-2">
-    <label class="label"><span class="label-text">Type</span></label>
-    <%= f.collection_select :address_type_code, @address_types, :code, :name,
-          { include_blank: "Select type" }, class: "select select-bordered w-full" %>
-  </div>
+<!-- app/views/party/addresses/_form.html.erb -->
+<%= form_with scope: :party_address,
+      url: (@address.persisted? ? party_party_address_path(@party.public_id, @address)
+                                : party_party_addresses_path(@party.public_id)),
+      method: (@address.persisted? ? :patch : :post),
+      data: { turbo_frame: "comm_modal_frame" } do |f| %>
 
-  <div class="md:col-span-2">
-    <label class="label"><span class="label-text">Country</span></label>
-    <%= f.collection_select :country_code, @countries, :code, :name,
-          { selected: (f.object.country_code.presence || "US") },
-          class: "select select-bordered w-full" %>
-  </div>
+  <div class="grid gap-3"
+       data-controller="region-select"
+       data-region-select-url-value="<%= ref_regions_path(format: :json) %>">
 
-  <div class="md:col-span-2">
-    <label class="label"><span class="label-text">Region/State</span></label>
-    <%= f.text_field :region_code, class: "input input-bordered w-full", placeholder: "MI" %>
-  </div>
+    <!-- Type -->
+    <div class="select">
+      <%= f.collection_select :address_type_code, @address_types, :code, :name,
+            { include_blank: true }, {} %>
+    </div>
 
-  <div class="md:col-span-3">
-    <label class="label"><span class="label-text">Address line 1</span></label>
-    <%= f.text_field :line1, class: "input input-bordered w-full" %>
-  </div>
+    <!-- Street 1 -->
+    <div class="input">
+      <%= f.text_field :line1, required: true, placeholder: "Street 1" %>
+    </div>
 
-  <div class="md:col-span-3">
-    <label class="label"><span class="label-text">Address line 2</span></label>
-    <%= f.text_field :line2, class: "input input-bordered w-full" %>
-  </div>
+    <!-- Street 2 -->
+    <div class="input">
+      <%= f.text_field :line2, placeholder: "Street 2" %>
+    </div>
 
-  <div class="md:col-span-3">
-    <label class="label"><span class="label-text">Address line 3</span></label>
-    <%= f.text_field :line3, class: "input input-bordered w-full" %>
-  </div>
+    <!-- Locality (City) -->
+    <div class="input">
+      <%= f.text_field :locality, required: true, placeholder: "Locality (City)" %>
+    </div>
 
-  <div class="md:col-span-2">
-    <label class="label"><span class="label-text">City</span></label>
-    <%= f.text_field :locality, class: "input input-bordered w-full" %>
-  </div>
+    <!-- Country (default US) -->
+    <div class="select">
+      <%= f.collection_select :country_code, @countries, :code, :name,
+            { include_blank: true },
+            { data: { region_select_target: "country", action: "change->region-select#refresh" },
+              value: (@address.country_code.presence || "US") } %>
+    </div>
 
-  <div>
-    <label class="label"><span class="label-text">Postal code</span></label>
-    <%= f.text_field :postal_code, class: "input input-bordered w-full" %>
-  </div>
+    <!-- Region/State (default MI when country is US) -->
+    <div class="select">
+      <% selected_region = @address.region_code.presence || ("MI" if (@address.country_code.presence || "US") == "US") %>
+      <%= f.select :region_code,
+            options_for_select(regions_for(@address.country_code.presence || "US"), selected_region),
+            { include_blank: true },
+            { data: { region_select_target: "region" },
+              disabled: (@address.country_code.blank?) } %>
+    </div>
 
-  <div class="md:col-span-6 flex items-center justify-between">
-    <label class="label cursor-pointer gap-2">
-      <%= f.check_box :is_primary, class: "checkbox" %>
-      <span class="label-text">Primary</span>
+    <!-- Postal Code -->
+    <div class="input">
+      <%= f.text_field :postal_code, placeholder: "Postal Code" %>
+    </div>
+
+    <!-- Primary -->
+    <label class="flex items-center gap-2">
+      <%= f.check_box :is_primary %> Primary
     </label>
-
-    <% if f.object.persisted? %>
-      <% uid = "address_#{f.object.id}_destroy" %>
-      <div>
-        <%= f.check_box :_destroy, include_hidden: false, id: uid %>
-        <%= f.label :_destroy, "Remove", for: uid, class: "text-sm" %>
-      </div>
-    <% else %>
-      <%= f.hidden_field :_destroy, value: "0", id: nil %>
-      <button type="button" class="btn btn-ghost btn-sm" data-action="nested-form#remove">Remove</button>
-    <% end %>
   </div>
-</div>
+
+  <div class="mt-4 flex justify-end gap-2">
+    <button type="button" class="btn btn-ghost" data-action="modal#close">Cancel</button>
+    <%= f.submit "Save", class: "btn btn-primary" %>
+  </div>
+<% end %>
