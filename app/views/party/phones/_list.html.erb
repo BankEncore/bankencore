@@ -4,7 +4,7 @@
       <%= link_to "Add",
         new_party_party_phone_path(party.public_id, from: :show),
         data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
-        class: "btn btn-secondary btn-xs" %>
+        class: "btn btn-secondary btn-soft btn-xs" %>
   </div>
 
   <ul class="menu menu-sm bg-base-100 rounded-box w-full">
@@ -13,9 +13,8 @@
         <div class="flex items-center justify-between">
           <div class="text-sm">
             <div>
-              <span class="font-mono"><%= phone.phone_e164.presence || phone.number_raw %></span>
-              <% if phone.phone_ext.present? %> x<%= phone.phone_ext %><% end %>
-              <% if phone.is_primary %><span class="badge badge-primary badge-sm ml-2 align-middle">Primary</span><% end %>
+              <span class="font-mono"><%= phone&.international_pretty || "—" %></span>
+              <% if phone.is_primary %><span class="badge badge-primary badge-sm badge-soft ml-2 align-middle">Primary</span><% end %>
               <% if phone.consent_sms %><span class="badge badge-ghost badge-sm ml-2 align-middle">SMS</span><% end %>
             </div>
             <div class="opacity-70"><%= phone.phone_type_code %></div>

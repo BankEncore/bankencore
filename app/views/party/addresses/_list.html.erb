@@ -4,7 +4,7 @@
     <%= link_to "Add",
       new_party_party_address_path(party.public_id, from: :show),
       data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
-      class: "btn btn-secondary btn-xs" %>
+      class: "btn btn-secondary btn-soft btn-xs" %>
   </div>
 
   <ul class="menu menu-sm bg-base-100 rounded-box w-full">
@@ -17,7 +17,7 @@
               <% tail = [address.locality, [address.region_code, address.postal_code].compact_blank.join(" ")].compact_blank.join(", ") %>
               <% if tail.present? %> <br/> <%= tail %><% end %>
               <% if address.country_code.present? %> · <%= address.country_code %><% end %>
-              <% if address.is_primary %><span class="badge badge-primary badge-sm ml-2 align-middle">Primary</span><% end %>
+              <% if address.is_primary %><span class="badge badge-primary badge-soft badge-sm ml-2 align-middle">Primary</span><% end %>
             </div>
             <div class="opacity-70"><%= address.address_type_code %></div>
           </div>
