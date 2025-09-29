@@ -60,13 +60,24 @@
       <%= f.text_field :postal_code, placeholder: "Postal code" %>
     </div>
 
-    <label class="flex items-center gap-2">
-      <%= f.check_box :is_primary %> Primary
-    </label>
-  </div>
+      <div class="md:col-span-8 flex items-center gap-4 pt-1">
+        <label class="label cursor-pointer gap-2">
+          <%= af.check_box :is_primary, class: "checkbox" %>
+          <span class="label-text">Primary</span>
+        </label>
 
-  <div class="mt-4 flex justify-end gap-2">
-    <button type="button" class="btn btn-soft" data-action="modal#close">Cancel</button>
-    <%= f.submit "Save", class: "btn btn-primary" %>
-  </div>
+        <%= af.hidden_field :_destroy, value: "0", data: { role: "destroy-flag" } %>
+        <button
+          class="btn btn-xs btn-error btn-soft"
+          onclick="
+            const li = this.closest('li');
+            const flag = li.querySelector('input[data-role=\"destroy-flag\"]');
+            if (flag) flag.value = '1';
+            li.remove();
+            return false;
+          ">
+          Remove
+        </button>
+      </div>
+    </div>
 <% end %>
