@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_29_021947) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_29_040907) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -104,7 +104,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_29_021947) do
     t.text "metadata", size: :long, collation: "utf8mb4_bin"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "identifier_type_id"
     t.index ["id_type_code", "value_bidx"], name: "idx_unique_identifier_value", unique: true
+    t.index ["identifier_type_id", "value_bidx"], name: "idx_unique_identifier_type_value", unique: true
+    t.index ["identifier_type_id"], name: "index_party_identifiers_on_identifier_type_id"
     t.index ["party_id", "id_type_code", "is_primary"], name: "idx_primary_identifier_by_party"
     t.index ["party_id", "id_type_code"], name: "idx_identifier_by_party_and_type"
     t.index ["party_id"], name: "index_party_identifiers_on_party_id"
@@ -182,6 +185,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_29_021947) do
     t.index ["code"], name: "index_ref_email_types_on_code", unique: true
   end
 
+  create_table "ref_identifier_types", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+    t.string "code", null: false
+    t.string "name", null: false
+    t.integer "sort_order", default: 100, null: false
+    t.boolean "require_issuer_country", default: false, null: false
+    t.boolean "require_issuer_region", default: false, null: false
+    t.string "normalize_rule"
+    t.string "mask_rule"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_ref_identifier_types_on_code", unique: true
+  end
+
   create_table "ref_organization_types", primary_key: "code", id: :string, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -233,6 +249,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_29_021947) do
   add_foreign_key "party_group_memberships", "party_groups", column: "group_id", on_delete: :cascade
   add_foreign_key "party_groups", "ref_party_group_types", column: "party_group_type_code", primary_key: "code"
   add_foreign_key "party_identifiers", "parties"
+  add_foreign_key "party_identifiers", "ref_identifier_types", column: "identifier_type_id"
   add_foreign_key "party_links", "parties", column: "source_party_id", on_delete: :cascade
   add_foreign_key "party_links", "parties", column: "target_party_id", on_delete: :cascade
   add_foreign_key "party_links", "ref_party_link_types", column: "party_link_type_code", primary_key: "code"

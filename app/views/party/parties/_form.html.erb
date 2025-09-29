@@ -54,18 +54,32 @@
               <li class="border rounded-box p-3">
                 <%= f.fields_for :identifiers, pi do |idf| %>
                   <%= idf.hidden_field :id %>
+
                   <div class="grid md:grid-cols-6 gap-3">
                     <div>
-                      <%= idf.label :id_type_code, "Type", class: "label-text" %>
-                      <%= idf.select :id_type_code,
-                            options_for_select(%w[ssn itin ein foreign_tin passport dl lei], idf.object.id_type_code),
-                            {}, class: "select select-bordered w-full" %>
+                      <%= idf.label :identifier_type_id, "Type", class: "label-text" %>
+                      <%= idf.collection_select :identifier_type_id, @identifier_types, :id, :name, {}, class:"select select-bordered w-full" %>
                     </div>
+
                     <div class="md:col-span-2">
                       <%= idf.label :value, "Identifier", class: "label-text" %>
-                      <%= idf.password_field :value, autocomplete:"off", class:"input input-bordered w-full",
-                            placeholder:"enter value to set or change" %>
+
+                      <%# Show masked current value if persisted %>
+                      <% if pi.persisted? && pi.value_masked.present? %>
+                        <span class="badge badge-ghost text-xs mb-1">Current: <span class="font-mono ml-1"><%= pi.value_masked %></span></span>
+                      <% end %>
+
+                      <%= idf.password_field :value,
+                            autocomplete:"off",
+                            class:"input input-bordered w-full",
+                            placeholder: (pi.persisted? ? "Leave blank to keep" : "Enter value") %>
+
+                      <%# Inline errors %>
+                      <% if idf.object.errors[:value].present? %>
+                        <p class="text-error text-xs mt-1"><%= idf.object.errors[:value].join(", ") %></p>
+                      <% end %>
                     </div>
+
                     <div>
                       <%= idf.label :country_code, "Issuer country", class:"label-text" %>
                       <%= idf.text_field :country_code, class:"input input-bordered w-full", placeholder:"US" %>

@@ -167,7 +167,8 @@ module Party
           :phone_e164, :is_primary, :consent_sms, :_destroy
         ],
         identifiers_attributes: [
-          :id, :id_type_code, :value, :is_primary, :country_code, :issuing_authority, :issued_on, :expires_on, :_destroy
+          :id, :identifier_type_id, :value, :is_primary,
+          :country_code, :issuing_authority, :issued_on, :expires_on, :_destroy
         ]
       )
     end
@@ -178,6 +179,7 @@ module Party
       @org_types     = Ref::OrganizationType.order(:name)
       @email_types   = Ref::EmailType.order(:name)
       @phone_types   = Ref::PhoneType.order(:name)
+      @identifier_types = Ref::IdentifierType.order(:sort_order, :name)
     end
 
     def handle_bad_params(_ex)
@@ -194,7 +196,8 @@ module Party
       @party.addresses.build(country_code: "US") if params[:add_address]
       @party.emails.build                        if params[:add_email]
       @party.phones.build(country_alpha2: "US")  if params[:add_phone]
-      @party.identifiers.build(id_type_code: (@party.organization ? "ein" : "ssn"), is_primary: @party.identifiers.tax_ids.where(is_primary: true).blank?) if params[:add_identifier]
+      @party.identifiers.build(identifier_type: Ref::IdentifierType.find_by!(code: (@party.organization ? "ein" : "ssn")),
+                         is_primary: @party.identifiers.tax_ids.where(is_primary: true).blank?) if params[:add_identifier]
       ensure_identifier_stub(@party)
       render view, status: :unprocessable_entity
     end
@@ -243,6 +246,11 @@ module Party
 
     def list_params
       params.permit(:q, :search_type, :sort, :dir, :page, :per)
+    end
+
+    def identifier_bidx_for(raw, code)
+      norm = ::Party::Identifier.normalize(raw, code)
+      BlindIndex.generate_bidx(norm, key: BlindIndex.master_key, encode: false)
     end
 
     def mysql_dup_identifier?(err)

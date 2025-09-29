@@ -21,7 +21,9 @@ module Party
     accepts_nested_attributes_for :phones, allow_destroy: true, reject_if: ->(h) {
       h["id"].blank? && h["number_raw"].to_s.strip.blank? && h["phone_e164"].to_s.strip.blank? && h["phone_ext"].to_s.strip.blank?
     }
-    accepts_nested_attributes_for :identifiers, allow_destroy: true,
+    accepts_nested_attributes_for :identifiers,
+      allow_destroy: true,
+      update_only: true,
       reject_if: ->(h) { h["id"].present? && h["value"].to_s.strip.blank? }
 
     # Virtuals for simple form binding
@@ -71,6 +73,13 @@ module Party
 
     def tax_id_bidx=(_v)
       raise "tax_id_bidx is deprecated"
+    end
+
+    def ensure_identifier_stub
+      return if identifiers.tax_ids.where(is_primary: true).exists?
+      code = organization.present? ? "ein" : "ssn"
+      type = ::Ref::IdentifierType.find_by!(code: code)
+      identifiers.build(identifier_type: type, is_primary: true)
     end
 
     private

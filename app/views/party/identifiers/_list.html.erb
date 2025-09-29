@@ -1,0 +1,71 @@
+<%# Requires: @party, eager loaded: identifiers.identifier_type %>
+<div data-controller="identifiers" class="grid md:grid-cols-2 gap-4">
+  <%# --- LEFT: rows ------------------------------------------------------ %>
+  <div>
+    <h3 class="text-sm font-semibold mb-2">Identifiers</h3>
+    <div class="divide-y divide-base-200 rounded-box border">
+      <% @party.identifiers
+           .includes(:identifier_type)
+           .order("ref_identifier_types.sort_order ASC, ref_identifier_types.name ASC")
+           .each do |pi| %>
+        <button
+          type="button"
+          class="w-full text-left px-3 py-2 hover:bg-base-200 focus:bg-base-200 focus:outline-none"
+          data-identifiers-target="row"
+          data-action="identifiers#select"
+          data-id="<%= pi.id %>"
+          data-type-name="<%= pi.identifier_type&.name || pi.id_type_code.to_s.titleize %>"
+          data-is-primary="<%= pi.is_primary? %>"
+          data-masked="<%= pi.value_masked %>"
+          data-reveal-url="<%= reveal_tax_id_party_party_path(@party.public_id, identifier_id: pi.id) %>"
+          data-issuer="<%= [pi.country_code, pi.issuing_authority].compact_blank.join(' · ') %>"
+          data-issued-on="<%= pi.issued_on&.to_fs(:mmm_d_yyyy).to_s %>"
+          data-expires-on="<%= pi.expires_on&.to_fs(:mmm_d_yyyy).to_s %>">
+          <div class="grid grid-cols-[1fr_auto] items-center gap-2">
+            <div class="min-w-0 flex items-center gap-2">
+              <span class="opacity-70 truncate"><%= pi.identifier_type&.name || pi.id_type_code.to_s.titleize %></span>
+              <% if pi.is_primary? %><span class="badge badge-outline badge-sm shrink-0">primary</span><% end %>
+            </div>
+            <div class="font-mono whitespace-nowrap text-sm"><%= pi.value_masked %></div>
+          </div>
+        </button>
+      <% end %>
+    </div>
+  </div>
+
+  <%# --- RIGHT: details panel ------------------------------------------- %>
+  <div class="card bg-base-100 shadow" data-identifiers-target="details" hidden>
+    <div class="card-body">
+      <h3 class="card-title text-base flex items-center gap-2">
+        <span data-identifiers-target="typeName">—</span>
+        <span class="badge badge-outline badge-sm" data-identifiers-target="primaryBadge" hidden>primary</span>
+      </h3>
+
+      <div class="mt-2 flex items-center gap-2">
+        <button class="btn btn-xs btn-outline" data-action="identifiers#copy" data-identifiers-target="copyBtn" disabled>Copy</button>
+        <button class="btn btn-xs btn-outline" data-action="identifiers#reveal" data-identifiers-target="revealBtn" disabled>Reveal</button>
+        <span class="loading loading-spinner loading-xs align-middle hidden" data-identifiers-target="spinner"></span>
+      </div>
+
+      <dl class="mt-3 grid grid-cols-3 gap-2">
+        <dt class="opacity-70">Masked</dt>
+        <dd class="col-span-2 font-mono" data-identifiers-target="masked">—</dd>
+
+        <dt class="opacity-70">Full</dt>
+        <dd class="col-span-2 font-mono" data-identifiers-target="full">—</dd>
+
+        <dt class="opacity-70">Issuer</dt>
+        <dd class="col-span-2" data-identifiers-target="issuer">—</dd>
+
+        <dt class="opacity-70">Issued</dt>
+        <dd class="col-span-2" data-identifiers-target="issuedOn">—</dd>
+
+        <dt class="opacity-70">Expires</dt>
+        <dd class="col-span-2" data-identifiers-target="expiresOn">—</dd>
+      </dl>
+
+      <p class="text-xs opacity-70 mt-2">Full value hides again after 15 seconds.</p>
+    </div>
+  </div>
+
+</div>

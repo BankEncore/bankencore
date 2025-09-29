@@ -83,26 +83,7 @@
           <div class="py-2 text-sm opacity-70">No identity details</div>
         <% end %>
 
-        <div class="py-2">
-          <dt class="opacity-70">Identifiers</dt>
-          <dd class="mt-1 space-y-1">
-            <% @party.identifiers.order(is_primary: :desc, id_type_code: :asc).each do |pi| %>
-              <div class="grid grid-cols-3 gap-2 items-center"
-                  data-controller="reveal"
-                  data-reveal-url-value="<%= reveal_tax_id_party_party_path(@party.public_id, identifier_id: pi.id) %>">
-                <div class="opacity-70">
-                  <%= pi.id_type_code.upcase %><%= " · primary" if pi.is_primary? %>
-                </div>
-                <div class="col-span-2">
-                  <span class="font-mono" data-reveal-target="text" aria-live="polite"><%= pi.value_masked %></span>
-                  <button class="btn btn-xs btn-outline ml-2" data-reveal-target="button" data-action="reveal#reveal">Reveal</button>
-                  <span class="loading loading-spinner loading-xs hidden align-middle ml-2" data-reveal-target="spinner"></span>
-                </div>
-              </div>
-            <% end %>
-          </dd>
-        </div>
-      </dl>
+    <%= render "party/identifiers/list", party: @party %>
     </div>
   </div>
 
