@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_23_185948) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_29_021947) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -85,6 +85,30 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_23_185948) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["party_group_type_code"], name: "fk_rails_c965026157"
+  end
+
+  create_table "party_identifiers", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+    t.bigint "party_id", null: false
+    t.string "id_type_code", null: false
+    t.string "country_code"
+    t.string "issuing_authority"
+    t.date "issued_on"
+    t.date "expires_on"
+    t.string "status_code"
+    t.boolean "is_primary", default: false, null: false
+    t.string "value", null: false
+    t.binary "value_bidx", limit: 32, null: false
+    t.string "value_masked"
+    t.datetime "verified_at"
+    t.string "verification_ref"
+    t.text "metadata", size: :long, collation: "utf8mb4_bin"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["id_type_code", "value_bidx"], name: "idx_unique_identifier_value", unique: true
+    t.index ["party_id", "id_type_code", "is_primary"], name: "idx_primary_identifier_by_party"
+    t.index ["party_id", "id_type_code"], name: "idx_identifier_by_party_and_type"
+    t.index ["party_id"], name: "index_party_identifiers_on_party_id"
+    t.check_constraint "json_valid(`metadata`)", name: "metadata"
   end
 
   create_table "party_links", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
@@ -208,6 +232,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_23_185948) do
   add_foreign_key "party_group_memberships", "parties", on_delete: :cascade
   add_foreign_key "party_group_memberships", "party_groups", column: "group_id", on_delete: :cascade
   add_foreign_key "party_groups", "ref_party_group_types", column: "party_group_type_code", primary_key: "code"
+  add_foreign_key "party_identifiers", "parties"
   add_foreign_key "party_links", "parties", column: "source_party_id", on_delete: :cascade
   add_foreign_key "party_links", "parties", column: "target_party_id", on_delete: :cascade
   add_foreign_key "party_links", "ref_party_link_types", column: "party_link_type_code", primary_key: "code"

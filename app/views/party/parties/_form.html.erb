@@ -39,11 +39,17 @@
         </div>
 
         <div>
-          <label class="label"><span class="label-text">Tax ID</span></label>
-          <%= f.password_field :tax_id,
-                autocomplete: "off", inputmode: "numeric",
-                class: "input input-bordered w-full",
-                placeholder: "•••-••-••••" %>
+          <label class="label"><span class="label-text"><%= @party.organization ? "EIN" : "SSN" %></span></label>
+          <% idrec = @party.primary_tax_id || @party.identifiers.build(id_type_code: (@party.organization ? "ein" : "ssn"), is_primary: true) %>
+          <%= f.fields_for :identifiers, idrec do |idf| %>
+            <%= idf.hidden_field :id %>
+            <%= idf.hidden_field :id_type_code %>
+            <%= idf.hidden_field :is_primary, value: true %>
+            <%= idf.password_field :value,
+                  autocomplete: "off", inputmode: "numeric",
+                  class: "input input-bordered w-full",
+                  placeholder: (@party.organization ? "••-•••••••" : "•••-••-••••") %>
+          <% end %>
           <p class="text-xs opacity-70 mt-1">Encrypted at rest. Leave blank to keep existing.</p>
         </div>
 

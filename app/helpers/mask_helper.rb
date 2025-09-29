@@ -6,9 +6,19 @@ module MaskHelper
     "#{name[0]}***@#{domain}"
   end
 
-  def mask_tax_id(tax_id)
-    return "" if tax_id.blank?
-    # e.g., show last 4
-    "•••-••-#{tax_id[-4..]}"
+  def mask_tax_id(value, id_type: nil)
+    return "" if value.blank?
+
+    digits = value.to_s.gsub(/\D/, "")
+    last4  = digits[-4, 4] || digits
+
+    case id_type.to_s
+    when "ein"
+      "••-••••#{last4}"
+    when "ssn", ""
+      "•••-••-#{last4}"  # default to SSN-style if unknown
+    else
+      "••••#{last4}"     # fallback if some other type
+    end
   end
 end
