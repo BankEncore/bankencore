@@ -38,7 +38,78 @@
                 data: { party_type_target: "select", action: "change->party-type#change" } %>
         </div>
 
-        <%# ---------- Identifiers ---------------------------------------- %>
+        <%# ---------- Person --------------------------------------------- %>
+        <fieldset class="<%= @party.party_type=='organization' ? 'hidden' : '' %> md:col-span-2"
+                  data-party-type-target="personSection">
+          <legend class="text-sm font-semibold uppercase opacity-70 mb-2">Person</legend>
+          <%= f.fields_for :person do |pf| %>
+            <%= pf.hidden_field :_destroy,
+                  value: (@party.party_type=='person' ? "0" : "1"),
+                  data: { party_type_target: "personDestroy" } %>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="col-span-2 md:col-span-1">
+                <%= pf.label :courtesy_title, class: "label-text" %>
+                <%= pf.text_field :courtesy_title, class: "input input-bordered w-full", autocapitalize: "words" %>
+              </div>
+              <div>
+                <%= pf.label :first_name, class: "label-text" %>
+                <%= pf.text_field :first_name, class: "input input-bordered w-full", autocomplete: "given-name", autocapitalize: "words" %>
+              </div>
+              <div>
+                <%= pf.label :middle_name, class: "label-text" %>
+                <%= pf.text_field :middle_name, class: "input input-bordered w-full", autocomplete: "additional-name", autocapitalize: "words" %>
+              </div>
+              <div>
+                <%= pf.label :last_name, class: "label-text" %>
+                <%= pf.text_field :last_name, class: "input input-bordered w-full", autocomplete: "family-name", autocapitalize: "words" %>
+              </div>
+              <div>
+                <%= pf.label :name_suffix, class: "label-text" %>
+                <%= pf.text_field :name_suffix, class: "input input-bordered w-full", autocomplete: "honorific-suffix" %>
+              </div>
+              <div class="col-span-2 md:col-span-1">
+                <%= pf.label :date_of_birth, class: "label-text" %>
+                <%= pf.date_field :date_of_birth, class: "input input-bordered w-full", autocomplete: "bday" %>
+              </div>
+            </div>
+          <% end %>
+        </fieldset>
+
+        <%# ---------- Organization --------------------------------------- %>
+        <fieldset class="<%= @party.party_type=='person' ? 'hidden' : '' %> md:col-span-2"
+                  data-party-type-target="orgSection">
+          <legend class="text-sm font-semibold uppercase opacity-70 mb-2">Organization</legend>
+          <%= f.fields_for :organization do |of| %>
+            <%= of.hidden_field :_destroy,
+                  value: (@party.party_type=='person' ? "1" : "0"),
+                  data: { party_type_target: "orgDestroy" } %>
+            <div class="grid gap-3">
+              <div>
+                <%= of.label :legal_name, class: "label-text" %>
+                <%= of.text_field :legal_name, class: "input input-bordered w-full", autocapitalize: "words" %>
+              </div>
+              <div>
+                <%= of.label :operating_name, class: "label-text" %>
+                <%= of.text_field :operating_name, class: "input input-bordered w-full", autocapitalize: "words" %>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <%= of.label :organization_type_code, "Type", class: "label-text" %>
+                  <%= of.text_field :organization_type_code, class: "input input-bordered w-full" %>
+                </div>
+                <div>
+                  <%= of.label :formation_date, class: "label-text" %>
+                  <%= of.date_field :formation_date, class: "input input-bordered w-full" %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </fieldset>
+      </fieldset>
+    </div>
+  </div>
+
+         <%# ---------- Identifiers ---------------------------------------- %>
         <div class="md:col-span-2">
           <div class="flex items-center justify-between">
             <label class="label"><span class="label-text">Identifiers</span></label>
@@ -51,6 +122,22 @@
             <% default_type = Ref::IdentifierType.find_by!(code: default_code) %>
             <% @party.identifiers.build(identifier_type: default_type, is_primary: true) %>
           <% end %>
+
+         <% if @party.new_record? && @party.identifiers.blank? %>
+          <% default_code = (@party.party_type == "organization" ? "ein" : "ssn") %>
+          <% default_type = Ref::IdentifierType.find_by!(code: default_code) %>
+          <% @party.identifiers.build(identifier_type: default_type, is_primary: true) %>
+        <% end %> 
+
+        <details class="mt-2">
+        <summary class="cursor-pointer select-none flex items-center gap-2">
+          <span class="label-text">Identifiers</span>
+          <span class="badge"><%= @party.identifiers.size %></span>
+          <span class="ml-auto">
+            <%= button_tag "Add", name: :add_identifier, value: "1", class:"btn btn-ghost btn-xs" %>
+          </span>
+        </summary>
+        <div class="pt-3">
 
           <ul role="list" class="space-y-3">
             <% @party.identifiers.each do |pi| %>
@@ -137,80 +224,11 @@
               </li>
             <% end %>
           </ul>
+              </div>
+  </details>
 
           <p class="text-xs opacity-70 mt-2">Encrypted at rest. Leave value blank to keep existing.</p>
         </div>
-
-        <%# ---------- Person --------------------------------------------- %>
-        <fieldset class="<%= @party.party_type=='organization' ? 'hidden' : '' %> md:col-span-2"
-                  data-party-type-target="personSection">
-          <legend class="text-sm font-semibold uppercase opacity-70 mb-2">Person</legend>
-          <%= f.fields_for :person do |pf| %>
-            <%= pf.hidden_field :_destroy,
-                  value: (@party.party_type=='person' ? "0" : "1"),
-                  data: { party_type_target: "personDestroy" } %>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="col-span-2 md:col-span-1">
-                <%= pf.label :courtesy_title, class: "label-text" %>
-                <%= pf.text_field :courtesy_title, class: "input input-bordered w-full", autocapitalize: "words" %>
-              </div>
-              <div>
-                <%= pf.label :first_name, class: "label-text" %>
-                <%= pf.text_field :first_name, class: "input input-bordered w-full", autocomplete: "given-name", autocapitalize: "words" %>
-              </div>
-              <div>
-                <%= pf.label :middle_name, class: "label-text" %>
-                <%= pf.text_field :middle_name, class: "input input-bordered w-full", autocomplete: "additional-name", autocapitalize: "words" %>
-              </div>
-              <div>
-                <%= pf.label :last_name, class: "label-text" %>
-                <%= pf.text_field :last_name, class: "input input-bordered w-full", autocomplete: "family-name", autocapitalize: "words" %>
-              </div>
-              <div>
-                <%= pf.label :name_suffix, class: "label-text" %>
-                <%= pf.text_field :name_suffix, class: "input input-bordered w-full", autocomplete: "honorific-suffix" %>
-              </div>
-              <div class="col-span-2 md:col-span-1">
-                <%= pf.label :date_of_birth, class: "label-text" %>
-                <%= pf.date_field :date_of_birth, class: "input input-bordered w-full", autocomplete: "bday" %>
-              </div>
-            </div>
-          <% end %>
-        </fieldset>
-
-        <%# ---------- Organization --------------------------------------- %>
-        <fieldset class="<%= @party.party_type=='person' ? 'hidden' : '' %> md:col-span-2"
-                  data-party-type-target="orgSection">
-          <legend class="text-sm font-semibold uppercase opacity-70 mb-2">Organization</legend>
-          <%= f.fields_for :organization do |of| %>
-            <%= of.hidden_field :_destroy,
-                  value: (@party.party_type=='person' ? "1" : "0"),
-                  data: { party_type_target: "orgDestroy" } %>
-            <div class="grid gap-3">
-              <div>
-                <%= of.label :legal_name, class: "label-text" %>
-                <%= of.text_field :legal_name, class: "input input-bordered w-full", autocapitalize: "words" %>
-              </div>
-              <div>
-                <%= of.label :operating_name, class: "label-text" %>
-                <%= of.text_field :operating_name, class: "input input-bordered w-full", autocapitalize: "words" %>
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <%= of.label :organization_type_code, "Type", class: "label-text" %>
-                  <%= of.text_field :organization_type_code, class: "input input-bordered w-full" %>
-                </div>
-                <div>
-                  <%= of.label :formation_date, class: "label-text" %>
-                  <%= of.date_field :formation_date, class: "input input-bordered w-full" %>
-                </div>
-              </div>
-            </div>
-          <% end %>
-        </fieldset>
-      </fieldset>
-    </div>
-  </div>
 
   <%# === Addresses ======================================================== %>
   <div class="card bg-base-100 shadow">
