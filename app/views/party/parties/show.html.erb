@@ -83,17 +83,7 @@
           <div class="py-2 text-sm opacity-70">No identity details</div>
         <% end %>
 
-        <div class="py-2 grid grid-cols-3 gap-2 items-center"
-             data-controller="reveal"
-             data-reveal-url-value="<%= reveal_tax_id_party_party_path(@party.public_id) %>">
-          <dt class="opacity-70">Tax ID</dt>
-          <dd class="col-span-2">
-            <span class="font-mono" data-reveal-target="text" aria-live="polite"><%= mask_tax_id(@party.tax_id) %></span>
-            <button class="btn btn-xs btn-outline ml-2" data-reveal-target="button" data-action="reveal#reveal">Reveal</button>
-            <span class="loading loading-spinner loading-xs hidden align-middle ml-2" data-reveal-target="spinner"></span>
-          </dd>
-        </div>
-      </dl>
+    <%= render "party/identifiers/list", party: @party %>
     </div>
   </div>
 

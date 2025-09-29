@@ -13,6 +13,7 @@ module Party
       orgs  = ::Party::Organization.table_name
       emls  = ::Party::Email.table_name
       parts = ::Party::Party.table_name
+      idts  = "party_identifiers"
 
       name_sql = "COALESCE(#{orgs}.legal_name, CONCAT_WS(' ', #{ppl}.first_name, #{ppl}.middle_name, #{ppl}.last_name))"
       sort     = qp[:sort].to_s
@@ -30,14 +31,16 @@ module Party
 
       scope =
         if mode == "tax_id" && qp[:q].present?
-          base.where(tax_id: normalize_tax_id(qp[:q]))
+          bidx = tax_id_bidx_for(qp[:q])
+          base.joins("INNER JOIN #{idts} ON #{idts}.party_id = #{parts}.id")
+              .where("#{idts}.id_type_code IN ('ssn','itin','ein','foreign_tin') AND #{idts}.value_bidx = ?", bidx)
         else
           base.yield_self { |rel|
             if qp[:q].present?
               q = "%#{qp[:q].strip}%"
               rel.where(
                 "#{ppl}.first_name LIKE :q OR #{ppl}.middle_name LIKE :q OR #{ppl}.last_name LIKE :q
-                OR #{orgs}.legal_name LIKE :q OR #{emls}.email LIKE :q OR #{parts}.customer_number LIKE :q",
+                 OR #{orgs}.legal_name LIKE :q OR #{emls}.email LIKE :q OR #{parts}.customer_number LIKE :q",
                 q: q
               )
             else
@@ -57,7 +60,6 @@ module Party
       @parties = scope.reorder(Arel.sql(order_sql)).to_a
     end
 
-
     def show; end
 
     def new
@@ -67,6 +69,7 @@ module Party
       @party.addresses.build(country_code: "US") if @party.addresses.empty?
       @party.emails.build                         if @party.emails.empty?
       @party.phones.build(country_alpha2: "US")   if @party.phones.empty?
+      ensure_identifier_stub(@party)
     end
 
     def edit
@@ -75,14 +78,13 @@ module Party
       @party.addresses.build(country_code: "US") if @party.addresses.empty?
       @party.emails.build                         if @party.emails.empty?
       @party.phones.build(country_alpha2: "US")   if @party.phones.empty?
+      ensure_identifier_stub(@party)
     end
 
     def create
-      return add_row_and_render(:new) if params[:add_address] || params[:add_email] || params[:add_phone]
+      return add_row_and_render(:new)  if params[:add_address] || params[:add_email] || params[:add_phone] || params[:add_identifier]
 
       attrs = scrub_email_params(scrub_address_params(party_params)).dup
-      attrs.delete(:tax_id) if attrs[:tax_id].blank?
-
       @party = ::Party::Party.new(attrs)
       if @party.save
         redirect_to party_party_path(@party.public_id), notice: "Party created"
@@ -92,15 +94,29 @@ module Party
     end
 
     def update
-      return add_row_and_render(:edit) if params[:add_address] || params[:add_email] || params[:add_phone]
+      return add_row_and_render(:edit) if params[:add_address] || params[:add_email] || params[:add_phone] || params[:add_identifier]
 
       attrs = scrub_email_params(scrub_address_params(party_params)).dup
-      attrs.delete(:tax_id) if attrs[:tax_id].blank?
-
       if @party.update(attrs)
         redirect_to party_party_path(@party.public_id), notice: "Party updated"
       else
+        load_ref_options
+        ensure_identifier_stub(@party)
         render :edit, status: :unprocessable_entity
+      end
+    rescue ActiveRecord::RecordNotUnique => e
+      if mysql_dup_identifier?(e)
+        # attach error to the edited identifier if present; else on base
+        if (iid = params.dig(:party_party, :identifiers_attributes)&.values&.first&.dig(:id))
+          rec = @party.identifiers.detect { |r| r.id.to_s == iid.to_s }
+          rec&.errors&.add(:value, "is already in use by another profile")
+        end
+        @party.errors.add(:base, "That SSN/EIN is already in use by another profile")
+        load_ref_options
+        ensure_identifier_stub(@party)
+        render :edit, status: :unprocessable_entity
+      else
+        raise
       end
     end
 
@@ -109,10 +125,16 @@ module Party
       redirect_to party_parties_path, notice: "Party deleted"
     end
 
-    # JSON reveal for Tax ID
+    # JSON reveal for Tax ID (primary identifier value)
     def reveal_tax_id
+      rec =
+        if params[:identifier_id].present?
+          @party.identifiers.find(params[:identifier_id])
+        else
+          @party.primary_tax_id
+        end
       response.set_header("Cache-Control", "no-store")
-      render json: { value: @party.tax_id }
+      render json: { value: rec&.value }
     end
 
     private
@@ -125,7 +147,7 @@ module Party
 
     def party_params
       params.require(:party_party).permit(
-        :party_type, :tax_id, # :customer_number intentionally omitted
+        :party_type, # :customer_number intentionally omitted
         person_attributes: [
           :id, :first_name, :middle_name, :last_name,
           :name_suffix, :courtesy_title, :date_of_birth, :_destroy
@@ -142,7 +164,11 @@ module Party
         ],
         phones_attributes: [
           :id, :phone_type_code, :number_raw, :country_alpha2, :phone_ext,
-          :is_primary, :consent_sms, :_destroy
+          :phone_e164, :is_primary, :consent_sms, :_destroy
+        ],
+        identifiers_attributes: [
+          :id, :identifier_type_id, :value, :is_primary,
+          :country_code, :issuing_authority, :issued_on, :expires_on, :_destroy
         ]
       )
     end
@@ -153,6 +179,7 @@ module Party
       @org_types     = Ref::OrganizationType.order(:name)
       @email_types   = Ref::EmailType.order(:name)
       @phone_types   = Ref::PhoneType.order(:name)
+      @identifier_types = Ref::IdentifierType.order(:sort_order, :name)
     end
 
     def handle_bad_params(_ex)
@@ -166,9 +193,20 @@ module Party
     def add_row_and_render(view)
       @party ||= ::Party::Party.new
       @party.assign_attributes(scrub_email_params(scrub_address_params(party_params)))
+
       @party.addresses.build(country_code: "US") if params[:add_address]
       @party.emails.build                        if params[:add_email]
       @party.phones.build(country_alpha2: "US")  if params[:add_phone]
+
+      if params[:add_identifier]
+        default_code = (@party.party_type == "organization" ? "ein" : "ssn")
+        default_type = Ref::IdentifierType.find_by(code: default_code) || Ref::IdentifierType.first
+        @party.identifiers.build(
+          identifier_type: default_type,
+          is_primary: @party.identifiers.tax_ids.where(is_primary: true).blank?
+        )
+      end
+
       render view, status: :unprocessable_entity
     end
 
@@ -198,12 +236,36 @@ module Party
       attrs
     end
 
+    def ensure_identifier_stub(party)
+      return if party.identifiers.respond_to?(:tax_ids) && party.identifiers.tax_ids.exists?(is_primary: true)
+      type = party.organization ? "ein" : "ssn"
+      party.identifiers.build(id_type_code: type, is_primary: true)
+    end
+
+    # search helpers
     def normalize_tax_id(v)
-      v.to_s.gsub(/\D/, "") # align with your storage/normalization
+      v.to_s.gsub(/\W/, "")
+    end
+
+    def tax_id_bidx_for(raw)
+      norm = normalize_tax_id(raw)
+      BlindIndex.generate_bidx(norm, key: BlindIndex.master_key, encode: false)
     end
 
     def list_params
       params.permit(:q, :search_type, :sort, :dir, :page, :per)
+    end
+
+    def identifier_bidx_for(raw, code)
+      norm = ::Party::Identifier.normalize(raw, code)
+      BlindIndex.generate_bidx(norm, key: BlindIndex.master_key, encode: false)
+    end
+
+    def mysql_dup_identifier?(err)
+      cause = err.cause
+      cause.respond_to?(:error_number) &&
+        cause.error_number == 1062 &&                         # MySQL duplicate key
+        err.message.include?("idx_unique_identifier_value")   # your unique index name
     end
   end
 end
