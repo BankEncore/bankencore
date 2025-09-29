@@ -64,7 +64,6 @@ group :development do
   gem "pry-rails"             # An enhanced Rails console for debugging
   gem "letter_opener_web"     # Allows you to preview emails in the browser
   gem "dotenv-rails"
-  gem 'erb_lint'
 end
 
 # == Test Group ==
