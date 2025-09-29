@@ -1,0 +1,12 @@
+EnableDefaultLinters: true
+
+Linters:
+  RuboCop:
+    enabled: true
+    rubocop_config: .rubocop.yml
+  TrailingWhitespace:
+    enabled: true
+  SpaceAroundErbTag:
+    enabled: true
+  FinalNewline:
+    enabled: true

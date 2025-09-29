@@ -3,8 +3,12 @@
     <div class="card-body">
       <div class="card-title">Quick Actions</div>
       <div class="flex flex-wrap gap-2">
-        <%= link_to "View Parties", party_parties_path, class: "btn btn-primary btn-sm" %>
-        <%= link_to "New Party", new_party_party_path, class: "btn btn-secondary btn-sm" %>
+# frozen_string_literal: true
+link_to 'View Parties', party_parties_path, class: 'btn btn-primary btn-sm'
+ %>
+# frozen_string_literal: true
+link_to 'New Party', new_party_party_path, class: 'btn btn-secondary btn-sm'
+ %>
       </div>
     </div>
   </section>
@@ -32,7 +36,9 @@
   <div class="card-body">
     <div class="card-title items-center justify-between">
       <span>Recent Parties</span>
-      <%= link_to "All Parties", party_parties_path, class: "btn btn-outline btn-sm" %>
+# frozen_string_literal: true
+link_to 'All Parties', party_parties_path, class: 'btn btn-outline btn-sm'
+ %>
     </div>
     <div class="overflow-x-auto">
       <table class="table table-zebra w-full">

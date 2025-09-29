@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_29_040907) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_29_211335) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -23,14 +23,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_29_040907) do
     t.string "public_id", limit: 36, null: false
     t.string "customer_number", limit: 10
     t.string "party_type", limit: 30, null: false
-    t.string "tax_id_masked"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "tax_id", limit: 510
-    t.binary "tax_id_bidx", limit: 32
     t.index ["customer_number"], name: "index_parties_on_customer_number", unique: true
     t.index ["public_id"], name: "index_parties_on_public_id", unique: true
-    t.index ["tax_id_bidx"], name: "index_parties_on_tax_id_bidx", unique: true
   end
 
   create_table "party_addresses", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
