@@ -22,13 +22,13 @@ class CreatePartyIdentifiers < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :party_identifiers, [:id_type_code, :value_bidx],
+    add_index :party_identifiers, [ :id_type_code, :value_bidx ],
       unique: true, name: "idx_unique_identifier_value"
 
-    add_index :party_identifiers, [:party_id, :id_type_code],
+    add_index :party_identifiers, [ :party_id, :id_type_code ],
       name: "idx_identifier_by_party_and_type"
 
-    add_index :party_identifiers, [:party_id, :id_type_code, :is_primary],
+    add_index :party_identifiers, [ :party_id, :id_type_code, :is_primary ],
       name: "idx_primary_identifier_by_party"
   end
 end

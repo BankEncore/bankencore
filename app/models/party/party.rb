@@ -28,7 +28,7 @@ module Party
     attr_accessor :tax_id_input, :tax_id_type  # "ssn","ein","itin","foreign_tin"
     before_save :sync_tax_identifier_from_virtual
 
-    phones_attrs = [:id, :phone_type_code, :phone_e164, :phone_ext, :consent_sms, :is_primary, :_destroy]
+    phones_attrs = [ :id, :phone_type_code, :phone_e164, :phone_ext, :consent_sms, :is_primary, :_destroy ]
 
     # Callbacks
     before_validation :ensure_public_id
@@ -41,7 +41,7 @@ module Party
     # Display helpers
     def display_name
       if person
-        [person.first_name, person.middle_name, person.last_name, person.name_suffix].compact_blank.join(" ")
+        [ person.first_name, person.middle_name, person.last_name, person.name_suffix ].compact_blank.join(" ")
       elsif organization
         organization.display_name
       else

@@ -19,7 +19,7 @@ namespace :data do
           )
         end
       end
-      puts "  batch #{i+1}: #{[i*batch, total].min}/#{total}"
+      puts "  batch #{i+1}: #{[ i*batch, total ].min}/#{total}"
     end
     puts "Done."
   end

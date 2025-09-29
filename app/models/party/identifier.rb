@@ -15,8 +15,8 @@ module Party
     def self.normalize(raw, id_type)
       v = raw.to_s.strip
       case id_type.to_s
-      when "ssn","itin","ein","foreign_tin" then v.gsub(/\W/, "")
-      when "lei","passport","dl"             then v.upcase.gsub(/\s+/, "")
+      when "ssn", "itin", "ein", "foreign_tin" then v.gsub(/\W/, "")
+      when "lei", "passport", "dl"             then v.upcase.gsub(/\s+/, "")
       else v.upcase.gsub(/\s+/, "")
       end
     end
@@ -44,8 +44,9 @@ module Party
       return unless value.present?
       self.value_masked =
         case id_type_code
-        when "ssn","itin" then "***-**-#{value[-4,4]}"
-        when "ein"        then "#{value[0,2]}-******"
+        when "ssn", "itin" then "***-**-#{value[-4, 4]}"
+        when "ein"        then "#{value[0, 2]}-******"
+        when "passport","dl","lei" then "****#{value[-4,4]}"
         else "****"
         end
     end

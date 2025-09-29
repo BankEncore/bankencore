@@ -82,7 +82,7 @@ module Party
     end
 
     def create
-      return add_row_and_render(:new) if params[:add_address] || params[:add_email] || params[:add_phone]
+      return add_row_and_render(:new)  if params[:add_address] || params[:add_email] || params[:add_phone] || params[:add_identifier]
 
       attrs = scrub_email_params(scrub_address_params(party_params)).dup
       @party = ::Party::Party.new(attrs)
@@ -94,7 +94,7 @@ module Party
     end
 
     def update
-      return add_row_and_render(:edit) if params[:add_address] || params[:add_email] || params[:add_phone]
+      return add_row_and_render(:edit) if params[:add_address] || params[:add_email] || params[:add_phone] || params[:add_identifier]
 
       attrs = scrub_email_params(scrub_address_params(party_params)).dup
       if @party.update(attrs)
@@ -127,8 +127,14 @@ module Party
 
     # JSON reveal for Tax ID (primary identifier value)
     def reveal_tax_id
+      rec =
+        if params[:identifier_id].present?
+          @party.identifiers.find(params[:identifier_id])
+        else
+          @party.primary_tax_id
+        end
       response.set_header("Cache-Control", "no-store")
-      render json: { value: @party.primary_tax_id&.value }
+      render json: { value: rec&.value }
     end
 
     private
@@ -161,7 +167,7 @@ module Party
           :phone_e164, :is_primary, :consent_sms, :_destroy
         ],
         identifiers_attributes: [
-          :id, :id_type_code, :is_primary, :value, :_destroy
+          :id, :id_type_code, :value, :is_primary, :country_code, :issuing_authority, :issued_on, :expires_on, :_destroy
         ]
       )
     end
@@ -188,6 +194,7 @@ module Party
       @party.addresses.build(country_code: "US") if params[:add_address]
       @party.emails.build                        if params[:add_email]
       @party.phones.build(country_alpha2: "US")  if params[:add_phone]
+      @party.identifiers.build(id_type_code: (@party.organization ? "ein" : "ssn"), is_primary: @party.identifiers.tax_ids.where(is_primary: true).blank?) if params[:add_identifier]
       ensure_identifier_stub(@party)
       render view, status: :unprocessable_entity
     end
