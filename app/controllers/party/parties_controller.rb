@@ -193,12 +193,20 @@ module Party
     def add_row_and_render(view)
       @party ||= ::Party::Party.new
       @party.assign_attributes(scrub_email_params(scrub_address_params(party_params)))
+
       @party.addresses.build(country_code: "US") if params[:add_address]
       @party.emails.build                        if params[:add_email]
       @party.phones.build(country_alpha2: "US")  if params[:add_phone]
-      @party.identifiers.build(identifier_type: Ref::IdentifierType.find_by!(code: (@party.organization ? "ein" : "ssn")),
-                         is_primary: @party.identifiers.tax_ids.where(is_primary: true).blank?) if params[:add_identifier]
-      ensure_identifier_stub(@party)
+
+      if params[:add_identifier]
+        default_code = (@party.party_type == "organization" ? "ein" : "ssn")
+        default_type = Ref::IdentifierType.find_by(code: default_code) || Ref::IdentifierType.first
+        @party.identifiers.build(
+          identifier_type: default_type,
+          is_primary: @party.identifiers.tax_ids.where(is_primary: true).blank?
+        )
+      end
+
       render view, status: :unprocessable_entity
     end
 
