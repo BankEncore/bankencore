@@ -38,84 +38,107 @@
                 data: { party_type_target: "select", action: "change->party-type#change" } %>
         </div>
         
-        <div class="md:col-span-2">
-          <div class="flex items-center justify-between">
-            <label class="label"><span class="label-text">Identifiers</span></label>
-            <%= button_tag "Add identifier", name: :add_identifier, value: "1", class: "btn btn-ghost btn-xs" %>
+        <<div class="md:col-span-2">
+  <div class="flex items-center justify-between">
+    <label class="label"><span class="label-text">Identifiers</span></label>
+    <%= button_tag "Add identifier", name: :add_identifier, value: "1", class: "btn btn-ghost btn-xs" %>
+  </div>
+
+  <%# ensure at least one primary tax-id row exists %>
+  <% if @party.identifiers.tax_ids.where(is_primary: true).blank? %>
+    <% default_type = Ref::IdentifierType.find_by!(code: (@party.organization ? "ein" : "ssn")) %>
+    <% @party.identifiers.build(identifier_type: default_type, is_primary: true) %>
+  <% end %>
+
+  <ul role="list" class="space-y-3">
+    <% @party.identifiers.each do |pi| %>
+      <li class="border rounded-box p-3" data-controller="identifier-row">
+        <%= f.fields_for :identifiers, pi do |idf| %>
+          <%= idf.hidden_field :id %>
+
+          <div class="grid md:grid-cols-[1fr_auto] gap-3 items-center">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="min-w-[12rem]">
+                <label class="label-text block mb-1">Type</label>
+
+                <%# options with per-type requirements in data-* %>
+                <select name="party_party[identifiers_attributes][<%= idf.index %>][identifier_type_id]"
+                        id="party_party_identifiers_attributes_<%= idf.index %>_identifier_type_id"
+                        class="select select-bordered w-full"
+                        data-identifier-row-target="typeSelect"
+                        data-action="change->identifier-row#changeType">
+                  <% @identifier_types.each do |t| %>
+                    <option value="<%= t.id %>"
+                            data-require-issuer-country="<%= t.require_issuer_country %>"
+                            data-require-issuer-region="<%= t.require_issuer_region %>"
+                            <%= "selected" if t.id == pi.identifier_type_id %>>
+                      <%= t.name %>
+                    </option>
+                  <% end %>
+                </select>
+              </div>
+
+              <div class="flex-1 min-w-0">
+                <label class="label-text block mb-1">Current</label>
+                <div class="font-mono truncate" data-identifier-row-target="current"><%= pi.value_masked.presence || "—" %></div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <label class="label cursor-pointer gap-2">
+                  <%= idf.check_box :is_primary, class:"checkbox" %><span class="label-text">Primary</span>
+                </label>
+                <label class="label cursor-pointer gap-2">
+                  <%= idf.check_box :_destroy, class:"checkbox" %><span class="label-text">Remove</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 justify-self-end">
+              <button class="btn btn-xs btn-outline"
+                      data-action="identifier-row#toggleChange"
+                      data-identifier-row-target="changeBtn">Change</button>
+              <button class="btn btn-xs btn-ghost"
+                      data-action="identifier-row#toggleDetails">Details</button>
+            </div>
           </div>
 
-          <% # ensure at least one primary tax-id row exists for the current party type %>
-          <% if @party.identifiers.tax_ids.where(is_primary: true).blank? %>
-            <% @party.identifiers.build(id_type_code: (@party.organization ? "ein" : "ssn"), is_primary: true) %>
-          <% end %>
-
-          <ul class="space-y-3">
-            <% @party.identifiers.each do |pi| %>
-              <li class="border rounded-box p-3">
-                <%= f.fields_for :identifiers, pi do |idf| %>
-                  <%= idf.hidden_field :id %>
-
-                  <div class="grid md:grid-cols-6 gap-3">
-                    <div>
-                      <%= idf.label :identifier_type_id, "Type", class: "label-text" %>
-                      <%= idf.collection_select :identifier_type_id, @identifier_types, :id, :name, {}, class:"select select-bordered w-full" %>
-                    </div>
-
-                    <div class="md:col-span-2">
-                      <%= idf.label :value, "Identifier", class: "label-text" %>
-
-                      <%# Show masked current value if persisted %>
-                      <% if pi.persisted? && pi.value_masked.present? %>
-                        <span class="badge badge-ghost text-xs mb-1">Current: <span class="font-mono ml-1"><%= pi.value_masked %></span></span>
-                      <% end %>
-
-                      <%= idf.password_field :value,
-                            autocomplete:"off",
-                            class:"input input-bordered w-full",
-                            placeholder: (pi.persisted? ? "Leave blank to keep" : "Enter value") %>
-
-                      <%# Inline errors %>
-                      <% if idf.object.errors[:value].present? %>
-                        <p class="text-error text-xs mt-1"><%= idf.object.errors[:value].join(", ") %></p>
-                      <% end %>
-                    </div>
-
-                    <div>
-                      <%= idf.label :country_code, "Issuer country", class:"label-text" %>
-                      <%= idf.text_field :country_code, class:"input input-bordered w-full", placeholder:"US" %>
-                    </div>
-                    <div>
-                      <%= idf.label :issuing_authority, "Issuer", class:"label-text" %>
-                      <%= idf.text_field :issuing_authority, class:"input input-bordered w-full" %>
-                    </div>
-                    <div class="md:col-span-2 grid grid-cols-2 gap-3">
-                      <div>
-                        <%= idf.label :issued_on, class:"label-text" %>
-                        <%= idf.date_field :issued_on, class:"input input-bordered w-full" %>
-                      </div>
-                      <div>
-                        <%= idf.label :expires_on, class:"label-text" %>
-                        <%= idf.date_field :expires_on, class:"input input-bordered w-full" %>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="mt-3 flex items-center gap-4">
-                    <label class="label cursor-pointer gap-2">
-                      <%= idf.check_box :is_primary, class:"checkbox" %><span class="label-text">Primary</span>
-                    </label>
-                    <label class="label cursor-pointer gap-2">
-                      <%= idf.check_box :_destroy, class:"checkbox" %><span class="label-text">Remove</span>
-                    </label>
-                  </div>
-                <% end %>
-              </li>
+          <div class="mt-3 hidden" data-identifier-row-target="valueInput">
+            <label class="label-text block mb-1">New value</label>
+            <%= idf.password_field :value, autocomplete:"off",
+                  class:"input input-bordered w-full",
+                  placeholder:"Enter new value or leave blank" %>
+            <% if idf.object.errors[:value].present? %>
+              <p class="text-error text-xs mt-1"><%= idf.object.errors[:value].join(", ") %></p>
             <% end %>
-          </ul>
+          </div>
 
-          <p class="text-xs opacity-70 mt-2">Encrypted at rest. Leave value blank to keep existing.</p>
-        </div>
+          <div class="mt-3 grid md:grid-cols-4 gap-3 hidden" data-identifier-row-target="details">
+            <div class="field">
+              <label class="label-text block mb-1">Issuer country</label>
+              <%= idf.text_field :country_code, class:"input input-bordered w-full", placeholder:"US",
+                    data: { identifier_row_target: "issuerCountry" } %>
+            </div>
+            <div class="field">
+              <label class="label-text block mb-1">Issuer</label>
+              <%= idf.text_field :issuing_authority, class:"input input-bordered w-full", placeholder:"MI",
+                    data: { identifier_row_target: "issuerRegion" } %>
+            </div>
+            <div>
+              <label class="label-text block mb-1">Issued on</label>
+              <%= idf.date_field :issued_on, class:"input input-bordered w-full" %>
+            </div>
+            <div>
+              <label class="label-text block mb-1">Expires on</label>
+              <%= idf.date_field :expires_on, class:"input input-bordered w-full" %>
+            </div>
+          </div>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
 
+  <p class="text-xs opacity-70 mt-2">Encrypted at rest. Leave value blank to keep existing.</p>
+</div>
         </div>
 
         <fieldset class="<%= @party.party_type=='organization' ? 'hidden' : '' %> md:col-span-2"
