@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_29_211335) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_30_050156) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -25,6 +25,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_29_211335) do
     t.string "party_type", limit: 30, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "last_screened_at"
+    t.integer "party_risk_score"
+    t.integer "risk_band"
     t.index ["customer_number"], name: "index_parties_on_customer_number", unique: true
     t.index ["public_id"], name: "index_parties_on_public_id", unique: true
   end
@@ -159,6 +162,34 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_29_211335) do
     t.index ["phone_type_code"], name: "fk_rails_21d3746b66"
   end
 
+  create_table "party_screenings", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+    t.bigint "party_id", null: false
+    t.integer "vendor", default: 0, null: false
+    t.integer "kind", null: false
+    t.integer "status", default: 0, null: false
+    t.string "query_name"
+    t.date "query_dob"
+    t.string "query_country", limit: 2
+    t.string "query_identifier_type"
+    t.string "query_identifier_last4"
+    t.string "vendor_ref"
+    t.decimal "vendor_score", precision: 6, scale: 2
+    t.datetime "requested_at"
+    t.datetime "completed_at"
+    t.datetime "expires_at"
+    t.text "vendor_payload", size: :long, null: false, collation: "utf8mb4_bin"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "normalized_score"
+    t.integer "match_strength"
+    t.text "risk_notes"
+    t.index ["expires_at"], name: "index_party_screenings_on_expires_at"
+    t.index ["party_id", "vendor", "kind", "status"], name: "idx_screenings_state"
+    t.index ["party_id"], name: "index_party_screenings_on_party_id"
+    t.check_constraint "json_valid(`vendor_payload`)", name: "vendor_payload"
+  end
+
   create_table "ref_address_types", primary_key: "code", id: :string, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -191,6 +222,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_29_211335) do
     t.string "mask_rule"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "person_only", default: false, null: false
+    t.boolean "organization_only", default: false, null: false
     t.index ["code"], name: "index_ref_identifier_types_on_code", unique: true
   end
 
@@ -254,5 +287,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_29_211335) do
   add_foreign_key "party_people", "parties", on_delete: :cascade
   add_foreign_key "party_phones", "parties", on_delete: :cascade
   add_foreign_key "party_phones", "ref_phone_types", column: "phone_type_code", primary_key: "code"
+  add_foreign_key "party_screenings", "parties", on_delete: :cascade
   add_foreign_key "ref_regions", "ref_countries", column: "country_code", primary_key: "code"
 end

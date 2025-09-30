@@ -25,6 +25,11 @@ Rails.application.routes.draw do
     end
 
     resources :links, only: %i[index create destroy]
+
+    resources :parties, param: :public_id do
+    resources :screenings, only: [ :new, :create, :index ]
+  end
+    resources :screenings, only: [ :show, :edit, :update ]
   end
 
   namespace :ref do

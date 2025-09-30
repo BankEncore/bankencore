@@ -1,0 +1,47 @@
+<%= form_with(
+      model: @screening,
+      url: (@screening.persisted? ? party_screening_path(@screening)
+                                  : party_party_screenings_path(@screening.party.public_id)),
+      local: true,
+      class: "space-y-4"
+    ) do |f| %>
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="label">Kind</label>
+      <%= f.select :kind, Party::Screening.kinds.keys.map{|k| [k.humanize,k]}, {}, class: "select" %>
+    </div>
+    <div>
+      <label class="label">Status</label>
+      <%= f.select :status, Party::Screening.statuses.keys.map{|k| [k.humanize,k]}, {}, class: "select" %>
+    </div>
+
+    <div class="col-span-2"><h3 class="text-sm opacity-70">Query snapshot</h3></div>
+    <div><label class="label">Name</label><%= f.text_field :query_name, class:"input" %></div>
+    <div><label class="label">DOB</label><%= f.date_field :query_dob, class:"input" %></div>
+    <div><label class="label">Country</label><%= f.text_field :query_country, class:"input", placeholder:"US" %></div>
+    <div><label class="label">ID Type</label><%= f.text_field :query_identifier_type, class:"input", placeholder:"ssn/ein/..." %></div>
+    <div><label class="label">ID Last4</label><%= f.text_field :query_identifier_last4, class:"input" %></div>
+
+    <div class="col-span-2"><h3 class="text-sm opacity-70">Result summary</h3></div>
+    <div><label class="label">Ref</label><%= f.text_field :vendor_ref, class:"input" %></div>
+    <div><label class="label">Score</label><%= f.number_field :vendor_score, step:"0.01", class:"input" %></div>
+    <div><label class="label">Requested</label><%= f.datetime_local_field :requested_at, class:"input" %></div>
+    <div><label class="label">Completed</label><%= f.datetime_local_field :completed_at, class:"input" %></div>
+    <div><label class="label">Expires</label><%= f.datetime_local_field :expires_at, class:"input" %></div>
+
+    <div class="col-span-2">
+      <label class="label">Raw payload (JSON)</label>
+      <%= f.text_area :vendor_payload, class:"textarea", rows:6 %>
+    </div>
+
+    <div class="col-span-2">
+      <label class="label">Notes</label>
+      <%= f.text_area :notes, class:"textarea", rows:4 %>
+    </div>
+  </div>
+
+  <div class="mt-4 flex gap-2">
+    <%= f.submit "Save", class:"btn btn-primary" %>
+    <%= link_to "Cancel", (@screening.persisted? ? party_screening_path(@screening) : party_party_screenings_path(@screening.party.public_id)), class:"btn" %>
+  </div>
+<% end %>

@@ -24,5 +24,6 @@ module Betest
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
     config.active_job.queue_adapter = :sidekiq
+    config.active_record.dump_schema_after_migration = true
   end
 end

@@ -10,6 +10,7 @@ module Party
     has_many :emails,       class_name: "Party::Email",        inverse_of: :party, dependent: :destroy
     has_many :phones,       class_name: "Party::Phone",        inverse_of: :party, dependent: :destroy
     has_many :identifiers,  class_name: "::Party::Identifier", inverse_of: :party, dependent: :destroy
+    has_many :screenings,   class_name: "Party::Screening",    inverse_of: :party, dependent: :destroy
 
     # Nested attrs
     accepts_nested_attributes_for :person, allow_destroy: true

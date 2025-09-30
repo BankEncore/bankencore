@@ -1,0 +1,20 @@
+<h1 class="text-2xl mb-4">Screening</h1>
+<div class="mb-3">Party: <%= link_to @screening.party.customer_number, party_party_path(@screening.party.public_id) %></div>
+<div class="grid grid-cols-2 gap-4">
+  <div><b>Kind:</b> <%= @screening.kind.humanize %></div>
+  <div><b>Status:</b> <span class="badge"><%= @screening.status.humanize %></span></div>
+  <div><b>Requested:</b> <%= @screening.requested_at %></div>
+  <div><b>Completed:</b> <%= @screening.completed_at %></div>
+  <div><b>Expires:</b> <%= @screening.expires_at %></div>
+</div>
+
+<div class="divider my-2">Query</div>
+<pre class="p-3 bg-base-200 rounded"><%= {name:@screening.query_name, dob:@screening.query_dob, country:@screening.query_country, id_type:@screening.query_identifier_type, last4:@screening.query_identifier_last4}.to_json %></pre>
+
+<div class="divider my-2">Payload</div>
+<pre class="p-3 bg-base-200 rounded"><%= JSON.pretty_generate(@screening.vendor_payload || {}) rescue @screening.vendor_payload %></pre>
+
+<div class="mt-4 flex gap-2">
+  <%= link_to "Edit", edit_party_screening_path(@screening), class:"btn btn-primary btn-sm" %>
+  <%= link_to "Back", party_party_screenings_path(@screening.party.public_id), class:"btn btn-ghost btn-sm" %>
+</div>

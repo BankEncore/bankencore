@@ -1,0 +1,34 @@
+<%# Party screenings index %>
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-semibold">Screenings for <%= @party.display_name %></h1>
+  <div class="flex gap-2">
+    <%= link_to "New screening", new_party_party_screening_path(@party.public_id), class: "btn btn-primary btn-sm" %>
+    <%= link_to "Back to party", party_party_path(@party.public_id), class: "btn btn-ghost btn-sm" %>
+  </div>
+</div>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>When</th>
+      <th>Kind</th>
+      <th>Status</th>
+      <th>Score</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @screenings.each do |s| %>
+      <tr>
+        <td><%= s.completed_at&.to_fs(:long) || s.requested_at&.to_fs(:long) %></td>
+        <td><%= s.kind.humanize %></td>
+        <td><span class="badge"><%= s.status.humanize %></span></td>
+        <td><%= s.vendor_score %></td>
+        <td><%= link_to "View", party_screening_path(s), class: "btn btn-ghost btn-xs" %></td>
+      </tr>
+    <% end %>
+    <% if @screenings.empty? %>
+      <tr><td colspan="5" class="opacity-60">No screenings yet.</td></tr>
+    <% end %>
+  </tbody>
+</table>
