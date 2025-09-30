@@ -6,6 +6,7 @@ module Party
     enum :vendor, { manual: 0 }              # extend later
     enum :kind, { sanctions: 0, pep: 1, watchlist: 2, adverse_media: 3, idv: 4 }
     enum :status, { pending: 0, matched: 1, clear: 2, needs_review: 3, rejected: 4, error: 5 }
+    attribute :vendor_payload, :json, default: {}
 
     belongs_to :party, class_name: "Party::Party", inverse_of: :screenings
 

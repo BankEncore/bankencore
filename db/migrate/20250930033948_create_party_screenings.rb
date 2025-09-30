@@ -19,7 +19,7 @@ class CreatePartyScreenings < ActiveRecord::Migration[7.2]
       t.datetime :requested_at
       t.datetime :completed_at
       t.datetime :expires_at
-      t.json :vendor_payload, null: false, default: {}
+      t.json :vendor_payload, null: false
       t.text :notes
 
       t.timestamps
