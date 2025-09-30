@@ -21,6 +21,11 @@
     <div class="divider my-2"></div>
 
     <ul class="menu">
+
+    <% if respond_to?(:authenticated?) && authenticated? && ENV["ADMIN_EMAILS"].to_s.include?(Current.user&.email_address.to_s) %>
+      <li><%= link_to "User Admin", admin_users_path %></li>
+    <% end %>
+
       <% if defined?(authenticated?) && authenticated? %>
         <% user_label = (respond_to?(:current_user) && current_user) ? (current_user.try(:email_address) || current_user.try(:email) || "Signed in") : "Signed in" %>
         <li class="menu-title text-xs opacity-70"><%= user_label %></li>

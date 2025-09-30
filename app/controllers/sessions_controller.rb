@@ -1,21 +1,36 @@
+# app/controllers/sessions_controller.rb
 class SessionsController < ApplicationController
-  allow_unauthenticated_access only: %i[ new create ]
-  rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_session_url, alert: "Try again later." }
+  skip_before_action :require_authentication, only: %i[new create]
 
-  def new
-  end
+  def new; end
 
   def create
-    if user = User.authenticate_by(params.permit(:email_address, :password))
-      start_new_session_for user
-      redirect_to after_authentication_url
+    email = params[:email_address].to_s.downcase
+    user  = User.find_by(email_address: email)
+
+    if user&.authenticate(params[:password])
+      # end any existing DB session for this browser
+      Current.session&.destroy
+      cookies.delete(:session_id)
+
+      # start a new DB session and set the signed cookie
+      s = Session.create!(user: user)
+      cookies.signed[:session_id] = {
+        value: s.id,
+        httponly: true,
+        same_site: :lax
+      }
+
+      redirect_to(session.delete(:return_to) || root_path)
     else
-      redirect_to new_session_path, alert: "Try another email address or password."
+      flash.now[:alert] = "Invalid credentials"
+      render :new, status: :unauthorized
     end
   end
 
   def destroy
-    terminate_session
-    redirect_to new_session_path
+    Current.session&.destroy
+    cookies.delete(:session_id)
+    redirect_to sign_in_path, notice: "Signed out"
   end
 end

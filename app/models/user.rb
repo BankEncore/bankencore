@@ -9,4 +9,8 @@ class User < ApplicationRecord
     return parts.join(" ") if parts.any?
     (try(:email_address) || try(:email)).to_s
   end
+
+  def login_email
+  respond_to?(:email_address) ? email_address : (respond_to?(:email) ? email : nil)
+  end
 end
