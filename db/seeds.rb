@@ -99,3 +99,13 @@ SEED_CONFIG.each do |model, records|
 end
 
 puts "✅ Seeding complete at #{Time.current}"
+
+# db/seeds.rb (append)
+Party::Party.limit(5).find_each do |p|
+  p.screenings.create!(
+    vendor: :manual, kind: :sanctions, status: :clear,
+    query_name: p.person&.full_name || p.organization&.display_name,
+    requested_at: Time.current - 1.hour, completed_at: Time.current - 30.minutes,
+    expires_at: 1.day.from_now, vendor_payload: { source: "manual", matches: [] }
+  )
+end

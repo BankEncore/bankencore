@@ -82,8 +82,9 @@
         <% else %>
           <div class="py-2 text-sm opacity-70">No identity details</div>
         <% end %>
+      </dl>
 
-    <%= render "party/identifiers/list", party: @party %>
+      <%= render "party/identifiers/list", party: @party %>
     </div>
   </div>
 
@@ -93,6 +94,35 @@
     <%= render "party/phones/list",    party: @party %>
     <%= render "party/emails/list",    party: @party %>
   </div>
+</div>
+
+<%# ===== Screenings ===== %>
+<div class="card my-4 p-4">
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-semibold">Screenings</h2>
+    <%= link_to "New screening",
+          new_party_party_screening_path(@party.public_id),
+          class: "btn btn-primary btn-sm" %>
+  </div>
+  <table class="table mt-3">
+    <thead>
+      <tr><th>When</th><th>Kind</th><th>Status</th><th>Score</th><th></th></tr>
+    </thead>
+    <tbody>
+      <% @party.screenings.order(created_at: :desc).limit(5).each do |s| %>
+        <tr>
+          <td><%= s.completed_at&.to_fs(:long) || s.requested_at&.to_fs(:long) %></td>
+          <td><%= s.kind.humanize %></td>
+          <td><span class="badge"><%= s.status.humanize %></span></td>
+          <td><%= s.vendor_score %></td>
+          <td><%= link_to "View", party_screening_path(s), class: "btn btn-ghost btn-xs" %></td>
+        </tr>
+      <% end %>
+      <% if @party.screenings.empty? %>
+        <tr><td colspan="5" class="opacity-60">No screenings yet.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
 </div>
 
 <dialog id="confirm-delete" class="modal">
