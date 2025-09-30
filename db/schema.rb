@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_30_044154) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_30_050156) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -222,6 +222,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_30_044154) do
     t.string "mask_rule"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "person_only", default: false, null: false
+    t.boolean "organization_only", default: false, null: false
     t.index ["code"], name: "index_ref_identifier_types_on_code", unique: true
   end
 
