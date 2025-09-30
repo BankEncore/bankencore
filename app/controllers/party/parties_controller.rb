@@ -60,7 +60,12 @@ module Party
       @parties = scope.reorder(Arel.sql(order_sql)).to_a
     end
 
-    def show; end
+    def show
+      @party = ::Party::Party.find_by!(public_id: params[:public_id])
+      @emails    = @party.emails.primary_first
+      @phones    = @party.phones.primary_first
+      @addresses = @party.addresses.primary_first
+    end
 
     def new
       @party = ::Party::Party.new(party_type: "person")

@@ -1,6 +1,7 @@
 # app/models/party/identifier.rb
 module Party
   class Identifier < ApplicationRecord
+    include PrimaryFirst
     self.table_name = "party_identifiers"
 
     belongs_to :party, class_name: "::Party::Party"
