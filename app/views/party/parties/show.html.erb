@@ -100,13 +100,20 @@
 <div class="card my-4 p-4">
   <div class="flex items-center justify-between">
     <h2 class="text-xl font-semibold">Screenings</h2>
-    <%= link_to "New screening",
-          new_party_party_screening_path(@party.public_id),
-          class: "btn btn-primary btn-sm" %>
+    <div class="flex items-center gap-2">
+      <% if @party.party_risk_score %>
+        <% badge = {0=>"badge-success",1=>"badge-warning",2=>"badge-error"}[@party.risk_band] %>
+        <span class="badge <%= badge %>">Risk <%= @party.party_risk_score %></span>
+      <% end %>
+      <%= link_to "New screening",
+            new_party_party_screening_path(@party.public_id),
+            class: "btn btn-primary btn-sm" %>
+    </div>
   </div>
+
   <table class="table mt-3">
     <thead>
-      <tr><th>When</th><th>Kind</th><th>Status</th><th>Score</th><th></th></tr>
+      <tr><th>When</th><th>Kind</th><th>Status</th><th>Score</th><th>Norm</th><th></th></tr>
     </thead>
     <tbody>
       <% @party.screenings.order(created_at: :desc).limit(5).each do |s| %>
@@ -115,32 +122,13 @@
           <td><%= s.kind.humanize %></td>
           <td><span class="badge"><%= s.status.humanize %></span></td>
           <td><%= s.vendor_score %></td>
+          <td><%= s.normalized_score %></td>
           <td><%= link_to "View", party_screening_path(s), class: "btn btn-ghost btn-xs" %></td>
         </tr>
       <% end %>
       <% if @party.screenings.empty? %>
-        <tr><td colspan="5" class="opacity-60">No screenings yet.</td></tr>
+        <tr><td colspan="6" class="opacity-60">No screenings yet.</td></tr>
       <% end %>
     </tbody>
   </table>
 </div>
-
-<dialog id="confirm-delete" class="modal">
-  <div class="modal-box">
-    <h3 class="font-bold text-lg">Delete party?</h3>
-    <p class="py-2">This cannot be undone.</p>
-    <div class="modal-action">
-      <form method="dialog"><button class="btn btn-ghost">Cancel</button></form>
-      <%= button_to "Delete",
-            party_party_path(@party),
-            method: :delete,
-            form: { class: "inline" },
-            class: "btn btn-error",
-            data: { turbo_confirm: nil },
-            aria: { label: "Confirm delete" } %>
-    </div>
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button aria-label="Close modal">close</button>
-  </form>
-</dialog>
