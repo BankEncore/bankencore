@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_30_050156) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_30_160022) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -269,6 +269,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_30_050156) do
     t.index ["country_code"], name: "fk_rails_27cb4ed1c4"
   end
 
+  create_table "sessions", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "ip_address"
+    t.string "user_agent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "users", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+    t.string "email_address", null: false
+    t.string "password_digest", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "first_name"
+    t.string "last_name"
+    t.index ["email_address"], name: "index_users_on_email_address", unique: true
+  end
+
   add_foreign_key "party_addresses", "parties", on_delete: :cascade
   add_foreign_key "party_addresses", "ref_address_types", column: "address_type_code", primary_key: "code"
   add_foreign_key "party_addresses", "ref_regions", column: ["country_code", "region_code"], primary_key: ["country_code", "code"], name: "fk_pa_ref_regions_ccode_rcode"
@@ -289,4 +308,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_30_050156) do
   add_foreign_key "party_phones", "ref_phone_types", column: "phone_type_code", primary_key: "code"
   add_foreign_key "party_screenings", "parties", on_delete: :cascade
   add_foreign_key "ref_regions", "ref_countries", column: "country_code", primary_key: "code"
+  add_foreign_key "sessions", "users"
 end

@@ -137,35 +137,7 @@
 
           <%= link_to "New Party", new_party_party_path, class: "btn btn-primary btn-sm hidden md:inline-flex" %>
 
-          <div class="dropdown dropdown-end">
-              <button tabindex="0" class="btn btn-ghost btn-circle btn-sm" aria-label="User menu">
-                <span class="w-8 h-8 rounded-full bg-base-300 text-base-content grid place-items-center">
-                  <svg class="w-5 h-5 block" viewBox="0 0 24 24" aria-label="User">
-                    <title>User</title>
-                    <path fill="currentColor"
-                      d="M12 14c-3.9 0-7 1.8-7 4v1h14v-1c0-2.2-3.1-4-7-4Zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/>
-                  </svg>
-                </span>
-              </button>
-            <div tabindex="0" class="dropdown-content z-10 bg-base-100 rounded-box shadow p-3 w-64">
-              <div class="mb-2 text-sm font-semibold">Appearance</div>
-              <div class="grid grid-cols-2 gap-2 text-sm">
-                <% ["blueLight","merlotLight","blueDark","merlotDark"].each do |t| %>
-                  <label class="label cursor-pointer justify-start gap-2">
-                    <input type="radio" name="theme" value="<%= t %>" class="theme-controller">
-                    <span><%= t.gsub(/([a-z])([A-Z])/,'\1 \2').split.map(&:capitalize).join(' ') %></span>
-                  </label>
-                <% end %>
-              </div>
-              <div class="divider my-2"></div>
-              <ul class="menu">
-                <li><a href="#">Profile</a></li>
-                <li><a href="#">Sign out</a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
+          <%= render "shared/user_menu" %>
       </div>
     </header>
 
@@ -178,9 +150,26 @@
     </main>
 
     <footer class="border-t">
-      <div class="max-w-7xl mx-auto p-4 text-sm opacity-70">
-        © <%= Time.current.year %> YourApp · <a href="#" class="link">Privacy</a>
+      <div class="max-w-7xl mx-auto p-4 text-sm opacity-70 flex items-center justify-between">
+        <div>
+          © <%= Time.current.year %> YourApp · <a href="#" class="link">Privacy</a>
+        </div>
+
+        <div>
+          <% if respond_to?(:authenticated?) && authenticated? %>
+            <span class="inline-flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-base-300 grid place-items-center">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 14c-3.9 0-7 1.8-7 4v1h14v-1c0-2.2-3.1-4-7-4Zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>
+              </span>
+              <%= (Current.user&.display_name || Current.user&.email_address || Current.user&.email) %>
+            </span>
+          <% else %>
+            <%= link_to "Sign in", sign_in_path, class: "link" %>
+          <% end %>
+        </div>
       </div>
-    </footer>
+  </footer>
+
+
   </body>
 </html>

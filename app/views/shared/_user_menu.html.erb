@@ -1,7 +1,43 @@
 <div class="dropdown dropdown-end">
-  <div tabindex="0" role="button" class="btn btn-ghost btn-sm">User</div>
-  <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box shadow p-2 w-52">
-    <li><%= link_to "Profile", "#" %></li>
-    <li><%= link_to "Sign out", destroy_user_session_path, data: { turbo_method: :delete } %></li>
-  </ul>
+  <button tabindex="0" class="btn btn-ghost btn-circle btn-sm" aria-label="User menu">
+    <span class="w-8 h-8 rounded-full bg-base-300 text-base-content grid place-items-center">
+      <svg class="w-5 h-5 block" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M12 14c-3.9 0-7 1.8-7 4v1h14v-1c0-2.2-3.1-4-7-4Zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/>
+      </svg>
+    </span>
+  </button>
+
+  <div tabindex="0" class="dropdown-content z-10 bg-base-100 rounded-box shadow p-3 w-64">
+    <div class="mb-2 text-sm font-semibold">Appearance</div>
+    <div class="grid grid-cols-2 gap-2 text-sm">
+      <% ["blueLight","merlotLight","blueDark","merlotDark"].each do |t| %>
+        <label class="label cursor-pointer justify-start gap-2">
+          <input type="radio" name="theme" value="<%= t %>" class="theme-controller">
+          <span><%= t.gsub(/([a-z])([A-Z])/,'\1 \2').split.map(&:capitalize).join(' ') %></span>
+        </label>
+      <% end %>
+    </div>
+
+    <div class="divider my-2"></div>
+
+    <ul class="menu">
+
+    <% if respond_to?(:authenticated?) && authenticated? && ENV["ADMIN_EMAILS"].to_s.include?(Current.user&.email_address.to_s) %>
+      <li><%= link_to "User Admin", admin_users_path %></li>
+    <% end %>
+
+      <% if defined?(authenticated?) && authenticated? %>
+        <% user_label = (respond_to?(:current_user) && current_user) ? (current_user.try(:email_address) || current_user.try(:email) || "Signed in") : "Signed in" %>
+        <li class="menu-title text-xs opacity-70"><%= user_label %></li>
+        <li><%= link_to "Profile", "#" %></li>
+        <li>
+          <%= link_to "Sign out", session_path,
+              data: { turbo_method: :delete },
+              class: "text-error" %>
+        </li>
+      <% else %>
+        <li><%= link_to "Sign in", sign_in_path %></li>
+      <% end %>
+    </ul>
+  </div>
 </div>

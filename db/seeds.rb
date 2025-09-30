@@ -101,6 +101,12 @@ SEED_CONFIG = {
   ]
 }
 
+User.find_or_create_by!(email_address: "admin@example.com") do |u|
+  u.password = "ChangeMe123!"
+  u.first_name = "Admin"
+  u.last_name  = "User"
+end
+
 SEED_CONFIG.each do |klass_name, rows|
   seed_records_by!(klass_name, rows, by: :code, timestamp: timestamp)
 end
