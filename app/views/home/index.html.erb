@@ -3,12 +3,8 @@
     <div class="card-body">
       <div class="card-title">Quick Actions</div>
       <div class="flex flex-wrap gap-2">
-# frozen_string_literal: true
-link_to 'View Parties', party_parties_path, class: 'btn btn-primary btn-sm'
- %>
-# frozen_string_literal: true
-link_to 'New Party', new_party_party_path, class: 'btn btn-secondary btn-sm'
- %>
+        <%= link_to 'View Parties', party_parties_path, class: 'btn btn-primary btn-sm' %>
+        <%= link_to 'New Party', new_party_party_path, class: 'btn btn-secondary btn-sm' %>
       </div>
     </div>
   </section>
@@ -32,30 +28,27 @@ link_to 'New Party', new_party_party_path, class: 'btn btn-secondary btn-sm'
   </section>
 </div>
 
-<section class="card bg-base-100 card-bordered mt-4">
-  <div class="card-body">
-    <div class="card-title items-center justify-between">
-      <span>Recent Parties</span>
-# frozen_string_literal: true
-link_to 'All Parties', party_parties_path, class: 'btn btn-outline btn-sm'
- %>
-    </div>
-    <div class="overflow-x-auto">
-      <table class="table table-zebra w-full">
-        <thead>
-          <tr><th>Name</th><th>Type</th><th>Created</th><th></th></tr>
-        </thead>
-        <tbody>
+<div class="card-title items-center justify-between">
+  <span>Recent Parties</span>
+  <%= link_to 'All Parties', party_parties_path, class: 'btn btn-outline btn-sm' %>
+</div>
+
+<div class="overflow-x-auto">
+  <table class="table table-zebra w-full">
+    <thead><tr><th>Name</th><th>Type</th><th>Updated</th><th></th></tr></thead>
+    <tbody>
+      <% if @recent_parties.present? %>
+        <% @recent_parties.each do |p| %>
           <tr>
-            <td>Acme Holdings, LLC</td><td>Organization</td><td>2025-08-12</td>
-            <td><a class="link" href="#">View</a></td>
+            <td><%= p.display_name %></td>
+            <td><%= p.party_type&.titleize %></td>
+            <td><%= l p.updated_at, format: :short %></td>
+            <td><%= link_to "View", party_party_path(p.public_id), class: "link" %></td>
           </tr>
-          <tr>
-            <td>Jane Doe</td><td>Person</td><td>2025-09-01</td>
-            <td><a class="link" href="#">View</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
+        <% end %>
+      <% else %>
+        <tr><td colspan="4" class="opacity-70">No recent updates.</td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

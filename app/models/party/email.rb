@@ -3,6 +3,7 @@
 module Party
   class Email < ApplicationRecord
     include SinglePrimary
+    include PrimaryFirst
     self.table_name = "party_emails"
 
     belongs_to :party, class_name: "Party::Party", inverse_of: :emails
