@@ -1,0 +1,65 @@
+<%# app/views/sessions/new.html.erb %>
+
+<% if flash[:alert].present? %>
+  <div class="alert alert-error mb-4">
+    <span><%= flash[:alert] %></span>
+  </div>
+<% end %>
+<% if flash[:notice].present? %>
+  <div class="alert alert-success mb-4">
+    <span><%= flash[:notice] %></span>
+  </div>
+<% end %>
+
+<div class="min-h-[60vh] w-full grid place-items-center">
+  <div class="w-full max-w-sm">
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-5">
+      <legend class="fieldset-legend text-lg font-semibold">Sign in</legend>
+
+      <%= form_with url: session_path, method: :post, local: true, class: "space-y-3" do |f| %>
+        <label class="label">
+          <span class="label-text">Email</span>
+        </label>
+        <%= f.email_field :email_address,
+              required: true,
+              autofocus: true,
+              autocomplete: "username",
+              placeholder: "you@bank.tsw.email",
+              value: params[:email_address],
+              class: "input input-bordered w-full" %>
+
+        <label class="label">
+          <span class="label-text">Password</span>
+        </label>
+        <%= f.password_field :password,
+              required: true,
+              autocomplete: "current-password",
+              maxlength: 72,
+              placeholder: "••••••••",
+              class: "input input-bordered w-full" %>
+
+        <div class="flex items-center justify-between pt-2">
+          <div class="form-control">
+            <label class="cursor-pointer label gap-2">
+              <span class="label-text">Remember me</span>
+              <input type="checkbox" name="remember_me" class="checkbox checkbox-sm">
+            </label>
+          </div>
+
+          <%# Optional: forgot-password link if you add routes later %>
+          <%# <%= link_to "Forgot password?", password_path, class: "link link-hover" %> %>
+        </div>
+
+        <div class="pt-2">
+          <button class="btn btn-neutral w-full" type="submit">Login</button>
+        </div>
+      <% end %>
+    </fieldset>
+  </div>
+    <div class="card w-96 bg-base-100 card-md shadow-sm">
+    <div class="card-body">
+      <h2 class="card-title">Access Restricted</h2>
+      <p>This system is intended solely for use by authorized BankEncore personnel. If you are not an authorized user, do not attempt to log in. Unauthorized access is strictly prohibited and may be subject to disciplinary action, audit review, and legal consequences. All activity is monitored and logged in accordance with company policy and regulatory requirements.</p>
+    </div>
+  </div>
+</div>
