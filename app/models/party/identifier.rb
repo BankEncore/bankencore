@@ -1,40 +1,72 @@
-# app/models/party/identifier.rb
 module Party
   class Identifier < ApplicationRecord
     include PrimaryFirst
     self.table_name = "party_identifiers"
 
-    belongs_to :party, class_name: "::Party::Party"
-    belongs_to :identifier_type, class_name: "::Ref::IdentifierType"
+    belongs_to :party,            class_name: "::Party::Party"
+    belongs_to :identifier_type,  class_name: "::Ref::IdentifierType"
 
     encrypts :value, deterministic: true
     blind_index :value, key: BlindIndex.master_key, encode: false
 
-    # Scopes
     scope :primary, -> { where(is_primary: true) }
     scope :tax_ids, -> {
       joins(:identifier_type).where(ref_identifier_types: { code: %w[ssn itin ein foreign_tin] })
     }
 
-    # Validations
     validates :identifier_type, presence: true
     validates :value, presence: true
+    validates :value_len, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+    validates :value_last4, length: { maximum: 4 }, allow_nil: true
     validate  :single_primary_per_type
     validate  :no_duplicate_identifier
     validate  :issuer_requirements
 
-    # Callbacks
+    # NEW
     before_validation :normalize_value
     before_validation :sync_legacy_code
-    before_save       :set_mask
+    before_validation :derive_len_last4   # NEW
+    # REMOVED: before_save :set_mask
 
     # Convenience
     def id_type_code = identifier_type&.code
 
-    # -------- private ------------------------------------------------------
-    private
+    # Public display API (use these in views)
 
-    # Normalization helper (class-level for reuse)
+
+    def masked(keep: 4, mask: "•")
+      len = value_len.to_i
+      return "" if len <= 0
+      k = [keep, len].min
+      mask * (len - k) + value_last4.to_s.last(k)
+    end
+
+    def masked_formatted
+      rule = identifier_type&.mask_rule.to_s
+
+      case rule
+      when "ssn"     # 9 digits → ***-**-1234
+        return (value_len == 9 && value_last4.present?) ? "***-**-#{value_last4}" : masked
+      when "ein"     # policy: hide prefix completely
+        return masked
+      when "last4"   # generic last4
+        return masked
+      when /\Apattern:(\d+)-(\d+)-(\d+)\z/ # e.g. "pattern:3-2-4"
+        g1,g2,g3 = [$1,$2,$3].map!(&:to_i)
+        return masked if value_len != (g1+g2+g3) || value_last4.blank?
+        # Only reveal last group’s last digits
+        "•" * g1 + "-" + "•" * g2 + "-" + value_last4.rjust(g3, "•")
+      when "none"    # show nothing
+        ""
+      else
+        masked       # default
+      end
+    end
+
+    # Legacy shim
+    def value_masked = masked_formatted
+
+    # Normalization helper (unchanged)
     def self.normalize(raw, type_or_code)
       code = type_or_code.is_a?(::Ref::IdentifierType) ? type_or_code.code : type_or_code.to_s
       v = raw.to_s.strip
@@ -50,16 +82,15 @@ module Party
       self.value = self.class.normalize(value, identifier_type)
     end
 
-    def set_mask
-      return unless value.present? && identifier_type
-      self.value_masked =
-        case identifier_type.mask_rule
-        when "ssn"   then "***-**-#{value[-4, 4]}"
-        when "ein"   then "#{value[0, 2]}-******"
-        when "last4" then "****#{value[-4, 4]}"
-        else "****"
-        end
+    # NEW: derive cached length and last4 from plaintext `value`
+    def derive_len_last4
+      return unless value.present?
+      d = value.to_s.gsub(/\D/, "")
+      self.value_len   = d.length
+      self.value_last4 = d.last(4).presence
     end
+
+    # REMOVED: set_mask (we no longer persist masked strings)
 
     def issuer_requirements
       return unless identifier_type

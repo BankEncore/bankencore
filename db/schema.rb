@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_30_160022) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_01_152921) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -104,6 +104,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_30_160022) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "identifier_type_id"
+    t.integer "value_len"
+    t.string "value_last4", limit: 4
     t.index ["id_type_code", "value_bidx"], name: "idx_unique_identifier_value", unique: true
     t.index ["identifier_type_id", "value_bidx"], name: "idx_unique_identifier_type_value", unique: true
     t.index ["identifier_type_id"], name: "index_party_identifiers_on_identifier_type_id"
