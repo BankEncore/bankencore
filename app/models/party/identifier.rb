@@ -45,8 +45,8 @@ module Party
       rule = identifier_type&.mask_rule.to_s
 
       case rule
-      when "ssn"     # 9 digits → ***-**-1234
-        (value_len == 9 && value_last4.present?) ? "***-**-#{value_last4}" : masked
+      when "ssn"     # 9 digits → •••-••-1234
+        (value_len == 9 && value_last4.present?) ? "•••-••-#{value_last4}" : masked
       when "ein"     # policy: hide prefix completely
         masked
       when "last4"   # generic last4
