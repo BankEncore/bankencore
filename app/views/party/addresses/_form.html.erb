@@ -6,78 +6,87 @@
               party_party_addresses_path(@party.public_id)),
       data: { turbo_frame: "comm_modal_frame" } do |f| %>
 
-  <div class="grid gap-3"
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
        data-controller="region-select"
        data-region-select-url-value="<%= ref_regions_path(format: :json) %>">
 
     <!-- Address Type -->
-    <div class="select">
+    <div class="form-control">
+      <%= f.label :address_type_code, "Address type", class: "label" %>
       <%= f.collection_select :address_type_code, @address_types, :code, :name,
-            { include_blank: true }, {} %>
+            { include_blank: true },
+            { class: "select select-bordered w-full" } %>
     </div>
 
     <!-- Street 1 -->
-    <div class="input">
-      <%= f.text_field :line1, required: true, placeholder: "Address line 1" %>
+    <div class="form-control">
+      <%= f.label :line1, "Address line 1", class: "label" %>
+      <%= f.text_field :line1, required: true, placeholder: "Address line 1",
+            class: "input input-bordered w-full" %>
     </div>
 
     <!-- Street 2 -->
-    <div class="input">
-      <%= f.text_field :line2, placeholder: "Address line 2" %>
+    <div class="form-control">
+      <%= f.label :line2, "Address line 2", class: "label" %>
+      <%= f.text_field :line2, placeholder: "Address line 2",
+            class: "input input-bordered w-full" %>
     </div>
 
     <!-- Locality / City -->
-    <div class="input">
-      <%= f.text_field :locality, required: true, placeholder: "Locality / City" %>
+    <div class="form-control">
+      <%= f.label :locality, "City", class: "label" %>
+      <%= f.text_field :locality, required: true, placeholder: "City",
+            class: "input input-bordered w-full" %>
     </div>
 
     <!-- Country -->
-    <div class="select">
+    <div class="form-control">
+      <%= f.label :country_code, "Country", class: "label" %>
       <% if @countries.present? %>
         <%= f.collection_select :country_code, @countries, :code, :name,
               { include_blank: true },
-              { data: { region_select_target: "country", action: "change->region-select#refresh" } } %>
+              { class: "select select-bordered w-full",
+                data: { region_select_target: "country", action: "change->region-select#refresh" } } %>
       <% else %>
         <%= f.select :country_code,
               options_for_select([["United States","US"],["Canada","CA"]], @address.country_code || "US"),
               { include_blank: true },
-              { data: { region_select_target: "country", action: "change->region-select#refresh" } } %>
+              { class: "select select-bordered w-full",
+                data: { region_select_target: "country", action: "change->region-select#refresh" } } %>
       <% end %>
     </div>
 
-
     <!-- State / Region -->
-    <div class="select">
+    <div class="form-control">
+      <%= f.label :region_code, "State/Region", class: "label" %>
       <%= f.select :region_code,
             options_for_select(regions_for(@address.country_code), @address.region_code),
             { include_blank: true },
-            { data: { region_select_target: "region" },
+            { class: "select select-bordered w-full",
+              data: { region_select_target: "region" },
               disabled: @address.country_code.blank? } %>
     </div>
 
     <!-- Postal Code -->
-    <div class="input">
-      <%= f.text_field :postal_code, placeholder: "Postal code" %>
+    <div class="form-control">
+      <%= f.label :postal_code, "Postal code", class: "label" %>
+      <%= f.text_field :postal_code, placeholder: "Postal code",
+            class: "input input-bordered w-full" %>
     </div>
 
-      <div class="md:col-span-8 flex items-center gap-4 pt-1">
-        <label class="label cursor-pointer gap-2">
-          <%= af.check_box :is_primary, class: "checkbox" %>
-          <span class="label-text">Primary</span>
-        </label>
-
-        <%= af.hidden_field :_destroy, value: "0", data: { role: "destroy-flag" } %>
-        <button
-          class="btn btn-xs btn-error btn-soft"
-          onclick="
-            const li = this.closest('li');
-            const flag = li.querySelector('input[data-role=\"destroy-flag\"]');
+      <%= f.hidden_field :_destroy, value: "0", data: { role: "destroy-flag" } %>
+      <button class="btn btn-xs btn-error btn-soft"
+        onclick="
+          const li = this.closest('li');
+          if (li) {
+            const flag = li.querySelector('input[data-role=&quot;destroy-flag&quot;]');
             if (flag) flag.value = '1';
             li.remove();
-            return false;
-          ">
-          Remove
-        </button>
-      </div>
+          }
+          return false;
+        ">
+        Remove
+      </button>
+    </div>
     </div>
 <% end %>
