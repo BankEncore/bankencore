@@ -1,0 +1,21 @@
+# ADR 0033: Deprecate `value_masked` column
+
+**Status**: Proposed  
+**Date**: 2025-10-01
+
+## Context
+`value_masked` exists but is no longer authoritative after ADR 0030.
+
+## Decision
+Keep short-term for compatibility. Remove after all consumers use `masked_formatted`.
+
+## Consequences
+- Temporary redundancy only during transition.
+
+## Implementation
+- Method shim: `def value_masked = masked_formatted`.
+- Follow-up migration to drop column after verification.
+
+## Rollout
+- Search usages and update.  
+- Remove within one release cycle post-cutover.
