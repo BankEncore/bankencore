@@ -1,4 +1,4 @@
-# Adr: 0023
+adr: 0023
 title: Use Rails 8 native Authentication with DB-backed Session model
 status: Accepted
 date: 2025-09-30
