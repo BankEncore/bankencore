@@ -37,7 +37,7 @@ module Party
     def masked(keep: 4, mask: "•")
       len = value_len.to_i
       return "" if len <= 0
-      k = [keep, len].min
+      k = [ keep, len ].min
       mask * (len - k) + value_last4.to_s.last(k)
     end
 
@@ -46,13 +46,13 @@ module Party
 
       case rule
       when "ssn"     # 9 digits → ***-**-1234
-        return (value_len == 9 && value_last4.present?) ? "***-**-#{value_last4}" : masked
+        (value_len == 9 && value_last4.present?) ? "***-**-#{value_last4}" : masked
       when "ein"     # policy: hide prefix completely
-        return masked
+        masked
       when "last4"   # generic last4
-        return masked
+        masked
       when /\Apattern:(\d+)-(\d+)-(\d+)\z/ # e.g. "pattern:3-2-4"
-        g1,g2,g3 = [$1,$2,$3].map!(&:to_i)
+        g1, g2, g3 = [ $1, $2, $3 ].map!(&:to_i)
         return masked if value_len != (g1+g2+g3) || value_last4.blank?
         # Only reveal last group’s last digits
         "•" * g1 + "-" + "•" * g2 + "-" + value_last4.rjust(g3, "•")
