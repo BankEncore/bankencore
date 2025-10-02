@@ -111,30 +111,42 @@
 
       <div class="mt-3">
         <%= render "party/links/list_by_type",
-          party: @party,
-          links: @party.links.includes(:party_link_type, :source_party, :target_party).order(:party_link_type_code),
-          editable: false %>
+        party: @party,
+        links: @party.links.includes(:party_link_type, :source_party, :target_party).order(:party_link_type_code),
+        editable: false %>
       </div>
     </div>
   </div>
 
   <%# --- Groups (household example) --- %>
+
   <div class="card bg-base-100 shadow">
     <div class="card-body">
       <h2 class="card-title text-base">Groups</h2>
 
+      <div class="flex gap-2 mb-3">
+      <%= button_to "Create household",
+            create_household_party_party_path(@party.public_id),
+            method: :post,
+            form: { data: { turbo_frame: "_top" } },
+            class: "btn btn-primary btn-sm" %>
+        <button class="btn btn-ghost btn-sm" data-action="click->group-picker#open">Add to existing group</button>
+      </div>
+
+      <!-- Place the Turbo Frame here -->
+      <turbo-frame id="group_add_frame">
+        <%= render "party/groups/add_to_existing_form", party: @party %>
+      </turbo-frame>
+
       <% if @household %>
         <h3 class="text-sm opacity-70"><%= @household.name %></h3>
         <%= render "party/groups/members_list", group: @household %>
-        <div class="mt-3">
-          <%= render "party/group_memberships/form", group: @household %>
-        </div>
       <% else %>
         <p class="opacity-70">No household group.</p>
       <% end %>
     </div>
   </div>
-</div>
+
 
 
 <%# ===== Screenings ===== %>

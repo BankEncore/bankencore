@@ -36,5 +36,12 @@ module Party
     def group_params
       params.require(:party_group).permit(:party_group_type_code, :name)
     end
+
+    def lookup
+        q = params[:q].to_s.strip
+        rel = ::Party::Group.order(:name)
+        rel = rel.where("name LIKE ?", "%#{q}%") if q.present?
+        render json: rel.limit(20).pluck(:id, :name).map { |id, name| { id:, name: } }
+    end
   end
 end

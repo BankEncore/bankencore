@@ -144,6 +144,14 @@ module Party
       render json: { value: rec&.value }
     end
 
+    def create_household
+      party = ::Party::Party.find_by!(public_id: params[:public_id])
+      name  = party.person ? "#{party.person.last_name} Household" : "#{party.display_name} Household"
+      grp   = ::Party::Group.create!(party_group_type_code: "household", name: name)
+      grp.group_memberships.create!(party_id: party.id)
+      redirect_to party_group_path(grp), notice: "Household created"
+    end
+
     private
 
     def set_party

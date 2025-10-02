@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_01_152921) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_02_014525) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -73,6 +73,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_01_152921) do
     t.bigint "group_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "started_on"
+    t.date "ended_on"
+    t.index ["group_id", "party_id", "started_on", "ended_on"], name: "idx_pgm_dedup_norole"
     t.index ["group_id"], name: "index_party_group_memberships_on_group_id"
     t.index ["party_id", "group_id"], name: "index_group_memberships_uniquely", unique: true
     t.index ["party_id"], name: "index_party_group_memberships_on_party_id"

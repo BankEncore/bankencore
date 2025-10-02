@@ -27,9 +27,12 @@ module Party
 
     # Prevent overlapping duplicate membership rows for same party+group+role_code
     def no_duplicate_interval
-      scope = self.class.where(group_id:, party_id:)
-      scope = scope.where(role_code: role_code)
+      scope = self.class.where(group_id: group_id, party_id: party_id)
       scope = scope.where.not(id: id) if persisted?
+      # only filter by role_code if the column exists
+      if self.class.column_names.include?("role_code")
+        scope = scope.where(role_code: self[:role_code])
+      end
 
       s = started_on || Date.new(0)
       e = ended_on   || Date.new(9999, 12, 31)

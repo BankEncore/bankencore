@@ -1,0 +1,17 @@
+<!-- app/views/party/groups/show.html.erb -->
+<div class="card bg-base-100 shadow">
+  <div class="card-body">
+    <h1 class="card-title text-xl"><%= @group.name %></h1>
+
+    <%= render "party/groups/members_list", group: @group %>
+
+    <div class="mt-3">
+      <%= render "party/group_memberships/form", group: @group %>
+    </div>
+
+    <div class="mt-4">
+      <%= link_to "Back to party", party_party_path(@group.parties.first.public_id),
+                  class: "btn btn-ghost btn-sm", data: { turbo_frame: "_top" } %>
+    </div>
+  </div>
+</div>
