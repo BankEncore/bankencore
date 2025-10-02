@@ -31,8 +31,11 @@ Rails.application.routes.draw do
         member { patch :primary }
       end
 
-      # nested create/index for screenings
+      # nested create/index for screenings on a party
       resources :screenings, only: %i[new create index]
+
+      # nested links (create/destroy) ON a party
+      resources :links, only: %i[create destroy]
     end
 
     # global screenings by id
@@ -42,10 +45,8 @@ Rails.application.routes.draw do
       resources :group_memberships, path: :memberships, only: %i[index create destroy]
     end
 
-    resources :links, only: %i[index create destroy]
-  end
-
-  namespace :ref do
-    resources :regions, only: :index
+    namespace :ref do
+      resources :regions, only: :index
+    end
   end
 end

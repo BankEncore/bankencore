@@ -12,6 +12,22 @@ module Party
     has_many :identifiers,  class_name: "::Party::Identifier", inverse_of: :party, dependent: :destroy
     has_many :screenings,   class_name: "Party::Screening",    inverse_of: :party, dependent: :destroy
 
+    has_many :source_links,
+      class_name: "::Party::Link",
+      foreign_key: :source_party_id,
+      inverse_of: :source_party,
+      dependent: :destroy
+
+    has_many :target_links,
+      class_name: "::Party::Link",
+      foreign_key: :target_party_id,
+      inverse_of: :target_party,
+      dependent: :destroy
+
+    has_many :group_memberships, class_name: "Party::GroupMembership",
+            foreign_key: :party_id, inverse_of: :party, dependent: :destroy
+    has_many :groups, through: :group_memberships, class_name: "Party::Group"
+
     # Nested attrs
     accepts_nested_attributes_for :person, allow_destroy: true
     accepts_nested_attributes_for :organization, allow_destroy: true
@@ -81,6 +97,10 @@ module Party
       code = organization.present? ? "ein" : "ssn"
       type = ::Ref::IdentifierType.find_by!(code: code)
       identifiers.build(identifier_type: type, is_primary: true)
+    end
+
+    def links
+      ::Party::Link.involving(id)
     end
 
     private

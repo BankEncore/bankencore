@@ -1,0 +1,9 @@
+<%# app/views/party/links/_form.html.erb %>
+<%= form_with url: party_party_links_path(party), scope: :party_link do |f| %>
+  <%= f.collection_select :party_link_type_code, Ref::PartyLinkType.order(:name), :code, :name %>
+  <%= f.text_field :target_public_id, placeholder:"Target public_id", class:"input" %>
+  <%= f.date_field :started_on %>
+  <%= f.date_field :ended_on %>
+  <%= f.text_field :notes, class:"input" %>
+  <%= f.submit "Link", class:"btn btn-primary" %>
+<% end %>

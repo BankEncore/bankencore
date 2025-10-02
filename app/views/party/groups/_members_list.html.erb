@@ -1,0 +1,8 @@
+<%# locals: group: %>
+<table class="table table-sm">
+  <tbody>
+    <%= render partial: "party/group_memberships/row",
+               collection: group.group_memberships.includes(:party),
+               as: :membership %>
+  </tbody>
+</table>

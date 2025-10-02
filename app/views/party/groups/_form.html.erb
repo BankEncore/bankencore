@@ -1,0 +1,8 @@
+<%# locals: group: %>
+<%= form_with url: party_group_group_memberships_path(group),
+              scope: :party_group_membership,
+              class:"flex gap-2" do |f| %>
+  <%= f.text_field :party_public_id, placeholder:"Member public_id", class:"input input-sm" %>
+  <%= f.text_field :role_code, placeholder:"role (optional)", class:"input input-sm" %>
+  <%= f.submit "Add", class:"btn btn-primary btn-sm" %>
+<% end %>

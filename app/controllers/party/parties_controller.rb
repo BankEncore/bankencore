@@ -65,6 +65,8 @@ module Party
       @emails    = @party.emails.primary_first
       @phones    = @party.phones.primary_first
       @addresses = @party.addresses.primary_first
+      @household = @party.groups.find_by(party_group_type_code: "household")
+      @group     = @party.groups.find_by(party_group_type_code: "household")
     end
 
     def new
