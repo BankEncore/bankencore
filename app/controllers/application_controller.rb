@@ -5,6 +5,8 @@ class ApplicationController < ActionController::Base
 
   helper_method :current_user, :authenticated?
 
+  helper Rails.application.routes.url_helpers
+
   def current_user
     Current.user            # Authentication concern populates Current.session → Current.user
   end
