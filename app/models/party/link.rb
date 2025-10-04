@@ -24,6 +24,7 @@ module Party
     validate  :no_self_link
     validate  :dates_in_order
     validate  :no_duplicate_interval
+    validate  :party_type_allowed
 
     # ---- callbacks ----
     after_commit :ensure_inverse!, on: :create
@@ -81,6 +82,14 @@ module Party
         ended_on: ended_on
       )
       inv.save! if inv.new_record?
+    end
+
+    def party_type_allowed
+      lt = party_link_type
+      return if lt.blank?
+      from_ok = Array(lt.allowed_from_party_types).include?(source_party.party_type)
+      to_ok   = Array(lt.allowed_to_party_types).include?(target_party.party_type)
+      errors.add(:base, "party types not allowed for #{lt.code}") unless from_ok && to_ok
     end
   end
 end

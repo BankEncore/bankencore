@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_02_014525) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_04_210732) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -75,7 +75,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_014525) do
     t.datetime "updated_at", null: false
     t.date "started_on"
     t.date "ended_on"
+    t.string "role_code"
     t.index ["group_id", "party_id", "started_on", "ended_on"], name: "idx_pgm_dedup_norole"
+    t.index ["group_id", "party_id", "started_on", "ended_on"], name: "idx_pgm_group_party_dates"
     t.index ["group_id"], name: "index_party_group_memberships_on_group_id"
     t.index ["party_id", "group_id"], name: "index_group_memberships_uniquely", unique: true
     t.index ["party_id"], name: "index_party_group_memberships_on_party_id"
@@ -86,6 +88,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_014525) do
     t.string "party_group_type_code"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "parent_group_id"
+    t.index ["parent_group_id"], name: "fk_rails_7505dd0a95"
+    t.index ["party_group_type_code", "created_at"], name: "idx_groups_type_created"
     t.index ["party_group_type_code"], name: "fk_rails_c965026157"
   end
 
@@ -125,8 +130,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_014525) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["party_link_type_code"], name: "fk_rails_6fccc90506"
+    t.index ["source_party_id", "party_link_type_code", "created_at", "updated_at"], name: "idx_links_src_type_dates"
     t.index ["source_party_id", "target_party_id", "party_link_type_code"], name: "index_party_links_on_parties_and_type", unique: true
     t.index ["source_party_id"], name: "index_party_links_on_source_party_id"
+    t.index ["target_party_id", "party_link_type_code", "created_at", "updated_at"], name: "idx_links_tgt_type_dates"
     t.index ["target_party_id"], name: "index_party_links_on_target_party_id"
   end
 
@@ -243,7 +250,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_014525) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "allowed_party_types", size: :long, default: "[]", null: false, collation: "utf8mb4_bin"
+    t.text "allowed_group_roles", size: :long, default: "[]", null: false, collation: "utf8mb4_bin"
+    t.boolean "hierarchical", default: false, null: false
     t.index ["code"], name: "index_ref_party_group_types_on_code", unique: true
+    t.check_constraint "json_valid(`allowed_group_roles`)", name: "allowed_group_roles"
+    t.check_constraint "json_valid(`allowed_party_types`)", name: "allowed_party_types"
   end
 
   create_table "ref_party_link_types", primary_key: "code", id: :string, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
@@ -252,8 +264,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_014525) do
     t.string "inverse_code"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "allowed_from_party_types", size: :long, default: "[]", null: false, collation: "utf8mb4_bin"
+    t.text "allowed_to_party_types", size: :long, default: "[]", null: false, collation: "utf8mb4_bin"
+    t.string "default_from_role"
+    t.string "default_to_role"
     t.index ["code"], name: "index_ref_party_link_types_on_code", unique: true
     t.index ["inverse_code"], name: "index_ref_party_link_types_on_inverse_code"
+    t.check_constraint "json_valid(`allowed_from_party_types`)", name: "allowed_from_party_types"
+    t.check_constraint "json_valid(`allowed_to_party_types`)", name: "allowed_to_party_types"
   end
 
   create_table "ref_phone_types", primary_key: "code", id: :string, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
@@ -300,6 +318,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_02_014525) do
   add_foreign_key "party_emails", "ref_email_types", column: "email_type_code", primary_key: "code"
   add_foreign_key "party_group_memberships", "parties", on_delete: :cascade
   add_foreign_key "party_group_memberships", "party_groups", column: "group_id", on_delete: :cascade
+  add_foreign_key "party_groups", "party_groups", column: "parent_group_id"
   add_foreign_key "party_groups", "ref_party_group_types", column: "party_group_type_code", primary_key: "code"
   add_foreign_key "party_identifiers", "parties"
   add_foreign_key "party_identifiers", "ref_identifier_types", column: "identifier_type_id"
