@@ -46,12 +46,11 @@ Rails.application.routes.draw do
       resources :group_memberships, path: :memberships, only: [ :create, :destroy ]
     end
 
-    namespace :ref do
-      resources :regions, only: :index
-    end
-
     resources :parties, param: :public_id do
       post :create_household, on: :member   # quick-create + add member
   end
+  end
+      namespace :ref do
+    resources :regions, only: :index
   end
 end

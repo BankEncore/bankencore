@@ -5,9 +5,10 @@
     - countries: @countries (Ref::Country collection)
 %>
 
-<li class="border rounded-box p-3"
-    data-controller="identifier-row region-select"
-    data-region-select-url-value="<%= ref_regions_path(format: :json) %>">
+  <li class="grid grid-cols-1 md:grid-cols-2 gap-4"
+      data-controller="region-select"
+      data-region-select-url-value="<%= ref_regions_path(format: :json) %>"
+      data-region-select-current-region-value="<%= @address&.region_code %>">
 
   <%= f.hidden_field :id %>
 

@@ -7,8 +7,9 @@
       data: { turbo_frame: "comm_modal_frame" } do |f| %>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
-       data-controller="region-select"
-       data-region-select-url-value="<%= ref_regions_path(format: :json) %>">
+        data-controller="region-select"
+        data-region-select-url-value="<%= ref_regions_path(format: :json) %>"
+        data-region-select-current-region-value="<%= @address&.region_code %>">
 
     <!-- Address Type -->
     <div class="form-control">
