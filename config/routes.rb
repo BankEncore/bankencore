@@ -19,6 +19,7 @@ Rails.application.routes.draw do
       member do
         get  :reveal_tax_id
         post :reveal_tax_id
+        post :create_household
       end
 
       resources :emails,    only: %i[new create edit update destroy] do
@@ -31,26 +32,22 @@ Rails.application.routes.draw do
         member { patch :primary }
       end
 
-      # nested create/index for screenings on a party
+      resources :links, only: %i[create destroy]      # nested links on a party
       resources :screenings, only: %i[new create index]
-
-      # nested links (create/destroy) ON a party
-      resources :links, only: %i[create destroy]
     end
 
-    # global screenings by id
-    resources :screenings, only: %i[show edit update]
+    resources :screenings, only: %i[show edit update] # global by id
 
     resources :groups do
-      get :lookup, on: :collection   # JSON autocomplete
-      resources :group_memberships, path: :memberships, only: [ :create, :destroy ]
+      get :lookup, on: :collection
+      resources :group_memberships, path: :memberships, only: %i[create destroy]
     end
 
-    resources :parties, param: :public_id do
-      post :create_household, on: :member   # quick-create + add member
+    resources :link_suggestions,  only: %i[index update]
+    resources :group_suggestions, only: %i[index update]
   end
-  end
-      namespace :ref do
+
+  namespace :ref do
     resources :regions, only: :index
   end
 end

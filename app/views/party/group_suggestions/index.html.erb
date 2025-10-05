@@ -1,0 +1,25 @@
+<!-- app/views/party/group_suggestions/index.html.erb -->
+<h1 class="text-2xl font-bold mb-4">Group Suggestions</h1>
+<table class="table w-full">
+  <thead><tr><th>Type</th><th>Name</th><th>Members</th><th>Confidence</th><th>Evidence</th><th></th></tr></thead>
+  <tbody>
+  <% @suggestions.each do |s| %>
+    <tr id="<%= dom_id(s) %>">
+      <td><%= s.group_type_code %></td>
+      <td><%= s.name || "-" %></td>
+      <td class="text-xs">
+        <% s.member_party_ids.each do |pid| %>
+          <% p = Party::Party.find(pid) %>
+          <div><%= p.display_name %></div>
+        <% end %>
+      </td>
+      <td><%= number_to_percentage(s.confidence_score * 100, precision: 1) %></td>
+      <td><pre class="text-xs"><%= s.evidence.to_json %></pre></td>
+      <td class="space-x-2">
+        <%= button_to "Accept", party_group_suggestion_path(s, decision: "accept"), method: :patch, class: "btn btn-success btn-sm" %>
+        <%= button_to "Reject", party_group_suggestion_path(s, decision: "reject"), method: :patch, class: "btn btn-error btn-sm" %>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

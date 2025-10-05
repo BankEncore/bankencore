@@ -1,0 +1,20 @@
+<!-- app/views/party/link_suggestions/index.html.erb -->
+<h1 class="text-2xl font-bold mb-4">Link Suggestions</h1>
+<table class="table w-full">
+  <thead><tr><th>Source</th><th>Type</th><th>Target</th><th>Confidence</th><th>Evidence</th><th></th></tr></thead>
+  <tbody>
+  <% @suggestions.each do |s| %>
+    <tr id="<%= dom_id(s) %>">
+      <td><%= s.source_party.display_name %></td>
+      <td><%= s.suggested_link_type_code %></td>
+      <td><%= s.target_party.display_name %></td>
+      <td><%= number_to_percentage(s.confidence_score * 100, precision: 1) %></td>
+      <td><pre class="text-xs"><%= s.evidence.to_json %></pre></td>
+      <td class="space-x-2">
+        <%= button_to "Accept", party_link_suggestion_path(s, decision: "accept"), method: :patch, class: "btn btn-success btn-sm" %>
+        <%= button_to "Reject", party_link_suggestion_path(s, decision: "reject"), method: :patch, class: "btn btn-error btn-sm" %>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
