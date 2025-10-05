@@ -56,9 +56,9 @@ module Party
       scope = self.class.where(party_link_type_code: party_link_type_code)
       scope = if symmetric?
                 scope.where("(source_party_id = :a AND target_party_id = :b) OR (source_party_id = :b AND target_party_id = :a)", a:, b:)
-              else
+      else
                 scope.where(source_party_id: a, target_party_id: b)
-              end
+      end
       scope = scope.where.not(id: id) if persisted?
 
       s = started_on || Date.new(0)
