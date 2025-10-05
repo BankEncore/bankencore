@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_04_210732) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_04_214057) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -129,11 +129,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_04_210732) do
     t.string "party_link_type_code", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "started_on", default: -> { "curdate()" }, null: false
+    t.date "ended_on"
     t.index ["party_link_type_code"], name: "fk_rails_6fccc90506"
-    t.index ["source_party_id", "party_link_type_code", "created_at", "updated_at"], name: "idx_links_src_type_dates"
+    t.index ["source_party_id", "party_link_type_code", "started_on", "ended_on"], name: "idx_links_src_type_dates"
     t.index ["source_party_id", "target_party_id", "party_link_type_code"], name: "index_party_links_on_parties_and_type", unique: true
     t.index ["source_party_id"], name: "index_party_links_on_source_party_id"
-    t.index ["target_party_id", "party_link_type_code", "created_at", "updated_at"], name: "idx_links_tgt_type_dates"
+    t.index ["target_party_id", "party_link_type_code", "started_on", "ended_on"], name: "idx_links_tgt_type_dates"
     t.index ["target_party_id"], name: "index_party_links_on_target_party_id"
   end
 

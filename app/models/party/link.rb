@@ -11,13 +11,15 @@ module Party
                primary_key: :code
 
     # ---- scopes ----
-    scope :active,     -> { where("started_on IS NULL OR started_on <= ?", Date.current)
-                              .where("ended_on   IS NULL OR ended_on   >= ?", Date.current) }
-    scope :between,    ->(from, to) {
+    scope :active, -> {
+      where("started_on IS NULL OR started_on <= ?", Date.current)
+        .where("ended_on   IS NULL OR ended_on   >= ?", Date.current)
+    }
+    scope :between, ->(from, to) {
       where("(started_on IS NULL OR started_on <= ?) AND (ended_on IS NULL OR ended_on >= ?)", to, from)
     }
-    scope :of_type,    ->(code) { where(party_link_type_code: code) }
-    scope :involving,  ->(party_id) { where("source_party_id = ? OR target_party_id = ?", party_id, party_id) }
+    scope :of_type,   ->(code) { where(party_link_type_code: code) }
+    scope :involving, ->(party_id) { where("source_party_id = ? OR target_party_id = ?", party_id, party_id) }
 
     # ---- validations ----
     validates :source_party_id, :target_party_id, :party_link_type_code, presence: true
@@ -30,13 +32,14 @@ module Party
     after_commit :ensure_inverse!, on: :create
 
     # ---- helpers ----
-    def symmetric? = party_link_type&.symmetric?
+    def symmetric?   = party_link_type&.symmetric?
     def inverse_code = party_link_type&.inverse_code
 
     private
 
     def no_self_link
-      errors.add(:base, "source and target cannot be the same party") if source_party_id.present? && source_party_id == target_party_id
+      return if source_party_id.blank? || target_party_id.blank?
+      errors.add(:base, "source and target cannot be the same party") if source_party_id == target_party_id
     end
 
     def dates_in_order
@@ -51,20 +54,16 @@ module Party
       return if a.blank? || b.blank? || party_link_type_code.blank?
 
       scope = self.class.where(party_link_type_code: party_link_type_code)
-      if symmetric?
-        scope = scope.where(
-          "(source_party_id = :a AND target_party_id = :b) OR (source_party_id = :b AND target_party_id = :a)",
-          a:, b:
-        )
-      else
-        scope = scope.where(source_party_id: a, target_party_id: b)
-      end
+      scope = if symmetric?
+                scope.where("(source_party_id = :a AND target_party_id = :b) OR (source_party_id = :b AND target_party_id = :a)", a:, b:)
+              else
+                scope.where(source_party_id: a, target_party_id: b)
+              end
       scope = scope.where.not(id: id) if persisted?
 
-      # overlap test: (other.start <= this.end) AND (other.end >= this.start), with NULL as open interval
       s = started_on || Date.new(0)
       e = ended_on   || Date.new(9999, 12, 31)
-      if scope.where("(COALESCE(started_on, '0001-01-01') <= ?) AND (COALESCE(ended_on, '9999-12-31') >= ?)", e, s).exists?
+      if scope.where("(COALESCE(started_on,'0001-01-01') <= ?) AND (COALESCE(ended_on,'9999-12-31') >= ?)", e, s).exists?
         errors.add(:base, "duplicate relationship for the same interval")
       end
     end
@@ -73,7 +72,6 @@ module Party
     def ensure_inverse!
       return if symmetric?
       return if inverse_code.blank?
-
       inv = self.class.find_or_initialize_by(
         source_party_id: target_party_id,
         target_party_id: source_party_id,
@@ -84,12 +82,36 @@ module Party
       inv.save! if inv.new_record?
     end
 
+    # Catalog-based guards with JSON-safe handling.
     def party_type_allowed
       lt = party_link_type
-      return if lt.blank?
-      from_ok = Array(lt.allowed_from_party_types).include?(source_party.party_type)
-      to_ok   = Array(lt.allowed_to_party_types).include?(target_party.party_type)
-      errors.add(:base, "party types not allowed for #{lt.code}") unless from_ok && to_ok
+      unless lt
+        errors.add(:party_link_type_code, "is invalid")
+        return
+      end
+
+      from_type = source_party&.party_type || ::Party::Party.where(id: source_party_id).limit(1).pick(:party_type)
+      to_type   = target_party&.party_type || ::Party::Party.where(id: target_party_id).limit(1).pick(:party_type)
+      unless from_type && to_type
+        errors.add(:base, "source and target must exist")
+        return
+      end
+
+      from_allowed = json_array(lt[:allowed_from_party_types]).map!(&:to_s)
+      to_allowed   = json_array(lt[:allowed_to_party_types]).map!(&:to_s)
+
+      if from_allowed.any? && !from_allowed.include?(from_type.to_s)
+        errors.add(:source_party_id, "party_type #{from_type} not allowed for #{lt.code}")
+      end
+      if to_allowed.any? && !to_allowed.include?(to_type.to_s)
+        errors.add(:target_party_id, "party_type #{to_type} not allowed for #{lt.code}")
+      end
+    end
+
+    def json_array(v)
+      return v if v.is_a?(Array)
+      return JSON.parse(v) rescue [] if v.is_a?(String)
+      []
     end
   end
 end
