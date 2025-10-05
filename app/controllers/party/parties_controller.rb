@@ -76,7 +76,6 @@ module Party
       @party.addresses.build(country_code: "US") if @party.addresses.empty?
       @party.emails.build                         if @party.emails.empty?
       @party.phones.build(country_alpha2: "US")   if @party.phones.empty?
-      ensure_identifier_stub(@party)
     end
 
     def edit
@@ -85,13 +84,16 @@ module Party
       @party.addresses.build(country_code: "US") if @party.addresses.empty?
       @party.emails.build                         if @party.emails.empty?
       @party.phones.build(country_alpha2: "US")   if @party.phones.empty?
-      ensure_identifier_stub(@party)
     end
 
     def create
       return add_row_and_render(:new)  if params[:add_address] || params[:add_email] || params[:add_phone] || params[:add_identifier]
 
-      attrs = scrub_email_params(scrub_address_params(party_params)).dup
+      attrs = scrub_email_params(
+          scrub_address_params(
+            scrub_identifier_params(
+              scrub_phone_params(party_params)
+            ))).dup
       @party = ::Party::Party.new(attrs)
       if @party.save
         redirect_to party_party_path(@party.public_id), notice: "Party created"
@@ -103,12 +105,16 @@ module Party
     def update
       return add_row_and_render(:edit) if params[:add_address] || params[:add_email] || params[:add_phone] || params[:add_identifier]
 
-      attrs = scrub_email_params(scrub_address_params(party_params)).dup
+      attrs = scrub_email_params(
+          scrub_address_params(
+            scrub_identifier_params(
+              scrub_phone_params(party_params)
+            ))).dup
       if @party.update(attrs)
         redirect_to party_party_path(@party.public_id), notice: "Party updated"
       else
         load_ref_options
-        ensure_identifier_stub(@party)
+        # ensure_identifier_stub(@party)
         render :edit, status: :unprocessable_entity
       end
     rescue ActiveRecord::RecordNotUnique => e
@@ -120,7 +126,7 @@ module Party
         end
         @party.errors.add(:base, "That SSN/EIN is already in use by another profile")
         load_ref_options
-        ensure_identifier_stub(@party)
+        # ensure_identifier_stub(@party)
         render :edit, status: :unprocessable_entity
       else
         raise
@@ -182,7 +188,7 @@ module Party
           :phone_e164, :is_primary, :consent_sms, :_destroy
         ],
         identifiers_attributes: [
-          :id, :identifier_type_id, :value, :is_primary,
+          :id, :id_type_code, :value, :is_primary,
           :country_code, :issuing_authority, :issued_on, :expires_on, :_destroy
         ]
       )
@@ -207,7 +213,12 @@ module Party
 
     def add_row_and_render(view)
       @party ||= ::Party::Party.new
-      @party.assign_attributes(scrub_email_params(scrub_address_params(party_params)))
+      @party.assign_attributes(
+        scrub_email_params(
+          scrub_address_params(
+            scrub_identifier_params(
+              scrub_phone_params(party_params)
+            ))))
 
       @party.addresses.build(country_code: "US") if params[:add_address]
       @party.emails.build                        if params[:add_email]
@@ -253,8 +264,8 @@ module Party
 
     def ensure_identifier_stub(party)
       return if party.identifiers.respond_to?(:tax_ids) && party.identifiers.tax_ids.exists?(is_primary: true)
-      type = party.organization ? "ein" : "ssn"
-      party.identifiers.build(id_type_code: type, is_primary: true)
+      code = (party.party_type == "organization") ? "ein" : "ssn"
+      party.identifiers.build(id_type_code: code, is_primary: true)
     end
 
     # search helpers
@@ -281,6 +292,51 @@ module Party
       cause.respond_to?(:error_number) &&
         cause.error_number == 1062 &&                         # MySQL duplicate key
         err.message.include?("idx_unique_identifier_value")   # your unique index name
+    end
+
+    def scrub_identifier_params(attrs)
+      attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_h : attrs
+      ihash = attrs.deep_dup[:identifiers_attributes]
+      return attrs unless ihash.is_a?(Hash)
+
+      cleaned = ihash.values.map { |h| h.symbolize_keys }
+
+      cleaned.each do |h|
+        # normalize incoming keys
+        if h[:identifier_type_code].present? && h[:id_type_code].blank?
+          h[:id_type_code] = h.delete(:identifier_type_code)
+        end
+        if h[:identifier_type_id].present? && h[:id_type_code].blank?
+          code = Ref::IdentifierType.find_by(id: h.delete(:identifier_type_id))&.code
+          h[:id_type_code] = code if code
+        end
+
+        # ensure association matches the code for model validations
+        if h[:id_type_code].present? && h[:identifier_type_id].blank?
+          h[:identifier_type_id] = Ref::IdentifierType.find_by(code: h[:id_type_code])&.id
+        end
+
+        # preserve existing encrypted value on edit when left blank
+        h.delete(:value) if h[:id].present? && h[:value].to_s.strip.blank?
+      end
+
+      # drop brand-new empty rows
+      content_keys = %i[id_type_code value country_code issuing_authority issued_on expires_on is_primary]
+      cleaned.select! { |h| h[:id].present? || content_keys.any? { |k| h[k].to_s.strip.present? } }
+
+      attrs[:identifiers_attributes] = cleaned.each_with_index.to_h { |h, i| [ i.to_s, h ] }
+      attrs
+    end
+
+    def scrub_phone_params(attrs)
+      attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_h : attrs
+      attrs = attrs.deep_dup
+      ph = attrs.delete(:phones)
+      return attrs unless ph.is_a?(Hash) # already correct or absent
+
+      # wrap single phone hash as nested-attributes hash
+      attrs[:phones_attributes] = { "0" => ph.symbolize_keys }
+      attrs
     end
   end
 end

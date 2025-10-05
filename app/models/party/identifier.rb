@@ -16,18 +16,19 @@ module Party
 
     validates :identifier_type, presence: true
     validates :value, presence: true
-    validates :value_len, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
     validates :value_last4, length: { maximum: 4 }, allow_nil: true
     validate  :single_primary_per_type
     validate  :no_duplicate_identifier
     validate  :issuer_requirements
+    validates :value_len, numericality: { only_integer: true, allow_nil: true }
 
     # NEW
     before_validation :normalize_value
     before_validation :sync_legacy_code
     before_validation :derive_len_last4   # NEW
-    # REMOVED: before_save :set_mask
-
+    before_validation do
+      self.identifier_type ||= Ref::IdentifierType.find_by(code: id_type_code) if id_type_code.present? && identifier_type_id.blank?
+    end
     # Convenience
     def id_type_code = identifier_type&.code
 
@@ -93,12 +94,13 @@ module Party
     # REMOVED: set_mask (we no longer persist masked strings)
 
     def issuer_requirements
-      return unless identifier_type
-      if identifier_type.require_issuer_country && country_code.blank?
-        errors.add(:country_code, "is required for #{identifier_type.name}")
+      t = identifier_type || Ref::IdentifierType.find_by(code: id_type_code)
+      return unless t
+      if t.require_issuer_country && country_code.blank?
+        errors.add(:country_code, "is required for #{t.name}")
       end
-      if identifier_type.require_issuer_region && issuing_authority.blank?
-        errors.add(:issuing_authority, "is required for #{identifier_type.name}")
+      if t.require_issuer_region && issuing_authority.blank?
+        errors.add(:issuing_authority, "is required for #{t.name}")
       end
     end
 
@@ -121,6 +123,12 @@ module Party
     def sync_legacy_code
       return unless has_attribute?(:id_type_code)
       self.id_type_code = identifier_type&.code
+    end
+
+    def set_value_len
+      return unless value.present?
+      normalized = self.class.normalize(value, id_type_code) # your existing normalizer
+      self.value_len = normalized.to_s.length
     end
   end
 end

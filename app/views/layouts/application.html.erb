@@ -93,12 +93,12 @@
     <header class="bg-base-100 border-b">
       <div class="max-w-7xl mx-auto flex flex-row flex-wrap md:flex-nowrap items-center justify-between gap-3 px-4 md:px-6 py-3">
 
-        <!-- left: logo -->
+        <!-- left -->
         <%= link_to root_path, class: "flex items-center gap-2 shrink-0" do %>
           <%= render "shared/logo" %>
         <% end %>
 
-        <!-- center: nav -->
+        <!-- center -->
         <nav class="hidden md:flex flex-1 justify-center items-center gap-2" role="navigation" aria-label="Main">
           <%= link_to "Home", root_path, class: "btn btn-ghost btn-sm" %>
           <%= link_to "Parties", party_parties_path, class: "btn btn-ghost btn-sm" %>
@@ -106,39 +106,31 @@
           <%= link_to "Reports", "#", class: "btn btn-ghost btn-sm" %>
         </nav>
 
-        <!-- right: actions -->
+        <!-- right -->
         <div class="flex items-center gap-3 shrink-0">
-        <%= form_with url: party_parties_path, method: :get, local: true, class: "join hidden md:flex" do %>
-          <%= select_tag :search_type,
-                options_for_select([["ID/Name","id_name"],["Tax ID","tax_id"]],
-                                  params[:search_type].presence || "id_name"),
-                id: "party-search-type",
-                class: "select select-bordered select-sm join-item" %>
+          <%= form_with url: party_parties_path, method: :get, local: true, class: "join hidden md:flex" do %>
+            <%= select_tag :search_type,
+                  options_for_select([["ID/Name","id_name"],["Tax ID","tax_id"]], params[:search_type].presence || "id_name"),
+                  id: "party-search-type",
+                  class: "select select-bordered select-sm join-item" %>
 
-          <div class="join">
-            <%= text_field_tag :q, params[:q],
-                  id: "party-search-q",
-                  aria: { label: "Search parties" },
-                  class: "input input-bordered input-sm join-item w-64 md:w-80",
-                  placeholder: "Search by name or customer #" %>
+            <div class="join">
+              <%= text_field_tag :q, params[:q],
+                    id: "party-search-q",
+                    aria: { label: "Search parties" },
+                    class: "input input-bordered input-sm join-item w-64 md:w-80",
+                    placeholder: "Search by name or customer #" %>
+              <button id="party-search-reveal" type="button" class="btn btn-sm join-item hidden" aria-label="Show tax ID">👁</button>
+            </div>
 
-            <!-- reveal toggle appears only in tax-id mode -->
-            <button id="party-search-reveal"
-                    type="button"
-                    class="btn btn-sm join-item hidden"
-                    aria-label="Show tax ID">
-              👁
-            </button>
-          </div>
-
-          <button class="btn btn-sm join-item" type="submit">Search</button>
-        <% end %>
-
+            <button class="btn btn-sm join-item" type="submit">Search</button>
+          <% end %>
 
           <%= link_to "New Party", new_party_party_path, class: "btn btn-primary btn-sm hidden md:inline-flex" %>
-
           <%= render "shared/user_menu" %>
-      </div>
+        </div> <!-- right -->
+
+      </div> <!-- header container -->
     </header>
 
     <main class="max-w-7xl mx-auto px-4 md:px-6 py-6">
@@ -170,6 +162,6 @@
       </div>
   </footer>
 
-
+    <turbo-frame id="comm_modal_frame"></turbo-frame>
   </body>
 </html>

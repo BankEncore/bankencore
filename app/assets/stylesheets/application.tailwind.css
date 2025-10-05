@@ -170,3 +170,24 @@
   --depth: 0;
   --noise: 0;
 }
+
+turbo-frame#comm_modal_frame{
+  position: static !important;
+  transform: none !important;
+  contain: none !important;
+  display: block !important;
+  overflow: visible !important;
+}
+
+turbo-frame#comm_modal_frame.addresses-modal{
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 10000 !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 1rem !important;
+  background: rgba(0,0,0,.4);
+}
+turbo-frame#comm_modal_frame.addresses-modal > *{
+  position: static !important;    /* prevent nested fixed from misbehaving */
+}

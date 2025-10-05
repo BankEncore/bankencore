@@ -1,0 +1,20 @@
+<%= turbo_frame_tag dom_id(address, :modal) do %>
+  <dialog open class="modal">
+    <div class="modal-box">
+      <h3 class="font-semibold mb-3"><%= address.persisted? ? "Edit address" : "Add address" %></h3>
+
+      <%= form_with(model: [party, address],
+            id: dom_id(address, :form),
+            data: { turbo: true }) do |f| %>
+
+        <%= render "party/addresses/fields",
+              f: f, address_types: address_types, countries: countries %>
+
+        <div class="modal-action mt-6">
+          <button type="button" class="btn btn-ghost" data-action="click->modal#close">Cancel</button>
+          <%= f.submit "Save", class: "btn btn-primary", data: { disable_with: "Saving…" } %>
+        </div>
+      <% end %>
+    </div>
+  </dialog>
+<% end %>

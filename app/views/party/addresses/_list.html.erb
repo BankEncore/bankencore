@@ -3,7 +3,7 @@
     <h3 class="font-semibold">Addresses</h3>
     <%= link_to "Add",
       new_party_party_address_path(party.public_id, from: :show),
-      data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
+      data: { turbo_frame: "comm_modal_frame" },
       class: "btn btn-secondary btn-soft btn-xs" %>
   </div>
 
@@ -15,7 +15,7 @@
             <div>
               <%= [address.line1, address.line2].compact_blank.join(", ") %>
               <% tail = [address.locality, [address.region_code, address.postal_code].compact_blank.join(" ")].compact_blank.join(", ") %>
-              <% if tail.present? %> <br/> <%= tail %><% end %>
+              <% if tail.present? %><br><%= tail %><% end %>
               <% if address.country_code.present? %> · <%= address.country_code %><% end %>
               <% if address.is_primary %><span class="badge badge-primary badge-soft badge-sm ml-2 align-middle">Primary</span><% end %>
             </div>
@@ -31,7 +31,7 @@
 
             <%= link_to "Edit",
               edit_party_party_address_path(party.public_id, address, from: :show),
-              data: { turbo_frame: "comm_modal_frame", action: "click->modal#open" },
+              data: { turbo_frame: "comm_modal_frame" },
               class: "btn btn-ghost btn-xs" %>
 
             <%= button_to "Delete",

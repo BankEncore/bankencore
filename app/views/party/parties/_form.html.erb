@@ -1,11 +1,11 @@
-<%# app/views/party/parties/_form.html.erb — DROP-IN, unified layout %>
 <div class="mx-auto max-w-3xl">
 <%= form_with model: @party,
       scope: :party_party,
       url: (@party.persisted? ? party_party_path(@party.public_id) : party_parties_path),
       data: { turbo: false },
-      class: "space-y-6" do |f| %>
+      class: "space-y-6 relative overflow-visible" do |f| %>
 
+  <%# ---- Error summary ---- %>
   <% if @party.errors.any? ||
         @party.person&.errors&.any? || @party.organization&.errors&.any? ||
         @party.addresses.any? { |a| a.errors.any? } ||
@@ -25,8 +25,8 @@
   <% end %>
 
   <%# ================= Identity ================= %>
-  <div class="card bg-base-100 shadow">
-    <div class="card-body">
+  <div class="card bg-base-100 shadow overflow-visible">
+    <div class="card-body overflow-visible">
       <div class="grid grid-cols-12 gap-4" data-controller="party-type">
         <h2 class="col-span-12 text-sm font-semibold tracking-wide uppercase text-base-content/70">Identity</h2>
 
@@ -67,73 +67,68 @@
               <div class="col-span-12 md:col-span-3">
                 <label class="label-text mb-1 block">Suffix</label>
                 <%= pf.text_field :name_suffix, class:"input input-bordered w-full", autocomplete:"honorific-suffix" %>
-                      </div>
-                      <div class="col-span-12 md:col-span-3">
-                        <label class="label-text mb-1 block">Date of birth</label>
-                        <%= pf.date_field :date_of_birth, class:"input input-bordered w-full", autocomplete:"bday" %>
-                      </div>
-                    </div>
-                  <% end %>
-                </fieldset>
-
-                <%# -------- Organization -------- %>
-                <fieldset class="col-span-12 <%= @party.party_type=='person' ? 'hidden' : '' %>"
-                          data-party-type-target="orgSection">
-                  <h3 class="text-sm font-semibold tracking-wide uppercase text-base-content/70 mb-2">Organization</h3>
-                  <%= f.fields_for :organization do |of| %>
-                    <%= of.hidden_field :_destroy,
-                          value: (@party.party_type=='person' ? "1" : "0"),
-                          data: { party_type_target: "orgDestroy" } %>
-                    <div class="grid grid-cols-12 gap-4">
-                      <div class="col-span-12">
-                        <label class="label-text mb-1 block">Legal name</label>
-                        <%= of.text_field :legal_name, class:"input input-bordered w-full", autocapitalize:"words" %>
-                      </div>
-                      <div class="col-span-12">
-                        <label class="label-text mb-1 block">DBA</label>
-                        <%= of.text_field :operating_name, class:"input input-bordered w-full", autocapitalize:"words" %>
-                      </div>
-                      <div class="col-span-12 md:col-span-6">
-                        <label class="label-text mb-1 block">Type</label>
-                        <%= of.text_field :organization_type_code, class:"input input-bordered w-full" %>
-                      </div>
-                      <div class="col-span-12 md:col-span-6">
-                        <label class="label-text mb-1 block">Formation date</label>
-                        <%= of.date_field :formation_date, class:"input input-bordered w-full" %>
-                      </div>
-                    </div>
-                  <% end %>
-                </fieldset>
-
-                <%# -------- Identifiers (moved below) -------- %>
-                <div class="col-span-12">
-                  <details class="rounded-box border p-3 open:pt-3">
-                    <summary class="flex items-center gap-2 cursor-pointer">
-                      <span class="text-sm font-medium">Identifiers</span>
-                      <span class="badge"><%= @party.identifiers.size %></span>
-                      <span class="ml-auto">
-                        <%= button_tag "Add",
-                              name: :add_identifier, value: "1",
-                              class: "btn btn-ghost btn-xs",
-                              onclick: "event.stopPropagation()" %>
-                      </span>
-                    </summary>
-
-                    <div class="pt-3">
-                      <% if @party.new_record? && @party.identifiers.blank? %>
-                        <% code  = (@party.party_type == "organization" ? "ein" : "ssn") %>
-                        <% itype = Ref::IdentifierType.find_by!(code: code) %>
-                        <% @party.identifiers.build(identifier_type: itype, is_primary: true) %>
-                      <% end %>
-
-        <ul role="list" class="space-y-3">
-          <%= f.fields_for :identifiers do |idf| %>
-            <%= render "party/identifiers/fields",
-                  f: idf,
-                  identifier_types: @identifier_types,
-                  countries: @countries %>
+              </div>
+              <div class="col-span-12 md:col-span-3">
+                <label class="label-text mb-1 block">Date of birth</label>
+                <%= pf.date_field :date_of_birth, class:"input input-bordered w-full", autocomplete:"bday" %>
+              </div>
+            </div>
           <% end %>
-        </ul>
+        </fieldset>
+
+        <%# -------- Organization -------- %>
+        <fieldset class="col-span-12 <%= @party.party_type=='person' ? 'hidden' : '' %>"
+                  data-party-type-target="orgSection">
+          <h3 class="text-sm font-semibold tracking-wide uppercase text-base-content/70 mb-2">Organization</h3>
+          <%= f.fields_for :organization do |of| %>
+            <%= of.hidden_field :_destroy,
+                  value: (@party.party_type=='person' ? "1" : "0"),
+                  data: { party_type_target: "orgDestroy" } %>
+            <div class="grid grid-cols-12 gap-4">
+              <div class="col-span-12">
+                <label class="label-text mb-1 block">Legal name</label>
+                <%= of.text_field :legal_name, class:"input input-bordered w-full", autocapitalize:"words" %>
+              </div>
+              <div class="col-span-12">
+                <label class="label-text mb-1 block">DBA</label>
+                <%= of.text_field :operating_name, class:"input input-bordered w-full", autocapitalize:"words" %>
+              </div>
+              <div class="col-span-12 md:col-span-6">
+                <label class="label-text mb-1 block">Type</label>
+                <%= of.text_field :organization_type_code, class:"input input-bordered w-full" %>
+              </div>
+              <div class="col-span-12 md:col-span-6">
+                <label class="label-text mb-1 block">Formation date</label>
+                <%= of.date_field :formation_date, class:"input input-bordered w-full" %>
+              </div>
+            </div>
+          <% end %>
+        </fieldset>
+
+        <%# -------- Identifiers -------- %>
+        <div class="col-span-12">
+          <details class="rounded-box border p-3 open:pt-3">
+            <summary class="flex items-center gap-2 cursor-pointer">
+              <span class="text-sm font-medium">Identifiers</span>
+              <span class="badge"><%= @party.identifiers.size %></span>
+              <span class="ml-auto">
+                <%= button_tag "Add",
+                      name: :add_identifier, value: "1",
+                      class: "btn btn-ghost btn-xs",
+                      onclick: "event.stopPropagation()" %>
+              </span>
+            </summary>
+
+            <div class="pt-3">
+
+              <ul role="list" class="space-y-3">
+                <%= f.fields_for :identifiers do |idf| %>
+                  <%= render "party/identifiers/fields",
+                        f: idf,
+                        identifier_types: @identifier_types,
+                        countries: @countries %>
+                <% end %>
+              </ul>
               <p class="text-xs opacity-70 mt-2">Encrypted at rest. Leave value blank to keep existing.</p>
             </div>
           </details>
@@ -143,249 +138,251 @@
   </div>
 
   <%# ================= Communications ================= %>
-  <div class="card bg-base-100 shadow">
-    <div class="card-body">
+  <div class="card bg-base-100 shadow overflow-visible">
+    <div class="card-body overflow-visible">
       <div class="grid grid-cols-12 gap-4">
         <h2 class="col-span-12 text-sm font-semibold tracking-wide uppercase text-base-content/70">Communications</h2>
 
- <%# Addresses %>
-<details class="col-span-12 rounded-box border p-3 open:pt-3">
-  <summary class="flex items-center gap-2 cursor-pointer">
-    <span class="text-sm font-medium">Addresses</span>
-    <span class="badge"><%= @party.addresses.size %></span>
-    <span class="ml-auto">
-      <%= button_tag "Add address", name: :add_address, value: "1", class:"btn btn-ghost btn-xs" %>
-    </span>
-  </summary>
+        <%# Addresses %>
+        <details class="col-span-12 rounded-box border p-3 open:pt-3">
+          <summary class="flex items-center gap-2 cursor-pointer">
+            <span class="text-sm font-medium">Addresses</span>
+            <span class="badge"><%= @party.addresses.size %></span>
+            <span class="ml-auto">
+              <%= button_tag "Add address", name: :add_address, value: "1", class:"btn btn-ghost btn-xs" %>
+            </span>
+          </summary>
 
-  <div class="pt-3">
-    <fieldset data-controller="single-primary">
-      <ul role="list" class="space-y-3">
-        <%= f.fields_for :addresses do |af| %>
-          <li class="border rounded-box p-3"
-              data-single-primary-target="row"
-              data-controller="region-select"
-              data-region-select-url-value="<%= ref_regions_path(format: :json) %>">
-            <div class="grid grid-cols-[auto,1fr] gap-3 items-start">
-              <!-- Column 1: primary radio -->
-              <div class="pt-6">
-                <%= af.hidden_field :id %>
-                <%= af.hidden_field :is_primary,
-                      value: (af.object.is_primary? ? 1 : 0),
-                      data: { single_primary_target: "hidden" } %>
-                <% rid = "#{af.object.object_id}_addr_primary" %>
-                <input id="<%= rid %>" type="radio"
-                       data-action="change->single-primary#pick"
-                       data-single-primary-target="radio"
-                       <%= "checked" if af.object.is_primary? %> />
-                <label for="<%= rid %>" class="text-sm">Primary</label>
-              </div>
+          <div class="pt-3">
+            <fieldset data-controller="single-primary">
+              <ul role="list" class="space-y-3">
+                <%= f.fields_for :addresses do |af| %>
+                  <li class="border rounded-box p-3"
+                      data-single-primary-target="row"
+                      data-controller="region-select"
+                      data-region-select-url-value="<%= ref_regions_path(format: :json) %>">
+                    <div class="grid grid-cols-[auto,1fr] gap-3 items-start">
+                      <div class="pt-6">
+                        <%= af.hidden_field :id %>
+                        <% aprimary = af.object&.is_primary ? 1 : 0 %>
+                        <%= af.hidden_field :is_primary, value: aprimary, data: { single_primary_target: "hidden" } %>
+                        <% rid = "#{af.object.object_id}_addr_primary" %>
+                        <input id="<%= rid %>" type="radio"
+                               data-action="change->single-primary#pick"
+                               data-single-primary-target="radio"
+                               <%= "checked" if aprimary == 1 %> />
+                        <label for="<%= rid %>" class="text-sm">Primary</label>
+                      </div>
 
-              <!-- Column 2: existing address fields -->
-              <div class="grid md:grid-cols-12 gap-3 w-full">
-                <div class="md:col-span-3">
-                  <label class="label-text mb-1 block">Type</label>
-                  <%= af.collection_select :address_type_code, @address_types, :code, :name,
-                        { include_blank: true }, { class: "select select-bordered w-full" } %>
-                </div>
+                      <div class="grid md:grid-cols-12 gap-3 w-full">
+                        <div class="md:col-span-3">
+                          <label class="label-text mb-1 block">Type</label>
+                          <%= af.collection_select :address_type_code, @address_types, :code, :name,
+                                { include_blank: true }, { class: "select select-bordered w-full" } %>
+                        </div>
 
-                <div class="md:col-span-9">
-                  <label class="label-text mb-1 block">Line 1</label>
-                  <%= af.text_field :line1, class:"input input-bordered w-full",
-                        placeholder:"Street address", autocomplete:"address-line1" %>
-                </div>
+                        <div class="md:col-span-9">
+                          <label class="label-text mb-1 block">Line 1</label>
+                          <%= af.text_field :line1, class:"input input-bordered w-full",
+                                placeholder:"Street address", autocomplete:"address-line1" %>
+                        </div>
 
-                <div class="md:col-span-6">
-                  <%= af.text_field :line2, placeholder:"Apt, suite, etc. (optional)",
-                        class:"input input-bordered w-full", autocomplete:"address-line2" %>
-                </div>
+                        <div class="md:col-span-6">
+                          <%= af.text_field :line2, placeholder:"Apt, suite, etc. (optional)",
+                                class:"input input-bordered w-full", autocomplete:"address-line2" %>
+                        </div>
 
-                <div class="md:col-span-6">
-                  <%= af.text_field :line3, placeholder:"Attention / care of (optional)",
-                        class:"input input-bordered w-full", autocomplete:"address-line3" %>
-                </div>
+                        <div class="md:col-span-6">
+                          <%= af.text_field :line3, placeholder:"Attention / care of (optional)",
+                                class:"input input-bordered w-full", autocomplete:"address-line3" %>
+                        </div>
 
-                <div class="md:col-span-4">
-                  <label class="label-text mb-1 block">Country</label>
-                  <%= af.collection_select :country_code, @countries, :code, :name,
-                        { include_blank: true },
-                        { class:"select select-bordered w-full",
-                          data: { region_select_target:"country", action:"change->region-select#refresh" },
-                          autocomplete:"country" } %>
-                </div>
+                        <div class="md:col-span-4">
+                          <label class="label-text mb-1 block">Country</label>
+                          <%= af.collection_select :country_code, @countries, :code, :name,
+                                { include_blank: true },
+                                { class:"select select-bordered w-full",
+                                  data: { region_select_target:"country", action:"change->region-select#refresh" },
+                                  autocomplete:"country" } %>
+                        </div>
 
-                <div class="md:col-span-4">
-                  <label class="label-text mb-1 block">Region/State</label>
-                  <%= af.select :region_code,
-                        options_for_select(regions_for(af.object.country_code), af.object.region_code),
-                        { include_blank: true },
-                        { class:"select select-bordered w-full",
-                          data: { region_select_target:"region", selected:af.object.region_code },
-                          autocomplete:"address-level1",
-                          disabled: af.object.country_code.blank? } %>
-                </div>
+                        <div class="md:col-span-4">
+                          <label class="label-text mb-1 block">Region/State</label>
+                          <%= af.select :region_code,
+                                options_for_select(regions_for(af.object.country_code), af.object.region_code),
+                                { include_blank: true },
+                                { class:"select select-bordered w-full",
+                                  data: { region_select_target:"region", selected:af.object.region_code },
+                                  autocomplete:"address-level1",
+                                  disabled: af.object.country_code.blank? } %>
+                        </div>
 
-                <div class="md:col-span-4">
-                  <label class="label-text mb-1 block">City</label>
-                  <%= af.text_field :locality, class:"input input-bordered w-full",
-                        autocomplete:"address-level2" %>
-                </div>
+                        <div class="md:col-span-4">
+                          <label class="label-text mb-1 block">City</label>
+                          <%= af.text_field :locality, class:"input input-bordered w-full",
+                                autocomplete:"address-level2" %>
+                        </div>
 
-                <div class="md:col-span-4">
-                  <label class="label-text mb-1 block">Postal</label>
-                  <%= af.text_field :postal_code, class:"input input-bordered w-full",
-                        inputmode:"numeric", autocomplete:"postal-code" %>
-                </div>
+                        <div class="md:col-span-4">
+                          <label class="label-text mb-1 block">Postal</label>
+                          <%= af.text_field :postal_code, class:"input input-bordered w-full",
+                                inputmode:"numeric", autocomplete:"postal-code" %>
+                        </div>
 
-                <div class="md:col-span-8 flex items-center gap-4 pt-1">
-                  <label class="label cursor-pointer gap-2">
-                    <%= af.check_box :_destroy, class:"checkbox" %>
-                    <span class="label-text">Remove</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </li>
-        <% end %>
-      </ul>
-    </fieldset>
-  </div>
-</details>
-
-<%# Phones %>
-<details class="col-span-12 rounded-box border p-3 open:pt-3">
-  <summary class="flex items-center gap-2 cursor-pointer">
-    <span class="text-sm font-medium">Phones</span>
-    <span class="badge"><%= @party.phones.size %></span>
-    <span class="ml-auto">
-      <%= button_tag "Add phone", name: :add_phone, value: "1", class:"btn btn-ghost btn-xs" %>
-    </span>
-  </summary>
-
-    <div class="pt-3">
-        <fieldset data-controller="single-primary">
-          <ul role="list" class="space-y-3">
-            <%= f.fields_for :phones do |pf| %>
-              <li class="border rounded-box p-3" data-single-primary-target="row">
-                <div class="grid grid-cols-[auto,1fr] gap-3 items-start">
-                  <!-- Column 1: primary radio -->
-                  <div class="pt-6">
-                    <%= pf.hidden_field :id %>
-                    <%= pf.hidden_field :is_primary,
-                          value: (pf.object.is_primary? ? 1 : 0),
-                          data: { single_primary_target: "hidden" } %>
-                    <% rid = "#{pf.object.object_id}_phone_primary" %>
-                    <input id="<%= rid %>" type="radio"
-                          data-action="change->single-primary#pick"
-                          data-single-primary-target="radio"
-                          <%= "checked" if pf.object.is_primary? %> />
-                    <label for="<%= rid %>" class="text-sm">Primary</label>
-                  </div>
-
-                  <!-- Column 2: existing phone fields -->
-                  <div class="grid md:grid-cols-5 gap-3 w-full items-start">
-                    <div>
-                      <label class="label-text mb-1 block">Phone type</label>
-                      <%= pf.collection_select :phone_type_code, @phone_types, :code, :name,
-                            { include_blank: true }, { class:"select select-bordered w-full" } %>
+                        <div class="md:col-span-8 flex items-center gap-4 pt-1">
+                          <label class="label cursor-pointer gap-2">
+                            <%= af.check_box :_destroy, class:"checkbox" %>
+                            <span class="label-text">Remove</span>
+                          </label>
+                        </div>
+                      </div>
                     </div>
+                  </li>
+                <% end %>
+              </ul>
+            </fieldset>
+          </div>
+        </details>
 
-                    <div class="md:col-span-2">
-                      <label class="label-text mb-1 block">Phone</label>
-                      <%= pf.telephone_field :phone_e164, class:"input input-bordered w-full",
-                            placeholder:"+15551234567", inputmode:"tel", autocomplete:"tel" %>
-                    </div>
+        <%# Phones %>
+        <details class="col-span-12 rounded-box border p-3 open:pt-3">
+          <summary class="flex items-center gap-2 cursor-pointer">
+            <span class="text-sm font-medium">Phones</span>
+            <span class="badge"><%= @party.phones.size %></span>
+            <span class="ml-auto">
+              <%= button_tag "Add phone", name: :add_phone, value: "1", class:"btn btn-ghost btn-xs" %>
+            </span>
+          </summary>
 
-                    <div>
-                      <label class="label-text mb-1 block">Ext</label>
-                      <%= pf.text_field :phone_ext, class:"input input-bordered w-full", inputmode:"numeric" %>
-                    </div>
+          <div class="pt-3">
+            <fieldset data-controller="single-primary">
+              <ul role="list" class="space-y-3">
+                <%= f.fields_for :phones do |pf| %>
+                  <li class="border rounded-box p-3" data-single-primary-target="row">
+                    <div class="grid grid-cols-[auto,1fr] gap-3 items-start">
+                      <div class="pt-6">
+                        <%= pf.hidden_field :id %>
+                        <% pprimary = pf.object&.is_primary ? 1 : 0 %>
+                        <%= pf.hidden_field :is_primary, value: pprimary, data: { single_primary_target: "hidden" } %>
 
-                    <div class="flex items-center gap-4 pt-6">
-                      <label class="label cursor-pointer gap-2">
-                        <%= pf.check_box :consent_sms, class:"checkbox" %>
-                        <span class="label-text">SMS consent</span>
-                      </label>
-                    </div>
+                        <% rid = "#{pf.object.object_id}_phone_primary" %>
+                        <input id="<%= rid %>"
+                               type="radio"
+                               data-action="change->single-primary#pick"
+                               data-single-primary-target="radio"
+                               <%= "checked" if pprimary == 1 %> />
+                        <label for="<%= rid %>" class="text-sm">Primary</label>
+                      </div>
 
-                    <div class="md:col-span-5 mt-3">
-                      <label class="label cursor-pointer gap-2">
-                        <%= pf.check_box :_destroy, class:"checkbox" %>
-                        <span class="label-text">Remove</span>
-                      </label>
+                      <div class="grid md:grid-cols-5 gap-3 w-full items-start">
+                        <div>
+                          <label class="label-text mb-1 block">Phone type</label>
+                          <%= pf.collection_select :phone_type_code, @phone_types, :code, :name,
+                                { include_blank: true }, { class: "select select-bordered w-full" } %>
+                        </div>
+
+                        <div class="md:col-span-2">
+                          <label class="label-text mb-1 block">Phone</label>
+                          <%= pf.telephone_field :phone_e164,
+                                class: "input input-bordered w-full",
+                                placeholder: "+15551234567",
+                                inputmode: "tel",
+                                autocomplete: "tel" %>
+                        </div>
+
+                        <div>
+                          <label class="label-text mb-1 block">Ext</label>
+                          <%= pf.text_field :phone_ext, class: "input input-bordered w-full", inputmode: "numeric" %>
+                        </div>
+
+                        <div class="flex items-center gap-4 pt-6">
+                          <label class="label cursor-pointer gap-2">
+                            <%= pf.check_box :consent_sms, class: "checkbox" %>
+                            <span class="label-text">SMS consent</span>
+                          </label>
+                        </div>
+
+                        <div class="md:col-span-5 mt-3">
+                          <label class="label cursor-pointer gap-2">
+                            <%= pf.check_box :_destroy, class: "checkbox" %>
+                            <span class="label-text">Remove</span>
+                          </label>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </li>
-            <% end %>
-          </ul>
-        </fieldset>
+                  </li>
+                <% end %>
+              </ul>
+            </fieldset>
+          </div>
+        </details>
+
+        <%# Emails %>
+        <details class="col-span-12 rounded-box border p-3 open:pt-3">
+          <summary class="flex items-center gap-2 cursor-pointer">
+            <span class="text-sm font-medium">Emails</span>
+            <span class="badge"><%= @party.emails.size %></span>
+            <span class="ml-auto"><%= button_tag "Add email", name: :add_email, value: "1", class:"btn btn-ghost btn-xs" %></span>
+          </summary>
+
+          <div class="pt-3">
+            <fieldset data-controller="single-primary">
+              <ul role="list" class="space-y-3">
+                <%= f.fields_for :emails do |ef| %>
+                  <li class="border rounded-box p-3" data-single-primary-target="row">
+                    <div class="grid grid-cols-[auto,1fr] gap-3 items-start">
+                      <div class="pt-6">
+                        <%= ef.hidden_field :id %>
+                        <% eprimary = ef.object&.is_primary ? 1 : 0 %>
+                        <%= ef.hidden_field :is_primary, value: eprimary, data: { single_primary_target: "hidden" } %>
+                        <% rid = "#{ef.object.object_id}_email_primary" %>
+                        <input id="<%= rid %>" type="radio"
+                               aria-label="Make primary"
+                               data-action="change->single-primary#pick"
+                               data-single-primary-target="radio"
+                               <%= "checked" if eprimary == 1 %> />
+                        <label for="<%= rid %>" class="text-sm">Primary</label>
+                      </div>
+
+                      <div class="grid grid-cols-12 gap-2 items-center w-full">
+                        <div class="col-span-5">
+                          <%= ef.email_field :email, class: "input input-sm w-full" %>
+                        </div>
+
+                        <div class="col-span-3">
+                          <%= ef.select :email_type_code,
+                                options_from_collection_for_select(@email_types, :code, :name, ef.object.email_type_code),
+                                {}, class: "select input-sm w-full" %>
+                        </div>
+
+                        <div class="col-span-4 text-right">
+                          <%= ef.hidden_field :_destroy %>
+                          <button type="button" class="btn btn-ghost btn-sm" data-action="click->nested#remove">Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                <% end %>
+              </ul>
+            </fieldset>
+          </div>
+        </details>
+
       </div>
-    </details>
-
-<%# Emails %>
-  <details class="col-span-12 rounded-box border p-3 open:pt-3">
-    <summary class="flex items-center gap-2 cursor-pointer">
-      <span class="text-sm font-medium">Emails</span>
-      <span class="badge"><%= @party.emails.size %></span>
-      <span class="ml-auto"><%= button_tag "Add email", name: :add_email, value: "1", class:"btn btn-ghost btn-xs" %></span>
-    </summary>
-
-    <div class="pt-3">
-      <fieldset data-controller="single-primary">
-        <ul role="list" class="space-y-3">
-          <%= f.fields_for :emails do |ef| %>
-            <li class="border rounded-box p-3" data-single-primary-target="row">
-              <div class="grid grid-cols-[auto,1fr] gap-3 items-start">
-                <!-- primary control -->
-                <div class="pt-6">
-                  <%= ef.hidden_field :id %>
-                  <%= ef.hidden_field :is_primary,
-                        value: (ef.object.is_primary? ? 1 : 0),
-                        data: { single_primary_target: "hidden" } %>
-                  <% rid = "#{ef.object.object_id}_primary" %>
-                  <input id="<%= rid %>" type="radio"
-                        aria-label="Make primary"
-                        data-action="change->single-primary#pick"
-                        data-single-primary-target="radio"
-                        <%= "checked" if ef.object.is_primary? %> />
-                  <label for="<%= rid %>" class="text-sm">Primary</label>
-                </div>
-
-                <!-- email fields -->
-                <div class="grid grid-cols-12 gap-2 items-center w-full">
-                  <div class="col-span-5">
-                    <%= ef.email_field :email, class: "input input-sm w-full" %>
-                  </div>
-
-                  <div class="col-span-3">
-                    <%= ef.select :email_type_code,
-                          options_from_collection_for_select(@email_types, :code, :name, ef.object.email_type_code),
-                          {}, class: "select input-sm w-full" %>
-                  </div>
-
-                  <div class="col-span-4 text-right">
-                    <%= ef.hidden_field :_destroy %>
-                    <button type="button" class="btn btn-ghost btn-sm" data-action="click->nested#remove">Remove</button>
-                  </div>
-                </div>
-              </div>
-            </li>
-          <% end %>
-        </ul>
-      </fieldset>
     </div>
-  </details>
-  
+  </div>
 
-  <%# ================= Actions ================= %>
-  <div class="sticky bottom-0 z-10 mt-4 border-t bg-base-100/95 backdrop-blur">
-    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-end gap-2">
+  <%# ================= Actions (sticky, inside form but outside cards) ================= %>
+  <div class="sticky bottom-0 inset-x-0 z-50 bg-base-100/95 backdrop-blur border-t">
+    <div class="mx-auto max-w-3xl px-4 py-3 flex items-center justify-end gap-2">
       <%= link_to "Cancel",
             (@party.persisted? ? party_party_path(@party.public_id) : party_parties_path),
             class:"btn btn-ghost" %>
-      <%= f.submit(@party.persisted? ? "Update" : "Create", class:"btn btn-primary") %>
+      <%= f.submit(@party.persisted? ? "Update" : "Create",
+            class:"btn btn-primary",
+            data: { disable_with: "Saving…" }) %>
     </div>
   </div>
+
 <% end %>
 </div>
