@@ -1,6 +1,6 @@
 <%# app/views/party/parties/show.html.erb %>
 
-<%# Modal host for Turbo-loaded forms %>
+<%# ---- Modal host for Turbo-loaded forms ---- %>
 <div data-controller="modal" data-modal-id-value="comm-modal">
   <%= render "shared/modal" %>
 </div>
@@ -42,7 +42,9 @@
         <% if @party.person %>
           <div class="py-2 grid grid-cols-3 gap-2">
             <dt class="opacity-70">Name</dt>
-            <dd class="col-span-2"><%= [@party.person.first_name, @party.person.middle_name, @party.person.last_name, @party.person.name_suffix].compact_blank.join(" ") %></dd>
+            <dd class="col-span-2">
+              <%= [@party.person.first_name, @party.person.middle_name, @party.person.last_name, @party.person.name_suffix].compact_blank.join(" ") %>
+            </dd>
           </div>
           <% if @party.person.courtesy_title.present? %>
             <div class="py-2 grid grid-cols-3 gap-2">
@@ -70,7 +72,9 @@
           <% if @party.organization.organization_type_code.present? %>
             <div class="py-2 grid grid-cols-3 gap-2">
               <dt class="opacity-70">Type</dt>
-              <dd class="col-span-2"><span class="badge badge-outline"><%= @party.organization.organization_type_code %></span></dd>
+              <dd class="col-span-2">
+                <span class="badge badge-outline"><%= @party.organization.organization_type_code %></span>
+              </dd>
             </div>
           <% end %>
           <% if @party.organization.formation_date.present? %>
@@ -98,30 +102,29 @@
 
 <%# ===== Relationships & Groups ===== %>
 <div class="grid md:grid-cols-2 gap-4 mt-6">
-  <%# --- Links (party↔party) --- %>
+  <%# --- Relationships (party↔party) --- %>
   <div class="card bg-base-100 shadow">
     <div class="card-body">
       <h2 class="card-title text-base">Relationships</h2>
 
-      <%= render "party/links/list_by_type",
-            party: @party,
-            links: @party.links
-                         .includes(:party_link_type, :source_party, :target_party)
-                         .order(:party_link_type_code) %>
-
-      <div class="mt-3">
+      <div id="links_by_type">
         <%= render "party/links/list_by_type",
-        party: @party,
-        links: @party.links.includes(:party_link_type, :source_party, :target_party).order(:party_link_type_code),
-        editable: false %>
+              party: @party,
+              links: @party.links.involving(@party.id).order(:party_link_type_code),
+              editable: true %>
       </div>
+
+      <turbo-frame id="comm_modal_frame">
+        <%= render "party/links/form",
+              party: @party,
+              link_types: Ref::PartyLinkType.order(:name) %>
+      </turbo-frame>
     </div>
   </div>
 
   <%# --- Groups (household example) --- %>
-
   <%= render "party/groups/section", party: @party %>
-
+</div>
 
 <%# ===== Screenings ===== %>
 <div class="card my-4 p-4">
@@ -129,12 +132,12 @@
     <h2 class="text-xl font-semibold">Screenings</h2>
     <div class="flex items-center gap-2">
       <% if @party.party_risk_score %>
-        <% badge = {0=>"badge-success",1=>"badge-warning",2=>"badge-error"}[@party.risk_band] %>
+        <% badge = { 0 => "badge-success", 1 => "badge-warning", 2 => "badge-error" }[@party.risk_band] %>
         <span class="badge <%= badge %>">Risk <%= @party.party_risk_score %></span>
       <% end %>
       <%= link_to "New screening",
-            new_party_party_screening_path(@party.public_id),
-            class: "btn btn-primary btn-sm" %>
+          new_party_party_screening_path(@party.public_id),
+          class: "btn btn-primary btn-sm" %>
     </div>
   </div>
 

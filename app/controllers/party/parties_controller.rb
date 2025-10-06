@@ -1,8 +1,10 @@
 # app/controllers/party/parties_controller.rb
 module Party
+  require "json"
+  require "ostruct"
   class PartiesController < ApplicationController
-    before_action :set_party, only: [ :show, :edit, :update, :destroy, :reveal_tax_id ]
-    before_action :load_ref_options, only: [ :new, :edit, :create, :update ]
+    before_action :set_party, only: %i[show edit update destroy reveal_tax_id]
+    before_action :load_ref_options, only: %i[new edit create update]
     rescue_from ActionController::ParameterMissing, with: :handle_bad_params
     helper ::Party::PartiesHelper
 
@@ -22,7 +24,7 @@ module Party
 
       base = ::Party::Party
         .includes(:person, :organization, :emails, :phones, :addresses)
-        .joins(<<~SQL.squish) # always join so ORDER BY works
+        .joins(<<~SQL.squish)
           LEFT JOIN #{ppl}  ON #{ppl}.party_id  = #{parts}.id
           LEFT JOIN #{orgs} ON #{orgs}.party_id = #{parts}.id
           LEFT JOIN #{emls} ON #{emls}.party_id = #{parts}.id
@@ -61,12 +63,57 @@ module Party
     end
 
     def show
-      @party = ::Party::Party.find_by!(public_id: params[:public_id])
+      @party     = ::Party::Party.find_by!(public_id: params[:public_id])
       @emails    = @party.emails.primary_first
       @phones    = @party.phones.primary_first
       @addresses = @party.addresses.primary_first
       @household = @party.groups.find_by(party_group_type_code: "household")
       @group     = @party.groups.find_by(party_group_type_code: "household")
+    end
+
+    # Typeahead lookup for link target selection
+    def lookup
+      q = params[:q].to_s.strip
+      types_param = params[:types]
+
+      types =
+        case types_param
+        when Array
+          types_param
+        else
+          s = types_param.to_s.strip
+          if s.start_with?("[")
+            JSON.parse(s) rescue []
+          else
+            s.split(",")
+          end
+        end
+      types = types.map(&:to_s).reject(&:blank?)
+
+      return render(json: []) if q.blank?
+
+      scope = ::Party::Party.all
+      scope = scope.where(party_type: types) if types.any?
+
+      scope =
+        if q.match?(/\A\d+\z/)
+          scope.where(customer_number: q)
+        else
+          scope.joins(<<~SQL.squish)
+            LEFT JOIN party_people pp        ON pp.party_id = parties.id
+            LEFT JOIN party_organizations po ON po.party_id = parties.id
+          SQL
+          .where("LOWER(CONCAT_WS(' ', pp.first_name, pp.last_name, po.legal_name)) LIKE ?", "%#{q.downcase}%")
+        end
+
+      results = scope
+        .select(:id, :public_id, :party_type, :customer_number)  # ← include :id
+        .limit(10)
+        .map { |p|
+          label = [ p.customer_number&.to_s&.rjust(6, "0"), p.display_name, p.party_type ].compact.join(" · ")
+          { public_id: p.public_id, label: label }
+        }
+      render json: results
     end
 
     def new
@@ -90,10 +137,11 @@ module Party
       return add_row_and_render(:new)  if params[:add_address] || params[:add_email] || params[:add_phone] || params[:add_identifier]
 
       attrs = scrub_email_params(
-          scrub_address_params(
-            scrub_identifier_params(
-              scrub_phone_params(party_params)
-            ))).dup
+        scrub_address_params(
+          scrub_identifier_params(
+            scrub_phone_params(party_params)
+          ))).dup
+
       @party = ::Party::Party.new(attrs)
       if @party.save
         redirect_to party_party_path(@party.public_id), notice: "Party created"
@@ -106,27 +154,25 @@ module Party
       return add_row_and_render(:edit) if params[:add_address] || params[:add_email] || params[:add_phone] || params[:add_identifier]
 
       attrs = scrub_email_params(
-          scrub_address_params(
-            scrub_identifier_params(
-              scrub_phone_params(party_params)
-            ))).dup
+        scrub_address_params(
+          scrub_identifier_params(
+            scrub_phone_params(party_params)
+          ))).dup
+
       if @party.update(attrs)
         redirect_to party_party_path(@party.public_id), notice: "Party updated"
       else
         load_ref_options
-        # ensure_identifier_stub(@party)
         render :edit, status: :unprocessable_entity
       end
     rescue ActiveRecord::RecordNotUnique => e
       if mysql_dup_identifier?(e)
-        # attach error to the edited identifier if present; else on base
         if (iid = params.dig(:party_party, :identifiers_attributes)&.values&.first&.dig(:id))
           rec = @party.identifiers.detect { |r| r.id.to_s == iid.to_s }
           rec&.errors&.add(:value, "is already in use by another profile")
         end
         @party.errors.add(:base, "That SSN/EIN is already in use by another profile")
         load_ref_options
-        # ensure_identifier_stub(@party)
         render :edit, status: :unprocessable_entity
       else
         raise
@@ -168,7 +214,7 @@ module Party
 
     def party_params
       params.require(:party_party).permit(
-        :party_type, # :customer_number intentionally omitted
+        :party_type,
         person_attributes: [
           :id, :first_name, :middle_name, :last_name,
           :name_suffix, :courtesy_title, :date_of_birth, :_destroy
@@ -208,8 +254,6 @@ module Party
       flash.now[:alert] = "Invalid form submission."
       render(action_name == "create" ? :new : :edit, status: :unprocessable_entity)
     end
-
-    # ------- helpers --------------------------------------------------------
 
     def add_row_and_render(view)
       @party ||= ::Party::Party.new
@@ -269,10 +313,7 @@ module Party
     end
 
     # search helpers
-    def normalize_tax_id(v)
-      v.to_s.gsub(/\W/, "")
-    end
-
+    def normalize_tax_id(v) = v.to_s.gsub(/\W/, "")
     def tax_id_bidx_for(raw)
       norm = normalize_tax_id(raw)
       BlindIndex.generate_bidx(norm, key: BlindIndex.master_key, encode: false)
@@ -290,51 +331,15 @@ module Party
     def mysql_dup_identifier?(err)
       cause = err.cause
       cause.respond_to?(:error_number) &&
-        cause.error_number == 1062 &&                         # MySQL duplicate key
-        err.message.include?("idx_unique_identifier_value")   # your unique index name
-    end
-
-    def scrub_identifier_params(attrs)
-      attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_h : attrs
-      ihash = attrs.deep_dup[:identifiers_attributes]
-      return attrs unless ihash.is_a?(Hash)
-
-      cleaned = ihash.values.map { |h| h.symbolize_keys }
-
-      cleaned.each do |h|
-        # normalize incoming keys
-        if h[:identifier_type_code].present? && h[:id_type_code].blank?
-          h[:id_type_code] = h.delete(:identifier_type_code)
-        end
-        if h[:identifier_type_id].present? && h[:id_type_code].blank?
-          code = Ref::IdentifierType.find_by(id: h.delete(:identifier_type_id))&.code
-          h[:id_type_code] = code if code
-        end
-
-        # ensure association matches the code for model validations
-        if h[:id_type_code].present? && h[:identifier_type_id].blank?
-          h[:identifier_type_id] = Ref::IdentifierType.find_by(code: h[:id_type_code])&.id
-        end
-
-        # preserve existing encrypted value on edit when left blank
-        h.delete(:value) if h[:id].present? && h[:value].to_s.strip.blank?
-      end
-
-      # drop brand-new empty rows
-      content_keys = %i[id_type_code value country_code issuing_authority issued_on expires_on is_primary]
-      cleaned.select! { |h| h[:id].present? || content_keys.any? { |k| h[k].to_s.strip.present? } }
-
-      attrs[:identifiers_attributes] = cleaned.each_with_index.to_h { |h, i| [ i.to_s, h ] }
-      attrs
+        cause.error_number == 1062 &&
+        err.message.include?("idx_unique_identifier_value")
     end
 
     def scrub_phone_params(attrs)
       attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_h : attrs
       attrs = attrs.deep_dup
       ph = attrs.delete(:phones)
-      return attrs unless ph.is_a?(Hash) # already correct or absent
-
-      # wrap single phone hash as nested-attributes hash
+      return attrs unless ph.is_a?(Hash)
       attrs[:phones_attributes] = { "0" => ph.symbolize_keys }
       attrs
     end

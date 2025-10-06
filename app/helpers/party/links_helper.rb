@@ -1,13 +1,18 @@
 # app/helpers/party/links_helper.rb
 module Party::LinksHelper
-  def rel_badge(link, viewer:)
-    other = link.source_party_id == viewer.id ? link.target_party : link.source_party
-    content_tag(:span, Ref::PartyLinkType.find(link.party_link_type_code).name, class: "badge badge-ghost") +
-      " ".html_safe +
-      link_to(other.display_name, party_party_path(other))
-  end
-
   def links_list(viewer, code:)
-    Party::Link.involving(viewer.id).of_type(code).includes(:source_party, :target_party)
+    rel = ::Party::Link.of_type(code)
+    t   = Ref::PartyLinkType.find_by(code: code)
+
+    if t&.symmetric == 1
+      # show one row per symmetric relation; normalize by smaller id
+      rel = rel.where("(source_party_id = :id AND source_party_id < target_party_id)
+                       OR (target_party_id = :id AND target_party_id < source_party_id)", id: viewer.id)
+    else
+      # directional: only show outbound from the viewer
+      rel = rel.where(source_party_id: viewer.id)
+    end
+
+    rel.includes(:source_party, :target_party)
   end
 end

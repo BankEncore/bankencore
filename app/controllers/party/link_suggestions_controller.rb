@@ -8,7 +8,8 @@ class Party::LinkSuggestionsController < ApplicationController
   # PATCH /party/link_suggestions/:id
   # params: { decision: "accept"|"reject" }
   def update
-    s = Party::LinkSuggestion.find(params[:id])
+    created = Party::Link.create!(source_party: @party, target_party: target, party_link_type_code: params[:party_link_type_code])
+
     case params[:decision]
     when "accept"
       Party::Link.create!(source_party_id: s.source_party_id, target_party_id: s.target_party_id, link_type_code: s.suggested_link_type_code)

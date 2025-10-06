@@ -1,9 +1,44 @@
-<%# app/views/party/links/_form.html.erb %>
-<%= form_with url: party_party_links_path(party), scope: :party_link do |f| %>
-  <%= f.collection_select :party_link_type_code, Ref::PartyLinkType.order(:name), :code, :name %>
-  <%= f.text_field :target_public_id, placeholder:"Target public_id", class:"input" %>
-  <%= f.date_field :started_on %>
-  <%= f.date_field :ended_on %>
-  <%= f.text_field :notes, class:"input" %>
-  <%= f.submit "Link", class:"btn btn-primary" %>
+<% types   = local_assigns[:link_types] || Ref::PartyLinkType.order(:name) %>
+<% allowed = defined?(allowed_target_types_for) ? allowed_target_types_for(types.first&.code) : [] %>
+
+<%= form_with url: party_party_links_path(party.public_id),
+              scope: :party_link,
+              data: { turbo_frame: "comm_modal_frame" } do |f| %>
+  <div class="flex gap-2 items-end"
+       data-controller="party-target-picker"
+       data-party-target-picker-lookup-url-value="<%= lookup_party_parties_path(format: :json) %>"
+       data-party-target-picker-allowed-types-value="<%= allowed.to_json %>">
+
+    <div>
+      <%= f.label :party_link_type_code, "Relationship" %>
+      <%= f.collection_select :party_link_type_code, types, :code, :name,
+            {}, { class: "select select-bordered",
+                  data: { action: "change->party-target-picker#clear" } } %>
+    </div>
+
+    <div class="grow">
+      <label>Related party</label>
+      <input type="text" class="input input-bordered w-full"
+             placeholder="Search by customer # or name"
+             data-party-target-picker-target="input"
+             data-action="input->party-target-picker#search" />
+      <input type="hidden" name="party_link[target_public_id]"
+             data-party-target-picker-target="hidden" />
+      <div class="mt-1 space-y-1"
+           data-party-target-picker-target="menu"
+           data-action="click->party-target-picker#pick"></div>
+    </div>
+
+    <div>
+      <%= f.label :started_on, "Start" %>
+      <%= f.date_field :started_on, class: "input input-bordered" %>
+    </div>
+
+    <div>
+      <%= f.label :ended_on, "End" %>
+      <%= f.date_field :ended_on, class: "input input-bordered" %>
+    </div>
+
+    <div><label>&nbsp;</label><%= f.submit "Add", class: "btn btn-primary" %></div>
+  </div>
 <% end %>

@@ -1,18 +1,18 @@
-<%# locals: link:, viewer:, editable: %>
-<% other = link.source_party_id == viewer.id ? link.target_party : link.source_party %>
+<!-- app/views/party/links/_row.html.erb -->
+<%# locals: link:, party:, editable: %>
+<% other = link.source_party_id == party.id ? link.target_party : link.source_party %>
 <li class="py-1 flex items-center justify-between">
   <div>
-    <%= link_to other.display_name, party_party_path(other.public_id), class:"link" %>
-    <% if link.started_on || link.ended_on %>
-      <span class="opacity-70">
-        (<%= [link.started_on&.to_fs(:long), link.ended_on&.to_fs(:long)].compact.join(" – ") %>)
-      </span>
-    <% end %>
+    <%= content_tag(:span,
+          Ref::PartyLinkType.find_by(code: link.party_link_type_code)&.name || link.party_link_type_code.humanize,
+          class: "badge badge-ghost") %>
+    <%= link_to other.display_name, party_party_path(other.public_id), class: "link" %>
   </div>
   <% if editable %>
     <%= button_to "Remove",
-          party_party_link_path(viewer, link),
-          method: :delete, class:"btn btn-ghost btn-xs",
-          data:{ turbo_confirm:"Remove relationship?" } %>
+          party_party_link_path(party.public_id, link),
+          method: :delete,
+          class: "btn btn-ghost btn-xs",
+          data: { turbo_confirm: "Remove relationship?" } %>
   <% end %>
 </li>
