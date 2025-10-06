@@ -12,5 +12,7 @@ module Ref
 
     validates :code, presence: true
     validates :name, presence: true
+
+    def symmetric? = !!self[:symmetric]
   end
 end

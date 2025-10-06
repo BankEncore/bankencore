@@ -12,20 +12,50 @@ module Party
     has_many :identifiers,  class_name: "::Party::Identifier", inverse_of: :party, dependent: :destroy
     has_many :screenings,   class_name: "Party::Screening",    inverse_of: :party, dependent: :destroy
 
+    has_many :source_links,
+      class_name: "::Party::Link",
+      foreign_key: :source_party_id,
+      inverse_of: :source_party,
+      dependent: :destroy
+
+    has_many :target_links,
+      class_name: "::Party::Link",
+      foreign_key: :target_party_id,
+      inverse_of: :target_party,
+      dependent: :destroy
+
+    has_many :group_memberships, class_name: "Party::GroupMembership",
+            foreign_key: :party_id, inverse_of: :party, dependent: :destroy
+    has_many :groups, through: :group_memberships, class_name: "Party::Group"
+
     # Nested attrs
-    accepts_nested_attributes_for :person, allow_destroy: true
+    accepts_nested_attributes_for :person,       allow_destroy: true
     accepts_nested_attributes_for :organization, allow_destroy: true
-    accepts_nested_attributes_for :addresses, allow_destroy: true, reject_if: ->(h) {
-      %i[line1 line2 line3 locality region_code postal_code country_code].all? { |k| h[k].to_s.strip.blank? }
-    }
-    accepts_nested_attributes_for :emails, allow_destroy: true, reject_if: ->(h) { h["email"].to_s.strip.blank? }
-    accepts_nested_attributes_for :phones, allow_destroy: true, reject_if: ->(h) {
-      h["id"].blank? && h["number_raw"].to_s.strip.blank? && h["phone_e164"].to_s.strip.blank? && h["phone_ext"].to_s.strip.blank?
-    }
+
+    accepts_nested_attributes_for :addresses,
+      allow_destroy: true,
+      reject_if: ->(h) {
+        %i[line1 line2 line3 locality region_code postal_code country_code].all? { |k| h[k].to_s.strip.blank? }
+      }
+
+    accepts_nested_attributes_for :emails,
+      allow_destroy: true,
+      reject_if: ->(h) { h["email"].to_s.strip.blank? }
+
+    accepts_nested_attributes_for :phones,
+      allow_destroy: true,
+      reject_if: ->(h) {
+        %w[phone_e164 phone_ext phone_type_code].all? { |k| h[k].to_s.strip.blank? }
+      }
+
+    # One definition only. Do NOT use update_only for has_many.
     accepts_nested_attributes_for :identifiers,
       allow_destroy: true,
-      update_only: true,
-      reject_if: ->(h) { h["id"].present? && h["value"].to_s.strip.blank? }
+      reject_if: ->(h) {
+        # drop brand-new empty rows, but allow edits to existing rows even if value blank (controller scrubber preserves old value)
+        h["id"].blank? &&
+          %w[value id_type_code country_code issuing_authority issued_on expires_on is_primary].all? { |k| h[k].to_s.strip.blank? }
+      }
 
     # Virtuals for simple form binding
     attr_accessor :tax_id_input, :tax_id_type  # "ssn","ein","itin","foreign_tin"
@@ -83,6 +113,10 @@ module Party
       identifiers.build(identifier_type: type, is_primary: true)
     end
 
+    def links
+      ::Party::Link.involving(id)
+    end
+
     private
 
     def ensure_public_id
@@ -108,6 +142,23 @@ module Party
         fallback = "C#{Time.current.strftime('%y%m%d')}#{format('%06d', SecureRandom.random_number(1_000_000))}"
         break(self.customer_number = fallback) unless self.class.exists?(customer_number: fallback)
       end
+    end
+
+    def scrub_identifier_params(attrs)
+      attrs = attrs.is_a?(ActionController::Parameters) ? attrs.to_h : attrs
+      ihash = attrs.deep_dup[:identifiers_attributes]
+      return attrs unless ihash.is_a?(Hash)
+
+      cleaned = ihash.values.map { |h| h.symbolize_keys }
+      cleaned.each do |h|
+        h[:value_len] = h.delete(:len) if h.key?(:len) && !h.key?(:value_len)
+        h.delete(:value) if h[:id].present? && h[:value].to_s.strip.blank?
+      end
+
+      content_keys = %i[id_type_code value value_len country_code issuing_authority issued_on expires_on is_primary]
+      cleaned.select! { |h| h[:id].present? || content_keys.any? { |k| h[k].to_s.strip.present? } }
+      attrs[:identifiers_attributes] = cleaned.each_with_index.to_h { |h, i| [ i.to_s, h ] }
+      attrs
     end
   end
 end

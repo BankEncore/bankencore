@@ -1,0 +1,36 @@
+<%# locals: membership:, editable: (true/false) %>
+<% ed = local_assigns.fetch(:editable, true) %>
+<tr>
+  <td class="font-mono">
+    <% if membership.has_attribute?(:role_code) && membership.role_code.present? %>
+      <span class="badge badge-ghost"><%= membership.role_code %></span>
+    <% else %>
+      <span class="opacity-60">member</span>
+    <% end %>
+  </td>
+
+  <td>
+    <%= link_to membership.party.display_name,
+                party_party_path(membership.party.public_id) %>
+  </td>
+
+  <td class="text-sm opacity-70">
+    <% if membership.has_attribute?(:started_on) || membership.has_attribute?(:ended_on) %>
+      <% s = membership.has_attribute?(:started_on) ? membership.started_on : nil %>
+      <% e = membership.has_attribute?(:ended_on)   ? membership.ended_on   : nil %>
+      <% if s || e %>
+        (<%= [s&.to_fs(:long), e&.to_fs(:long)].compact.join(" – ") %>)
+      <% end %>
+    <% end %>
+  </td>
+
+  <td class="text-right">
+    <% if ed %>
+      <%= button_to "Remove",
+            party_group_group_membership_path(membership.group, membership),
+            method: :delete,
+            class: "btn btn-ghost btn-xs",
+            data: { turbo_confirm: "Remove member?" } %>
+    <% end %>
+  </td>
+</tr>

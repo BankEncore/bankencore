@@ -1,0 +1,9 @@
+<%# app/views/party/groups/_add_to_existing_form.html.erb %>
+<%= form_with url: "", scope: :party_group_membership,
+              data: { controller: "group-picker" }, class: "flex gap-2" do |f| %>
+  <input type="hidden" name="party_group_membership[party_public_id]" value="<%= party.public_id %>">
+  <input name="q" placeholder="Search groups..." data-group-picker-target="search" class="input input-sm">
+  <select data-group-picker-target="select" class="select select-sm"></select>
+  <%= f.text_field :role_code, placeholder: "role", class: "input input-sm" %>
+  <%= f.submit "Add", class: "btn btn-primary btn-sm" %>
+<% end %>

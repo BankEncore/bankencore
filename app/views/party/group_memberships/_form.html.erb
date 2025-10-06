@@ -1,0 +1,17 @@
+<%= form_with url: party_party_group_memberships_path(@party.public_id),
+      scope: :group_membership,
+      data: { turbo_frame: "comm_modal_frame" },
+      class: "space-y-4" do |f| %>
+
+  <div>
+    <label class="label-text mb-1 block">Select group</label>
+    <%= f.collection_select :group_id, groups, :id, :name,
+          { include_blank: "Choose a group…" },
+          class: "select select-bordered w-full" %>
+  </div>
+
+  <div class="flex justify-end gap-2">
+    <button type="button" class="btn btn-ghost" data-action="click->modal#close">Cancel</button>
+    <%= f.submit "Add", class: "btn btn-primary", data: { disable_with: "Adding…" } %>
+  </div>
+<% end %>

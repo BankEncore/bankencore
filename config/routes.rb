@@ -16,33 +16,49 @@ Rails.application.routes.draw do
 
   namespace :party do
     resources :parties, param: :public_id do
+      get :lookup, on: :collection   # JSON search for target party picker
       member do
         get  :reveal_tax_id
         post :reveal_tax_id
+        post :create_household
       end
 
-      resources :emails,    only: %i[new create edit update destroy] do
-        member { patch :primary; get :reveal }
+      resources :emails, only: %i[new create edit update destroy] do
+        member do
+          patch :primary
+          get   :reveal
+        end
       end
-      resources :phones,    only: %i[new create edit update destroy] do
+
+      resources :phones, only: %i[new create edit update destroy] do
         member { patch :primary }
       end
+
       resources :addresses, only: %i[index new create edit update destroy] do
         member { patch :primary }
       end
 
-      # nested create/index for screenings
+      # Party-scoped "join group" modal + create
+      resources :group_memberships, path: :memberships, only: %i[new create]
+
+      # Links + suggestions scoped to a source party
+      resources :links,             only: %i[create destroy]           # Party::LinksController
+      resources :link_suggestions,  only: %i[index update]             # Party::LinkSuggestionsController
+
       resources :screenings, only: %i[new create index]
     end
 
-    # global screenings by id
     resources :screenings, only: %i[show edit update]
 
-    resources :groups do
-      resources :group_memberships, path: :memberships, only: %i[index create destroy]
+    # Groups
+    resources :groups, only: %i[index show edit update destroy] do
+      get :lookup, on: :collection
+      # Group-scoped join/leave
+      resource :membership, only: %i[create destroy], controller: "groups/memberships"
     end
 
-    resources :links, only: %i[index create destroy]
+    # Global group suggestions (not tied to a single party)
+    resources :group_suggestions, only: %i[index update]
   end
 
   namespace :ref do

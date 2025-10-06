@@ -1,0 +1,15 @@
+<!-- app/views/party/links/_list_by_type.html.erb -->
+<%# locals: party:, links:, editable: %>
+<% links.group_by(&:party_link_type_code).each do |code, group| %>
+  <% t = group.first.party_link_type %>
+
+  <% group.each do |link| %>
+    <% if t&.symmetric == 1 %>
+      <% next unless [link.source_party_id, link.target_party_id].min == party.id %>
+    <% else %>
+      <% next unless link.source_party_id == party.id %>
+    <% end %>
+
+    <%= render "party/links/row", link: link, party: party, editable: editable %>
+  <% end %>
+<% end %>

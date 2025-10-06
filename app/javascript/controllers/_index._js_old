@@ -25,3 +25,6 @@ application.register("tabs", TabsController)
 
 import ToggleInputController from "./toggle_input_controller"
 application.register("toggle-input", ToggleInputController)
+
+import PartyTargetPickerController from "./party_target_picker_controller"
+application.register("party-target-picker", PartyTargetPickerController)

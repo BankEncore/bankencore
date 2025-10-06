@@ -8,3 +8,4 @@
 @plugin "daisyui" {
   themes: all;              /* or: themes: corporate --default; */
 }
+

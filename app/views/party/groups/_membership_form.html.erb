@@ -1,0 +1,16 @@
+<%# app/views/party/groups/_form.html.erb (locals: group:) %>
+<%= form_with url: party_group_membership_path(group),
+              scope: :party_group_membership,
+              method: :post,
+              class: "flex gap-2",
+              data: { turbo_frame: "comm_modal_frame" } do |f| %>
+  <%= f.text_field :party_public_id,
+        placeholder: "Member public_id",
+        class: "input input-sm" %>
+
+  <%= f.text_field :role_code,
+        placeholder: "role (optional)",
+        class: "input input-sm" %>
+
+  <%= f.submit "Add", class: "btn btn-sm btn-primary" %>
+<% end %>
