@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_05_015738) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_06_041838) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -100,7 +100,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_05_015738) do
     t.index ["group_type_code"], name: "index_party_group_suggestions_on_group_type_code"
     t.index ["reviewed_by_id"], name: "index_party_group_suggestions_on_reviewed_by_id"
     t.index ["reviewed_flag"], name: "index_party_group_suggestions_on_reviewed_flag"
-    t.check_constraint "json_valid(`evidence`)", name: "evidence"
+    t.check_constraint "json_valid(`evidence`)", name: "chk_group_suggestions_evidence"
     t.check_constraint "json_valid(`members`)", name: "members"
   end
 
@@ -163,7 +163,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_05_015738) do
     t.index ["source_party_id", "target_party_id", "suggested_link_type_code"], name: "idx_pls_pair_type"
     t.index ["source_party_id"], name: "index_party_link_suggestions_on_source_party_id"
     t.index ["target_party_id"], name: "index_party_link_suggestions_on_target_party_id"
-    t.check_constraint "json_valid(`evidence`)", name: "evidence"
+    t.check_constraint "json_valid(`evidence`)", name: "chk_link_suggestions_evidence"
   end
 
   create_table "party_links", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
