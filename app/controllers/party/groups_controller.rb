@@ -9,7 +9,9 @@ module Party
 
     def show; end
     def new  ; @group = ::Party::Group.new; end
-    def edit ; end
+    def edit
+      render layout: false
+    end
 
     def create
       @group = ::Party::Group.new(group_params)
@@ -18,8 +20,19 @@ module Party
     end
 
     def update
-      @group.update(group_params) ? redirect_to(@group, notice: "Group updated") :
-                                    render(:edit, status: :unprocessable_entity)
+      if @group.update(group_params)
+        respond_to do |f|
+          f.turbo_stream { redirect_to party_group_path(@group), notice: "Group renamed" }
+          f.html { redirect_to party_group_path(@group), notice: "Group renamed" }
+        end
+      else
+        render :edit, status: :unprocessable_content, layout: false
+      end
+    end
+
+    def show
+        @group = ::Party::Group.find(params[:id])
+        @memberships = @group.group_memberships.includes(:party)
     end
 
     def destroy
@@ -29,13 +42,10 @@ module Party
 
     private
 
-    def set_group
-      @group = ::Party::Group.find(params[:id])
-    end
-
-    def group_params
-      params.require(:party_group).permit(:party_group_type_code, :name)
-    end
+    private
+    def set_group   = @group = ::Party::Group.find(params[:id])
+    def group_params = params.require(:party_group).permit(:name)
+  end
 
     def lookup
         q = params[:q].to_s.strip
@@ -43,5 +53,4 @@ module Party
         rel = rel.where("name LIKE ?", "%#{q}%") if q.present?
         render json: rel.limit(20).pluck(:id, :name).map { |id, name| { id:, name: } }
     end
-  end
 end

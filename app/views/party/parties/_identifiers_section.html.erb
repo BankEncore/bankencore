@@ -1,0 +1,22 @@
+<details class="rounded-box border p-3 open:pt-3">
+  <summary class="flex items-center gap-2 cursor-pointer">
+    <span class="text-sm font-medium">Identifiers</span>
+    <span class="badge"><%= @party.identifiers.size %></span>
+    <span class="ml-auto">
+      <%= button_tag "Add", name: :add_identifier, value: "1",
+            class: "btn btn-ghost btn-xs", onclick: "event.stopPropagation()" %>
+    </span>
+  </summary>
+
+  <div class="pt-3" data-controller="single-primary">
+    <ul role="list" class="space-y-3">
+      <%= f.fields_for :identifiers do |idf| %>
+        <%= render "party/identifiers/fields",
+              f: idf,
+              identifier_types: @identifier_types,
+              countries: @countries %>
+      <% end %>
+    </ul>
+    <p class="text-xs opacity-70 mt-2">Encrypted at rest. Leave value blank to keep existing.</p>
+  </div>
+</details>

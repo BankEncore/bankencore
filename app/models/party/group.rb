@@ -7,5 +7,9 @@ class Party::Group < ApplicationRecord
            foreign_key: :group_id, inverse_of: :group, dependent: :destroy
   has_many :parties, through: :group_memberships, class_name: "Party::Party"
   validates :name, presence: true
+
+    scope :of_type, ->(code) {
+      code.present? ? where(party_group_type_code: code) : all
+    }
 end
 # replaces current minimal version 【4:review_bundle.txt†L44-L50】

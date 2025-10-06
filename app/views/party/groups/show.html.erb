@@ -1,0 +1,60 @@
+<% content_for(:title) { @group.name } %>
+
+<div class="max-w-4xl mx-auto space-y-6">
+  <div class="flex items-center justify-between">
+    <h1 class="text-xl font-semibold"><%= @group.name %></h1>
+    <%= link_to "Back to parties", party_parties_path, class: "btn btn-ghost btn-sm" %>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div>
+          <div class="text-sm opacity-70">Type</div>
+          <div><%= @group.party_group_type_code %></div>
+        </div>
+        <div>
+          <div class="text-sm opacity-70">Members</div>
+          <div><%= @memberships.size %></div>
+        </div>
+        <div>
+          <div class="text-sm opacity-70">Created</div>
+          <div><%= l(@group.created_at, format: :short) %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card bg-base-100 shadow">
+    <div class="card-body">
+      <h2 class="text-sm font-semibold tracking-wide uppercase text-base-content/70 mb-2">Members</h2>
+      <div class="overflow-x-auto">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Party</th>
+              <th>Customer #</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @memberships.each do |m| %>
+              <% p = m.party %>
+              <tr>
+                <td><%= link_to p.display_name, party_party_path(p.public_id), class: "link" %></td>
+                <td><%= p.customer_number %></td>
+                <td class="text-right">
+                  <%= button_to "Remove",
+                        party_group_membership_path(@group, party_id: p.id),
+                        method: :delete,
+                        form: { data: { turbo_confirm: "Remove this member?" } },
+                        class: "btn btn-ghost btn-xs text-error" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

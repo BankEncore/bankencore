@@ -120,33 +120,7 @@
 
   <%# --- Groups (household example) --- %>
 
-  <div class="card bg-base-100 shadow">
-    <div class="card-body">
-      <h2 class="card-title text-base">Groups</h2>
-
-      <div class="flex gap-2 mb-3">
-      <%= button_to "Create household",
-            create_household_party_party_path(@party.public_id),
-            method: :post,
-            form: { data: { turbo_frame: "_top" } },
-            class: "btn btn-primary btn-sm" %>
-        <button class="btn btn-ghost btn-sm" data-action="click->group-picker#open">Add to existing group</button>
-      </div>
-
-      <!-- Place the Turbo Frame here -->
-      <turbo-frame id="group_add_frame">
-        <%= render "party/groups/add_to_existing_form", party: @party %>
-      </turbo-frame>
-
-      <% if @household %>
-        <h3 class="text-sm opacity-70"><%= @household.name %></h3>
-        <%= render "party/groups/members_list", group: @household %>
-      <% else %>
-        <p class="opacity-70">No household group.</p>
-      <% end %>
-    </div>
-  </div>
-
+  <%= render "party/groups/section", party: @party %>
 
 
 <%# ===== Screenings ===== %>

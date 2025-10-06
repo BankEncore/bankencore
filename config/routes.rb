@@ -22,30 +22,39 @@ Rails.application.routes.draw do
         post :create_household
       end
 
-      resources :emails,    only: %i[new create edit update destroy] do
+      resources :emails, only: %i[new create edit update destroy] do
         member { patch :primary; get :reveal }
       end
-      resources :phones,    only: %i[new create edit update destroy] do
+      resources :phones, only: %i[new create edit update destroy] do
         member { patch :primary }
       end
       resources :addresses, only: %i[index new create edit update destroy] do
         member { patch :primary }
       end
 
-      resources :links, only: %i[create destroy]      # nested links on a party
+      # Party-scoped "join group" modal + create
+      resources :group_memberships, path: :memberships, only: %i[new create]
+
+      resources :links, only: %i[create destroy]
       resources :screenings, only: %i[new create index]
     end
 
-    resources :screenings, only: %i[show edit update] # global by id
+    resources :screenings, only: %i[show edit update]
 
-    resources :groups do
+    # Add :edit and :update to enable rename modal
+    resources :groups, only: %i[index show edit update] do
       get :lookup, on: :collection
-      resources :group_memberships, path: :memberships, only: %i[create destroy]
+
+      # Group-scoped join/leave (singular resource gives helper: party_group_membership_path(group))
+      resource :membership,
+              only: %i[create destroy],
+              controller: "groups/memberships"
     end
 
     resources :link_suggestions,  only: %i[index update]
     resources :group_suggestions, only: %i[index update]
   end
+
 
   namespace :ref do
     resources :regions, only: :index
