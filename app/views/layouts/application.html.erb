@@ -5,6 +5,34 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+
+    <!-- Apply saved theme before CSS to avoid fallback to blueLight -->
+    <script>
+    (function(){
+      var root = document.documentElement;
+      try {
+        var urlTheme = new URLSearchParams(location.search).get('theme');
+        var key = 'daisy-theme';
+        var t = urlTheme || localStorage.getItem(key) || 'blueLight';
+        root.setAttribute('data-theme', t);
+        if (urlTheme) localStorage.setItem(key, t);
+      } catch(_) {
+        root.setAttribute('data-theme','blueLight');
+      }
+    })();
+    </script>
+    <script>
+    (function(){
+    try{
+    var t = localStorage.getItem("daisy-theme") || "blueLight";
+    document.documentElement.setAttribute("data-theme", t);
+    }catch(_){
+    document.documentElement.setAttribute("data-theme","blueLight");
+    }
+    })();
+    </script>
+
+
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
     <script>
