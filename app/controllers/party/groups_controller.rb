@@ -36,7 +36,16 @@ module Party
     end
 
     def destroy
-      @group.destroy
+      @group = ::Party::Group.find(params[:id])
+
+      # Optional guard: block deletion if members still present
+      if @group.group_memberships.exists?
+        redirect_back fallback_location: party_group_path(@group),
+                      alert: "Remove all members before deleting this group."
+        return
+      end
+
+      @group.destroy!
       redirect_to party_groups_path, notice: "Group deleted"
     end
 

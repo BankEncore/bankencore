@@ -1,82 +1,84 @@
-<div class="bg-base-100 rounded-box shadow-xl w-[clamp(40rem,92vw,64rem)] max-h-[85vh] overflow-auto">
-  <div class="p-6">
-    <h3 class="font-semibold mb-3"><%= @address.persisted? ? "Edit address" : "Add address" %></h3>
+<%# app/views/party/addresses/_form.html.erb %>
+<turbo-frame id="comm_modal_frame">
+  <div class="modal-panel address-modal">  <%# ← no max-w-* or modal-box here %>
+    <div class="modal-body">
+      <h3 class="font-semibold mb-4"><%= @address.persisted? ? "Edit address" : "Add address" %></h3>
 
-    <%= form_with model: [@party, @address],
-          scope: :party_address,
-          id: "address-form",
-          url: (@address.persisted? ? party_party_address_path(@party.public_id, @address)
-                                    : party_party_addresses_path(@party.public_id)),
-          data: { turbo: true } do |f| %>
+      <%= form_with model: [@party, @address],
+            scope: :party_address,
+            id: "address-form",
+            url: (@address.persisted? ? party_party_address_path(@party.public_id, @address)
+                                      : party_party_addresses_path(@party.public_id)),
+            data: { turbo: true } do |f| %>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
-           data-controller="region-select"
-           data-region-select-url-value="<%= ref_regions_path(format: :json) %>"
-           data-region-select-current-region-value="<%= @address&.region_code %>">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
+             data-controller="region-select"
+             data-region-select-url-value="<%= ref_regions_path(format: :json) %>"
+             data-region-select-current-region-value="<%= @address&.region_code %>">
 
-        <div class="form-control">
-          <%= f.label :address_type_code, "Address type", class: "label" %>
-          <%= f.collection_select :address_type_code, @address_types, :code, :name,
-                { include_blank: true }, { class: "select select-bordered w-full" } %>
-        </div>
+          <div class="form-control">
+            <%= f.label :address_type_code, "Address type", class: "label" %>
+            <%= f.collection_select :address_type_code, @address_types, :code, :name, { include_blank: true }, { class: "select select-bordered w-full" } %>
+          </div>
 
-        <div class="form-control">
-          <%= f.label :line1, "Address line 1", class: "label" %>
-          <%= f.text_field :line1, required: true, class: "input input-bordered w-full" %>
-        </div>
+          <div class="form-control">
+            <%= f.label :line1, "Address line 1", class: "label" %>
+            <%= f.text_field :line1, required: true, class: "input input-bordered w-full" %>
+          </div>
 
-        <div class="form-control">
-          <%= f.label :line2, "Address line 2", class: "label" %>
-          <%= f.text_field :line2, class: "input input-bordered w-full" %>
-        </div>
+          <div class="form-control">
+            <%= f.label :line2, "Address line 2", class: "label" %>
+            <%= f.text_field :line2, class: "input input-bordered w-full" %>
+          </div>
 
-        <div class="form-control">
-          <%= f.label :locality, "City", class: "label" %>
-          <%= f.text_field :locality, required: true, class: "input input-bordered w-full" %>
-        </div>
+          <div class="form-control">
+            <%= f.label :locality, "City", class: "label" %>
+            <%= f.text_field :locality, required: true, class: "input input-bordered w-full" %>
+          </div>
 
-        <div class="form-control">
-          <%= f.label :country_code, "Country", class: "label" %>
-          <% if @countries.present? %>
-            <%= f.collection_select :country_code, @countries, :code, :name,
+          <div class="form-control">
+            <%= f.label :country_code, "Country", class: "label" %>
+            <% if @countries.present? %>
+              <%= f.collection_select :country_code, @countries, :code, :name,
+                    { include_blank: true },
+                    { class: "select select-bordered w-full",
+                      data: { region_select_target: "country", action: "change->region-select#refresh" } } %>
+            <% else %>
+              <%= f.select :country_code,
+                    options_for_select([["United States","US"],["Canada","CA"]], @address.country_code || "US"),
+                    { include_blank: true },
+                    { class: "select select-bordered w-full",
+                      data: { region_select_target: "country", action: "change->region-select#refresh" } } %>
+            <% end %>
+          </div>
+
+          <div class="form-control">
+            <%= f.label :region_code, "State/Region", class: "label" %>
+            <%= f.select :region_code,
+                  options_for_select(regions_for(@address.country_code), @address.region_code),
                   { include_blank: true },
                   { class: "select select-bordered w-full",
-                    data: { region_select_target: "country", action: "change->region-select#refresh" } } %>
-          <% else %>
-            <%= f.select :country_code,
-                  options_for_select([["United States","US"],["Canada","CA"]], @address.country_code || "US"),
-                  { include_blank: true },
-                  { class: "select select-bordered w-full",
-                    data: { region_select_target: "country", action: "change->region-select#refresh" } } %>
+                    data: { region_select_target: "region" },
+                    disabled: @address.country_code.blank? } %>
+          </div>
+
+          <div class="form-control md:col-span-2">
+            <%= f.label :postal_code, "Postal code", class: "label" %>
+            <%= f.text_field :postal_code, class: "input input-bordered w-full" %>
+          </div>
+        </div>
+
+        <div class="mt-6 flex items-center justify-end gap-3">
+          <button type="button" class="btn btn-ghost" data-action="click->modal#close">Cancel</button>
+          <%= f.submit "Save", class: "btn btn-primary", data: { disable_with: "Saving…" } %>
+          <% if @address.persisted? %>
+            <%= link_to "Delete",
+                  party_party_address_path(@party.public_id, @address),
+                  data: { turbo_method: :delete, turbo_confirm: "Delete this address?" },
+                  class: "btn btn-error btn-outline" %>
           <% end %>
         </div>
-
-        <div class="form-control">
-          <%= f.label :region_code, "State/Region", class: "label" %>
-          <%= f.select :region_code,
-                options_for_select(regions_for(@address.country_code), @address.region_code),
-                { include_blank: true },
-                { class: "select select-bordered w-full",
-                  data: { region_select_target: "region" },
-                  disabled: @address.country_code.blank? } %>
-        </div>
-
-        <div class="form-control">
-          <%= f.label :postal_code, "Postal code", class: "label" %>
-          <%= f.text_field :postal_code, class: "input input-bordered w-full" %>
-        </div>
-      </div>
-
-      <div class="mt-6 flex items-center justify-end gap-3">
-        <button type="button" class="btn btn-ghost" data-action="click->modal#close">Cancel</button>
-        <%= f.submit "Save", class: "btn btn-primary", data: { disable_with: "Saving…" } %>
-        <% if @address.persisted? %>
-          <%= link_to "Delete",
-                party_party_address_path(@party.public_id, @address),
-                data: { turbo_method: :delete, turbo_confirm: "Delete this address?" },
-                class: "btn btn-error btn-outline" %>
-        <% end %>
-      </div>
-    <% end %>
+      <% end %>
+    </div>
   </div>
-</div>
+</turbo-frame>

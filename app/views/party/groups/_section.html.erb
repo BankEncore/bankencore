@@ -32,11 +32,12 @@
               data: { turbo_frame: "comm_modal_frame" },
               class: "btn btn-ghost btn-xs" %>
 
-            <%= button_to "Leave",
-                  party_group_membership_path(g, party_id: party.id),
-                  method: :delete,
-                  form: { data: { turbo_confirm: "Remove from this group?", turbo_frame: dom_id(party, :groups_section) } },
-                  class: "btn btn-ghost btn-xs text-error" %>
+        <%= button_to "Leave",
+              party_group_membership_path(g),
+              method: :delete,
+              params: { party_id: party.id, from: :show, party_public_id: party.public_id },
+              form: { data: { turbo_frame: dom_id(party, :groups_section), turbo_confirm: "Remove from this group?" } },
+              class: "btn btn-ghost btn-xs text-error" %>
           </div>
         </div>
       </li>

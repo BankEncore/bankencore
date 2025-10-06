@@ -22,16 +22,29 @@ module Party
 
       # DELETE /party/groups/:group_id/membership?party_id=<public_id>
       def destroy
-        if (pid = params[:party_id] || params[:party_public_id]).present?
-          party = ::Party::Party.find_by!(public_id: pid)
-          @group.group_memberships.where(party_id: party.id).destroy_all
+        # Find the member to remove by party_id or party_public_id
+        pid = params[:party_id]
+        unless pid
+          pub = params[:party_public_id]
+          pid = ::Party::Party.find_by!(public_id: pub).id if pub.present?
         end
 
-        respond_to do |f|
-          f.turbo_stream { head :ok }
-          f.html { redirect_back fallback_location: party_group_path(@group), notice: "Member removed" }
+        m = @group.group_memberships.find_by!(party_id: pid)
+        m.destroy!
+
+        # If we came from a Party profile, refresh its groups section
+        if params[:from] == "show" && params[:party_public_id].present?
+          party = ::Party::Party.find_by!(public_id: params[:party_public_id])
+          render turbo_stream: turbo_stream.replace(
+            view_context.dom_id(party, :groups_section),
+            partial: "party/groups/section",
+            locals: { party: party }
+          )
+        else
+          redirect_back fallback_location: party_group_path(@group), notice: "Member removed"
         end
       end
+
 
       private
 

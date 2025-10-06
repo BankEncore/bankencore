@@ -9,8 +9,3 @@
   themes: all;              /* or: themes: corporate --default; */
 }
 
-turbo-frame#comm_modal_frame{
-  position: fixed; inset: 0; z-index: 10000;
-  display: grid; place-items: center; padding: 1rem;
-  background: rgba(0,0,0,.4); overflow: auto;
-}

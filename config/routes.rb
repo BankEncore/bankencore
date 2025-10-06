@@ -42,8 +42,9 @@ Rails.application.routes.draw do
     resources :screenings, only: %i[show edit update]
 
     # Add :edit and :update to enable rename modal
-    resources :groups, only: %i[index show edit update] do
+    resources :groups, only: %i[index show edit update destroy] do
       get :lookup, on: :collection
+
 
       # Group-scoped join/leave (singular resource gives helper: party_group_membership_path(group))
       resource :membership,
