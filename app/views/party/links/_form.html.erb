@@ -4,41 +4,70 @@
 <%= form_with url: party_party_links_path(party.public_id),
               scope: :party_link,
               data: { turbo_frame: "comm_modal_frame" } do |f| %>
-  <div class="flex gap-2 items-end"
+
+  <div class="grid grid-cols-12 gap-4 items-end"
        data-controller="party-target-picker"
        data-party-target-picker-lookup-url-value="<%= lookup_party_parties_path(format: :json) %>"
        data-party-target-picker-allowed-types-value="<%= allowed.to_json %>">
 
-    <div>
-      <%= f.label :party_link_type_code, "Relationship" %>
-      <%= f.collection_select :party_link_type_code, types, :code, :name,
-            {}, { class: "select select-bordered",
-                  data: { action: "change->party-target-picker#clear" } } %>
-    </div>
+      <!-- Relationship -->
+      <div class="col-span-12 sm:col-span-4 lg:col-span-3">
+        <% rel_id = "#{f.object_name}_party_link_type_code" %>
+        <%= f.label :party_link_type_code, "Relationship", class: "label", for: rel_id %>
+        <%= f.collection_select :party_link_type_code, types, :code, :name, {},
+              class: "select select-bordered w-full",
+              id: rel_id,
+              data: { action: "change->party-target-picker#clear" } %>
+      </div>
 
-    <div class="grow">
-      <label>Related party</label>
-      <input type="text" class="input input-bordered w-full"
-             placeholder="Search by customer # or name"
-             data-party-target-picker-target="input"
-             data-action="input->party-target-picker#search" />
-      <input type="hidden" name="party_link[target_public_id]"
-             data-party-target-picker-target="hidden" />
-      <div class="mt-1 space-y-1"
+      <!-- Related party -->
+      <div class="col-span-12 sm:col-span-8 lg:col-span-6 relative">
+        <% input_id = "#{f.object_name}_related_party_search" %>
+        <% list_id  = "#{input_id}_menu" %>
+        <label class="label" for="<%= input_id %>"><span class="label-text">Related party</span></label>
+        <input id="<%= input_id %>" type="text" class="input input-bordered w-full"
+              placeholder="Search by customer # or name" autocomplete="off"
+              role="combobox" aria-autocomplete="list" aria-expanded="false"
+              aria-owns="<%= list_id %>"
+              data-party-target-picker-target="input"
+              data-action="input->party-target-picker#search" />
+
+        <input type="hidden" name="party_link[target_public_id]"
+              data-party-target-picker-target="hidden" />
+
+        <div id="<%= list_id %>" role="listbox"
+            data-party-target-picker-target="menu"
+            data-action="click->party-target-picker#pick"
+            class="absolute left-0 right-0 mt-1 max-h-64 overflow-auto
+                    bg-base-100 border border-base-300 rounded-box shadow z-50 p-2 space-y-1"></div>
+      </div>
+
+      <!-- Suggestion menu -->
+      <div id="<%= list_id %>"
+           role="listbox"
            data-party-target-picker-target="menu"
-           data-action="click->party-target-picker#pick"></div>
+           data-action="click->party-target-picker#pick"
+           class="absolute left-0 right-0 mt-1 max-h-64 overflow-auto
+                  bg-base-100 border border-base-300 rounded-box shadow z-50 p-2 space-y-1">
+      </div>
     </div>
 
-    <div>
-      <%= f.label :started_on, "Start" %>
-      <%= f.date_field :started_on, class: "input input-bordered" %>
+    <!-- Dates -->
+    <div class="col-span-6 sm:col-span-4 lg:col-span-1">
+      <%= f.label :started_on, "Start", class: "label" %>
+      <%= f.date_field :started_on, class: "input input-bordered w-full" %>
     </div>
 
-    <div>
-      <%= f.label :ended_on, "End" %>
-      <%= f.date_field :ended_on, class: "input input-bordered" %>
+    <div class="col-span-6 sm:col-span-4 lg:col-span-1">
+      <%= f.label :ended_on, "End", class: "label" %>
+      <%= f.date_field :ended_on, class: "input input-bordered w-full" %>
     </div>
 
-    <div><label>&nbsp;</label><%= f.submit "Add", class: "btn btn-primary" %></div>
+    <!-- Submit -->
+    <div class="col-span-12 text-right">
+      <%= f.submit "Add", class: "btn btn-primary",
+            data: { action: "click->party-target-picker#validate" } %>
+    </div>
+  </div>
   </div>
 <% end %>

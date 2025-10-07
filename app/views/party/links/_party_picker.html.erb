@@ -1,0 +1,27 @@
+<%# Wide, no-JS fallback picker. Lets the user search in a new tab and paste the ID. %>
+<% field =
+  [:related_party_id, :target_party_id, :other_party_id].find { |k| f.object.respond_to?(k) } ||
+  :related_party_id %>
+
+<div class="space-y-2">
+  <div class="join w-full">
+    <input type="text"
+           class="input input-bordered join-item w-full"
+           placeholder="Search name or customer # (opens search in new tab)"
+           onfocus="this.select()"
+           onkeydown="if(event.key==='Enter'){window.open('<%= party_parties_path %>','_blank');}">
+    <%= link_to "Find", party_parties_path, class: "btn join-item", target: "_blank", rel: "noopener" %>
+  </div>
+
+  <div class="form-control">
+    <label class="label"><span class="label-text">Related party ID</span></label>
+    <%= f.number_field field,
+          class: "input input-bordered w-full",
+          placeholder: "Paste the numeric ID of the related party" %>
+    <div class="label">
+      <span class="label-text-alt opacity-70">
+        Paste the ID from the party you want to link. Controller can map this to source/target as needed.
+      </span>
+    </div>
+  </div>
+</div>
