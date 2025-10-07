@@ -107,15 +107,14 @@
       </div>
 
       <div class="card bg-base-200 shadow-md">
-        <div class="card-body overflow-visible min-w-0">
+        <div class="card bg-base-200 shadow-md overflow-visible">
           <div class="flex items-center justify-between">
             <h2 class="card-title text-base font-semibold m-0">Relationships</h2>
             <details class="dropdown dropdown-end">
               <summary class="btn btn-outline btn-sm">Add link</summary>
-              <div class="dropdown-content z-40 card bg-base-100 shadow-2xl p-4
-                          left-2 right-2 sm:left-auto sm:right-0
-                          max-w-[min(95vw,900px)]">
-                <%= render "party/links/form", party: @party, ui: :wide %>
+               <div class="dropdown-content z-50 card bg-base-100 shadow-2xl p-4 mt-2
+                  w-[36rem] max-w-[95vw] sm:w-[40rem]">
+                  <%= render "party/links/form", party: @party, ui: :wide %>
               </div>
             </details>
           </div>

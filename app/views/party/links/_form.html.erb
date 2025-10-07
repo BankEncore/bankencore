@@ -10,55 +10,47 @@
        data-party-target-picker-lookup-url-value="<%= lookup_party_parties_path(format: :json) %>"
        data-party-target-picker-allowed-types-value="<%= allowed.to_json %>">
 
-      <!-- Relationship -->
-      <div class="col-span-12 sm:col-span-4 lg:col-span-3">
-        <% rel_id = "#{f.object_name}_party_link_type_code" %>
-        <%= f.label :party_link_type_code, "Relationship", class: "label", for: rel_id %>
-        <%= f.collection_select :party_link_type_code, types, :code, :name, {},
-              class: "select select-bordered w-full",
-              id: rel_id,
-              data: { action: "change->party-target-picker#clear" } %>
-      </div>
+    <!-- Relationship -->
+    <div class="col-span-12 sm:col-span-4 lg:col-span-3">
+      <% rel_id = "#{f.object_name}_party_link_type_code" %>
+      <%= f.label :party_link_type_code, "Relationship", class: "label", for: rel_id %>
+      <%= f.collection_select :party_link_type_code, types, :code, :name, {},
+            class: "select select-bordered w-full",
+            id: rel_id,
+            data: { action: "change->party-target-picker#clear" } %>
+    </div>
 
-      <!-- Related party -->
-      <div class="col-span-12 sm:col-span-8 lg:col-span-6 relative">
-        <% input_id = "#{f.object_name}_related_party_search" %>
-        <% list_id  = "#{input_id}_menu" %>
-        <label class="label" for="<%= input_id %>"><span class="label-text">Related party</span></label>
-        <input id="<%= input_id %>" type="text" class="input input-bordered w-full"
-              placeholder="Search by customer # or name" autocomplete="off"
-              role="combobox" aria-autocomplete="list" aria-expanded="false"
-              aria-owns="<%= list_id %>"
-              data-party-target-picker-target="input"
-              data-action="input->party-target-picker#search" />
+    <!-- Related party -->
+    <div class="col-span-12 sm:col-span-12 lg:col-span-12 relative">
+      <% input_id = "#{f.object_name}_related_party_search" %>
+      <% list_id  = "#{input_id}_menu" %>
 
-        <input type="hidden" name="party_link[target_public_id]"
-              data-party-target-picker-target="hidden" />
+      <label class="label" for="<%= input_id %>"><span class="label-text">Related party</span></label>
+      <input id="<%= input_id %>" type="text" class="input input-bordered w-full"
+             placeholder="Search by customer # or name" autocomplete="off"
+             role="combobox" aria-autocomplete="list" aria-expanded="false"
+             aria-owns="<%= list_id %>"
+             data-party-target-picker-target="input"
+             data-action="input->party-target-picker#search" />
 
-        <div id="<%= list_id %>" role="listbox"
-            data-party-target-picker-target="menu"
-            data-action="click->party-target-picker#pick"
-            class="absolute left-0 right-0 mt-1 max-h-64 overflow-auto
-                    bg-base-100 border border-base-300 rounded-box shadow z-50 p-2 space-y-1"></div>
-      </div>
+      <input type="hidden" name="party_link[target_public_id]"
+             data-party-target-picker-target="hidden" />
 
-      <!-- Suggestion menu -->
-      <div id="<%= list_id %>"
-           role="listbox"
-           data-party-target-picker-target="menu"
-           data-action="click->party-target-picker#pick"
-           class="absolute left-0 right-0 mt-1 max-h-64 overflow-auto
-                  bg-base-100 border border-base-300 rounded-box shadow z-50 p-2 space-y-1">
-      </div>
+      <!-- single suggestions menu -->
+    <div id="<%= list_id %>" role="listbox"
+        class="mt-1 max-h-64 overflow-auto
+                bg-base-100 border border-base-300 rounded-box shadow p-2 space-y-1"
+        data-party-target-picker-target="menu"
+        data-action="click->party-target-picker#pick">
     </div>
 
     <!-- Dates -->
-    <div class="col-span-6 sm:col-span-4 lg:col-span-1">
+    <div class="col-span-12 sm:col-start-1 sm:col-span-3 lg:col-span-2">
       <%= f.label :started_on, "Start", class: "label" %>
       <%= f.date_field :started_on, class: "input input-bordered w-full" %>
     </div>
 
-    <div class="col-span-6 sm:col-span-4 lg:col-span-1">
+    <div class="col-span-12 sm:col-span-3 lg:col-span-2">
       <%= f.label :ended_on, "End", class: "label" %>
       <%= f.date_field :ended_on, class: "input input-bordered w-full" %>
     </div>
@@ -68,6 +60,5 @@
       <%= f.submit "Add", class: "btn btn-primary",
             data: { action: "click->party-target-picker#validate" } %>
     </div>
-  </div>
   </div>
 <% end %>
