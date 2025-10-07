@@ -1,17 +1,12 @@
-<%# app/views/party/links/_row.html.erb %>
-<%# locals: link:, party:, editable:, tag_class: %>
-<% chip = local_assigns[:tag_class] || "badge badge-ghost badge-sm" %>
+<% chip  = local_assigns[:tag_class] || "badge badge-ghost badge-xs" %>
+<% other = (link.source_party_id == party.id) ? link.target_party : link.source_party %>
 
-<li class="py-2 flex items-center justify-between gap-2">
+<li class="py-2 flex items-center justify-between gap-2 text-sm"> <!-- was py-3/grid -->
   <div class="flex items-center gap-2 min-w-0">
-    <span class="<%= chip %>">
-      <%= link.party_link_type&.name || link.party_link_type_code.humanize %>
-    </span>
-
-    <% other = (link.source_party_id == party.id) ? link.target_party : link.source_party %>
+    <span class="<%= chip %> shrink-0"><%= link.party_link_type&.name || link.party_link_type_code.humanize %></span>
     <%= link_to other.display_name,
           party_party_path(other.public_id),
-          class: "link truncate max-w-[60ch] align-middle",
+          class: "link truncate sm:whitespace-normal",
           title: other.display_name %>
   </div>
 
@@ -19,7 +14,6 @@
     <%= button_to "Remove",
           party_party_link_path(party, link),
           method: :delete,
-          form: { class: "inline m-0" },
-          class: "btn btn-ghost btn-xs text-error whitespace-nowrap" %>
+          class: "link text-error text-xs p-0 m-0 whitespace-nowrap" %>
   <% end %>
 </li>

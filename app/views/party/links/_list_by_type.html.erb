@@ -9,7 +9,7 @@
   end %>
 
 <% rendered_any = false %>
-<ul class="divide-y divide-base-300">
+<ul class="mt-2 divide-y divide-base-300">
   <% links.group_by(&:party_link_type_code).each do |code, group| %>
     <% t = group.first.party_link_type %>
 
@@ -29,6 +29,6 @@
   <% end %>
 
   <% unless rendered_any %>
-    <li class="py-2 text-sm opacity-60">No relationships.</li>
+    <li class="py-3 text-sm opacity-60">No relationships.</li>
   <% end %>
 </ul>
