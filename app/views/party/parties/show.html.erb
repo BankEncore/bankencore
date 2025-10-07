@@ -27,42 +27,29 @@
     </div>
   </div>
 </div>
-
 <%# ===== TWO COLUMNS (sibling of hero) ===== %>
-<%# ===== Two-column layout (hard no-wrap) ===== %>
 <div class="mx-auto max-w-7xl px-4 md:px-6">
-  <div style="display:flex;flex-direction:row;flex-wrap:nowrap;align-items:flex-start;gap:1.5rem">
-
-    <!-- LEFT column: fixed ~22rem -->
-    <div class="mx-auto max-w-7xl px-4 md:px-6">
-      <div class="flex flex-nowrap items-start gap-6">
-        <section class="w-80 shrink-0 flex flex-col gap-6 min-w-0">
-
-       <%# Identity Card %>
+  <div class="flex flex-nowrap items-start gap-6">
+    <!-- LEFT column: fixed -->
+    <section class="w-80 shrink-0 flex flex-col gap-6 min-w-0">
+      <%# Identity Card %>
       <div class="card bg-base-200 shadow-md">
         <div class="card-body">
           <h2 class="card-title text-base font-semibold">Identity</h2>
           <% if @party.customer_number.present? %>
-              <% if @party.customer_number.present? %>
-                <div>
-                  <div class="text-xs opacity-70">Customer #</div>
-                  <div class="mt-1 flex items-center gap-2">
-                    <span class="text-lg font-semibold tabular-nums"><%= @party.customer_number %></span>
-                    <button
-                      class="btn btn-ghost btn-xs"
-                      aria-label="Copy customer number"
-                      data-controller="copy"
-                      data-copy-text-value="<%= @party.customer_number %>"
-                      data-action="copy#copy">
-                      Copy
-                    </button>
-                  </div>
-                </div>
-                <div class="divider mt-2 mb-0"></div>
-              <% end %>
+            <div>
+              <div class="text-xs opacity-70">Customer #</div>
+              <div class="mt-1 flex items-center gap-2">
+                <span class="text-lg font-semibold tabular-nums"><%= @party.customer_number %></span>
+                <button class="btn btn-ghost btn-xs"
+                        data-controller="copy"
+                        data-copy-text-value="<%= @party.customer_number %>"
+                        data-action="copy#copy">Copy</button>
+              </div>
+            </div>
+            <div class="divider mt-2 mb-0"></div>
           <% end %>
 
-           <%# Name Sub-Card %>
           <dl class="mt-2">
             <% if @party.person %>
               <div class="py-2 grid grid-cols-3 gap-2">
@@ -91,7 +78,7 @@
         </div>
       </div>
 
-       <%# Identifiers Card %>
+      <%# Identifiers Card %>
       <div class="card bg-base-200 shadow-md">
         <div class="card-body">
           <h2 class="card-title text-base font-semibold">Identifiers</h2>
@@ -109,12 +96,34 @@
         </div>
       </div>
 
+      <%# Relationships %>
+      <div class="card bg-base-200 shadow-md">
+        <div class="card-body p-6">
+          <div class="flex items-center justify-between">
+            <h2 class="card-title text-base font-semibold">Relationships</h2>
+            <details class="dropdown dropdown-end">
+              <summary class="btn btn-outline btn-sm list-none">Add link</summary>
+              <div class="dropdown-content z-50 card bg-base-100 shadow-2xl p-4 mt-2 w-[36rem] max-w-[95vw] sm:w-[40rem]">
+                <div id="<%= dom_id(@party, :link_form) %>">
+                  <%= render "party/links/form", party: @party, ui: :wide %>
+                </div>
+              </div>
+            </details>
+          </div>
+          <turbo-frame id="<%= dom_id(@party, :links) %>">
+            <%= render "party/links/list_by_type",
+                  party: @party,
+                  links: Party::Link.involving(@party.id).includes(:party_link_type, :source_party, :target_party).order(:party_link_type_code),
+                  editable: true, tag_variant: :neutral %>
+          </turbo-frame>
+        </div>
+      </div>
+
     </section>
 
     <!-- RIGHT column: flexible -->
     <section class="flex-1 flex flex-col gap-6 min-w-0">
-
-       <%# Contact Information Card %>
+      <%# Contact Information %>
       <div class="card bg-base-200 shadow-md">
         <div class="card-body">
           <h2 class="card-title text-base font-semibold">Contact Information</h2>
@@ -124,50 +133,19 @@
         </div>
       </div>
 
-      <%# Links Card %>
-      <div class="card bg-base-200 shadow-md">
-        <div class="card-body p-6"> <!-- align padding with other cards -->
-          <div class="flex items-center justify-between">
-            <h2 class="card-title text-base font-semibold">Relationships</h2>
-
-            <details class="dropdown dropdown-end">
-              <summary class="btn btn-outline btn-sm list-none">Add link</summary>
-              <div class="dropdown-content z-50 card bg-base-100 shadow-2xl p-4 mt-2
-                          w-[36rem] max-w-[95vw] sm:w-[40rem]">
-                <div id="<%= dom_id(@party, :link_form) %>">
-                  <%= render "party/links/form", party: @party, ui: :wide %>
-                </div>
-              </div>
-            </details>
-          </div>
-
-          <turbo-frame id="<%= dom_id(@party, :links) %>">
-            <%= render "party/links/list_by_type",
-                  party: @party,
-                  links: Party::Link.involving(@party.id)
-                                    .includes(:party_link_type, :source_party, :target_party)
-                                    .order(:party_link_type_code),
-                  editable: true,
-                  tag_variant: :neutral %>
-          </turbo-frame>
-        </div>
-      </div>
-
-      <%# Groups Card %>
+      <%# Groups %>
       <div class="card bg-base-200 shadow-md">
         <div class="card-body">
           <div class="flex items-center justify-between">
             <h2 class="card-title text-base font-semibold">Groups</h2>
-            <%= link_to "Join group",
-                  new_party_party_group_membership_path(@party.public_id),
-                  data: { turbo_frame: "comm_modal_frame" },
-                  class: "btn btn-ghost btn-xs" %>
+            <%= link_to "Join group", new_party_party_group_membership_path(@party.public_id),
+                  data: { turbo_frame: "comm_modal_frame" }, class: "btn btn-ghost btn-xs" %>
           </div>
           <%= render "party/groups/section", party: @party %>
         </div>
       </div>
 
-       <%# Screenings Card %>
+      <%# Screenings %>
       <div class="card bg-base-200 shadow-md">
         <div class="card-body">
           <div class="flex items-center justify-between">
@@ -188,12 +166,10 @@
               </thead>
               <tbody>
                 <% @party.screenings.order(created_at: :desc).limit(5).each do |s| %>
-                  <% status_badge =
-                    case s.status
+                  <% status_badge = case s.status
                     when "completed" then "badge-success"
                     when "pending"    then "badge-warning"
-                    else                   "badge-ghost"
-                    end %>
+                    else "badge-ghost" end %>
                   <tr>
                     <td><%= s.completed_at&.to_fs(:short) || s.requested_at&.to_fs(:short) %></td>
                     <td><%= s.kind.humanize %></td>
@@ -210,6 +186,6 @@
           </div>
         </div>
       </div>
-
     </section>
+  </div>
 </div>
