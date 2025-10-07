@@ -28,3 +28,6 @@ application.register("toggle-input", ToggleInputController)
 
 import PartyTargetPickerController from "./party_target_picker_controller"
 application.register("party-target-picker", PartyTargetPickerController)
+
+import IdentifierRowController from "./identifier_row_controller"
+application.register("identifier-row", IdentifierRowController)
