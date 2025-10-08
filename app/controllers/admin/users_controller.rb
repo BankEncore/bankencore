@@ -40,7 +40,7 @@ class Admin::UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:email_address, :email, :first_name, :last_name, :password, :password_confirmation)
-      .delete_if { |_, v| v.blank? } # allow blank password on update
+    params.require(:user).permit(:first_name, :last_name, :email_address,
+      :password, :password_confirmation, :role, :active_flag, :time_zone)
   end
 end

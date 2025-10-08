@@ -14,4 +14,9 @@ class ApplicationController < ActionController::Base
   def authenticated?
     Current.user.present?
   end
+
+  before_action :set_time_zone
+  def set_time_zone
+    Time.zone = Current.user&.time_zone.presence || "UTC"
+  end
 end

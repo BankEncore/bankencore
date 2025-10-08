@@ -2,6 +2,10 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
 
+  has_secure_password
+  VALID_ZONES = ActiveSupport::TimeZone.all.map(&:name).freeze
+  validates :time_zone, inclusion: { in: VALID_ZONES }, allow_nil: true
+
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
   def display_name
