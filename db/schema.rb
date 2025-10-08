@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_06_041838) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_08_204117) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -353,7 +353,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_06_041838) do
     t.datetime "updated_at", null: false
     t.string "first_name"
     t.string "last_name"
+    t.string "time_zone"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["time_zone"], name: "index_users_on_time_zone"
   end
 
   add_foreign_key "party_addresses", "parties", on_delete: :cascade

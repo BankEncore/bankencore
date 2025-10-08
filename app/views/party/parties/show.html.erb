@@ -9,7 +9,7 @@
           <h1 class="text-3xl font-bold truncate"><%= @party.display_name %></h1>
           <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
             <span class="badge badge-outline"><%= @party.party_type %></span>
-            <span class="badge badge-ghost">Updated <%= l(@party.updated_at, format: :short) %></span>
+            <span class="badge badge-ghost">Updated <%= l(@party.updated_at.in_time_zone, format: :short) %></span>
           </div>
         </div>
 
@@ -172,7 +172,7 @@
                     when "pending"    then "badge-warning"
                     else "badge-ghost" end %>
                   <tr>
-                    <td><%= s.completed_at&.to_fs(:short) || s.requested_at&.to_fs(:short) %></td>
+                    <%= (s.completed_at || s.requested_at)&.in_time_zone&.to_fs(:short) %>
                     <td><%= s.kind.humanize %></td>
                     <td><span class="badge <%= status_badge %>"><%= s.status.humanize %></span></td>
                     <td><%= s.normalized_score || "N/A" %></td>

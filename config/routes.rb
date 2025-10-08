@@ -60,4 +60,8 @@ Rails.application.routes.draw do
   namespace :ref do
     resources :regions, only: :index
   end
+
+  resource :profile, only: [] do
+    patch :time_zone
+  end
 end

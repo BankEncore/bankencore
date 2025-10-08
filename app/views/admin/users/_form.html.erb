@@ -16,6 +16,13 @@
       </div>
     </div>
 
+
+    <%= f.label :time_zone %>
+      <%= f.select :time_zone,
+      ActiveSupport::TimeZone.all.map { |z| [z.to_s, z.name] },
+      { include_blank: "— Select —" },
+      class: "select select-bordered w-full" %>
+
     <label class="label">Password <span class="opacity-60">(leave blank to keep)</span></label>
     <%= f.password_field :password, class: "input input-bordered w-full", autocomplete: "new-password" %>
     <%= f.password_field :password_confirmation, class: "input input-bordered w-full mt-2", autocomplete: "new-password" %>
