@@ -1,38 +1,36 @@
-// app/javascript/controllers/reveal_controller.js
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
+  static targets = ["text","button","spinner"]
   static values = { url: String }
-  static targets = ["text", "button", "spinner"]
 
-  async reveal(event) {
-    event?.preventDefault()
-
-    // simple demo fallback if no URL provided
-    if (!this.hasUrlValue || !this.urlValue) {
-      this.textTarget.textContent = "reveal clicked"
-      return
-    }
-
-    this.buttonTarget.disabled = true
-    this.buttonTarget.classList.add("hidden")
-    if (this.hasSpinnerTarget) this.spinnerTarget.classList.remove("hidden")
-
+  async reveal(e) {
+    e?.preventDefault()
+    const url = this.urlValue || this.element.dataset.url
+    if (!url) { console.error("reveal: missing url"); return }
+    this.#loading(true)
     try {
-      const res = await fetch(this.urlValue, {
-        headers: { "Accept": "application/json" },
-        credentials: "same-origin"
-      })
-      if (!res.ok) throw new Error("Reveal failed")
+      const res = await fetch(url, { headers: { "Accept":"application/json" }, credentials:"same-origin" })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const { value } = await res.json()
-      this.textTarget.textContent = value || ""
-    } catch (e) {
-      console.error(e)
-      this.buttonTarget.disabled = false
-      this.buttonTarget.classList.remove("hidden")
-      alert("Unable to reveal right now.")
+      this.textTarget.textContent = value || "(empty)"
+    } catch (err) {
+      console.error("reveal failed:", err)
+      alert("Unable to reveal identifier.")
     } finally {
-      if (this.hasSpinnerTarget) this.spinnerTarget.classList.add("hidden")
+      this.#loading(false)
     }
+  }
+
+  async copy(e) {
+    e?.preventDefault()
+    const t = this.textTarget.textContent?.trim()
+    if (!t || t.includes("•")) return
+    await navigator.clipboard.writeText(t)
+  }
+
+  #loading(on) {
+    if (this.hasSpinnerTarget) this.spinnerTarget.classList.toggle("hidden", !on)
+    if (this.hasButtonTarget)  this.buttonTarget.disabled = on
   }
 }

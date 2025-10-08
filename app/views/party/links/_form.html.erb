@@ -1,44 +1,61 @@
-<% types   = local_assigns[:link_types] || Ref::PartyLinkType.order(:name) %>
-<% allowed = defined?(allowed_target_types_for) ? allowed_target_types_for(types.first&.code) : [] %>
+<%# locals: party:, ui: :wide, link: nil %>
+<% link ||= Party::Link.new %>
 
-<%= form_with url: party_party_links_path(party.public_id),
-              scope: :party_link,
-              data: { turbo_frame: "comm_modal_frame" } do |f| %>
-  <div class="flex gap-2 items-end"
+<%= form_with model: link,
+              url: party_party_links_path(party.public_id),
+              data: { controller: "dropdown", action: "turbo:submit-end->dropdown#afterSubmit" } do |f| %>
+
+  <% if f.object.errors.any? %>
+    <div class="alert alert-error text-sm mb-3">
+      <ul class="list-disc ml-5">
+        <% f.object.errors.full_messages.each do |m| %><li><%= m %></li><% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-12 gap-4 items-end"
        data-controller="party-target-picker"
        data-party-target-picker-lookup-url-value="<%= lookup_party_parties_path(format: :json) %>"
-       data-party-target-picker-allowed-types-value="<%= allowed.to_json %>">
+       data-party-target-picker-allowed-types-value="<%= (defined?(allowed_target_types_for) ? allowed_target_types_for(f.object.party_link_type_code) : []).to_json %>">
 
-    <div>
-      <%= f.label :party_link_type_code, "Relationship" %>
-      <%= f.collection_select :party_link_type_code, types, :code, :name,
-            {}, { class: "select select-bordered",
-                  data: { action: "change->party-target-picker#clear" } } %>
+    <!-- Relationship -->
+    <div class="col-span-12 sm:col-span-4 lg:col-span-3">
+      <%= f.label :party_link_type_code, "Relationship", class: "label" %>
+      <%= f.collection_select :party_link_type_code, (local_assigns[:link_types] || Ref::PartyLinkType.order(:name)),
+            :code, :name, {},
+            class: "select select-bordered w-full #{'select-error' if f.object.errors[:party_link_type_code].present?}",
+            data: { action: "change->party-target-picker#clear" } %>
     </div>
 
-    <div class="grow">
-      <label>Related party</label>
-      <input type="text" class="input input-bordered w-full"
+    <!-- Related party (search + hidden target_public_id) -->
+    <div class="col-span-12 sm:col-span-8 lg:col-span-6 relative">
+      <label class="label"><span class="label-text">Related party</span></label>
+      <input type="text"
+             class="input input-bordered w-full"
              placeholder="Search by customer # or name"
              data-party-target-picker-target="input"
              data-action="input->party-target-picker#search" />
-      <input type="hidden" name="party_link[target_public_id]"
-             data-party-target-picker-target="hidden" />
-      <div class="mt-1 space-y-1"
-           data-party-target-picker-target="menu"
-           data-action="click->party-target-picker#pick"></div>
+      <%= hidden_field_tag "party_link[target_public_id]", f.object.target_party&.public_id, data: { party_target_picker_target: "hidden" } %>
+      <div data-party-target-picker-target="menu"
+           data-action="click->party-target-picker#pick"
+           class="mt-1 max-h-64 overflow-auto bg-base-100 border border-base-300 rounded-box shadow p-2 space-y-1"></div>
+      <% if f.object.errors[:target_party].present? || f.object.errors[:target_public_id].present? %>
+        <div class="text-error text-xs mt-1">Select a valid related party.</div>
+      <% end %>
     </div>
 
-    <div>
-      <%= f.label :started_on, "Start" %>
-      <%= f.date_field :started_on, class: "input input-bordered" %>
+    <!-- Dates on next row -->
+    <div class="col-span-12 sm:col-start-1 sm:col-span-3 lg:col-span-2">
+      <%= f.label :started_on, "Start", class: "label" %>
+      <%= f.date_field :started_on, class: "input input-bordered w-full #{'input-error' if f.object.errors[:started_on].present?}" %>
+    </div>
+    <div class="col-span-12 sm:col-span-3 lg:col-span-2">
+      <%= f.label :ended_on, "End", class: "label" %>
+      <%= f.date_field :ended_on, class: "input input-bordered w-full #{'input-error' if f.object.errors[:ended_on].present?}" %>
     </div>
 
-    <div>
-      <%= f.label :ended_on, "End" %>
-      <%= f.date_field :ended_on, class: "input input-bordered" %>
+    <div class="col-span-12 text-right">
+      <%= f.submit "Add", class: "btn btn-primary" %>
     </div>
-
-    <div><label>&nbsp;</label><%= f.submit "Add", class: "btn btn-primary" %></div>
   </div>
 <% end %>

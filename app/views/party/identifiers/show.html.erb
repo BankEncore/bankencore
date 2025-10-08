@@ -1,0 +1,33 @@
+<!-- app/views/party/identifiers/show.html.erb -->
+<turbo-frame id="comm_modal_frame">
+  <div class="p-4 space-y-4"
+       data-controller="reveal"
+       data-reveal-url-value="<%= reveal_party_party_identifier_path(@party, @identifier) %>">
+
+    <h3 class="text-lg font-semibold">Identifier details</h3>
+
+    <div class="grid grid-cols-2 gap-3 text-sm">
+      <div class="opacity-70">Type</div>
+      <div><%= @identifier.identifier_type&.name || @identifier.id_type_code&.upcase %></div>
+
+      <div class="opacity-70">Issued By</div>
+      <div><%= [@identifier.country_code, @identifier.issuing_authority].compact.join(" • ").presence || "—" %></div>
+
+      <div class="opacity-70">Expires</div>
+      <div><%= @identifier.expires_on || "—" %></div>
+
+      <div class="opacity-70">Value</div>
+      <div>
+        <span data-reveal-target="text"><%= @identifier.value_masked.presence || "••••" %></span>
+        <span class="loading loading-spinner loading-xs hidden ml-2" data-reveal-target="spinner"></span>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button type="button" class="btn btn-sm btn-outline"
+              data-reveal-target="button" data-action="reveal#reveal">Reveal</button>
+      <button type="button" class="btn btn-sm btn-ghost" data-action="reveal#copy">Copy</button>
+      <button type="button" class="btn btn-sm btn-ghost" data-action="modal#close">Close</button>
+    </div>
+  </div>
+</turbo-frame>

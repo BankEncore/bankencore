@@ -1,18 +1,19 @@
-<!-- app/views/party/links/_row.html.erb -->
-<%# locals: link:, party:, editable: %>
-<% other = link.source_party_id == party.id ? link.target_party : link.source_party %>
-<li class="py-1 flex items-center justify-between">
-  <div>
-    <%= content_tag(:span,
-          Ref::PartyLinkType.find_by(code: link.party_link_type_code)&.name || link.party_link_type_code.humanize,
-          class: "badge badge-ghost") %>
-    <%= link_to other.display_name, party_party_path(other.public_id), class: "link" %>
+<% chip  = local_assigns[:tag_class] || "badge badge-ghost badge-xs" %>
+<% other = (link.source_party_id == party.id) ? link.target_party : link.source_party %>
+
+<li class="py-2 flex items-center justify-between gap-2 text-sm"> <!-- was py-3/grid -->
+  <div class="flex items-center gap-2 min-w-0">
+    <span class="<%= chip %> shrink-0"><%= link.party_link_type&.name || link.party_link_type_code.humanize %></span>
+    <%= link_to other.display_name,
+          party_party_path(other.public_id),
+          class: "link truncate sm:whitespace-normal",
+          title: other.display_name %>
   </div>
+
   <% if editable %>
     <%= button_to "Remove",
-          party_party_link_path(party.public_id, link),
+          party_party_link_path(party, link),
           method: :delete,
-          class: "btn btn-ghost btn-xs",
-          data: { turbo_confirm: "Remove relationship?" } %>
+          class: "link text-error text-xs p-0 m-0 whitespace-nowrap" %>
   <% end %>
 </li>

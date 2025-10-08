@@ -1,70 +1,79 @@
 # app/controllers/party/links_controller.rb
+include ActionView::RecordIdentifier
 module Party
   class LinksController < ApplicationController
     before_action :set_source
     before_action :set_link_type, only: :create
 
+    # app/controllers/party/links_controller.rb
     def create
       target = ::Party::Party.find_by!(public_id: pl_params[:target_public_id])
 
       from_allowed = json_list(@type.allowed_from_party_types)
       to_allowed   = json_list(@type.allowed_to_party_types)
-
       if from_allowed.any? && !from_allowed.include?(@party.party_type)
-        return redirect_back fallback_location: party_party_path(@party.public_id),
-                            alert: "Source must be #{from_allowed.join('/')}"
+        return redirect_back fallback_location: party_party_path(@party.public_id), alert: "Source must be #{from_allowed.join('/')}"
       end
       if to_allowed.any? && !to_allowed.include?(target.party_type)
-        return redirect_back fallback_location: party_party_path(@party.public_id),
-                            alert: "Target must be #{to_allowed.join('/')}"
+        return redirect_back fallback_location: party_party_path(@party.public_id), alert: "Target must be #{to_allowed.join('/')}"
       end
 
-      ::Party::Link.create!(
-        source_party: @party, target_party: target,
+      @link = ::Party::Link.new(
+        source_party: @party,
+        target_party: target,
         party_link_type_code: @type.code,
-        started_on: pl_params[:started_on], ended_on: pl_params[:ended_on]
+        started_on: pl_params[:started_on],
+        ended_on:   pl_params[:ended_on]
       )
-      if @type.inverse_code.present?
-        ::Party::Link.create!(
-          source_party: target, target_party: @party,
-          party_link_type_code: @type.inverse_code,
-          started_on: pl_params[:started_on], ended_on: pl_params[:ended_on]
-        )
-      end
 
-      respond_to do |format|
-        format.turbo_stream do
-          links = ::Party::Link.involving(@party.id)
-                  .includes(:party_link_type, :source_party, :target_party)
-                  .order(:party_link_type_code)
+      if @link.save
+        if @type.inverse_code.present?
+          ::Party::Link.create!(
+            source_party: target, target_party: @party,
+            party_link_type_code: @type.inverse_code,
+            started_on: pl_params[:started_on], ended_on: pl_params[:ended_on]
+          )
+        end
 
-          render turbo_stream: [
-            turbo_stream.replace(
-              "links_by_type",
-              partial: "party/links/list_by_type",
-              locals: { party: @party, links: links, editable: true }
-            ),
-            turbo_stream.replace(
-              "comm_modal_frame",
+        links = ::Party::Link.involving(@party.id)
+                            .includes(:party_link_type, :source_party, :target_party)
+                            .order(:party_link_type_code)
+
+        respond_to do |format|
+          format.turbo_stream do
+            render turbo_stream: [
+              turbo_stream.replace(
+                dom_id(@party, :links),
+                partial: "party/links/list_by_type",
+                locals: { party: @party, links: links, editable: true, tag_variant: :neutral }
+              ),
+              # optionally refresh the blank form so it’s clean if still open
+              turbo_stream.replace(
+                dom_id(@party, :link_form),
+                partial: "party/links/form",
+                locals: { party: @party, ui: :wide }
+              )
+            ]
+          end
+          format.html { redirect_to party_party_path(@party.public_id), notice: "Relationship added." }
+        end
+      else
+        respond_to do |format|
+          format.turbo_stream do
+            render turbo_stream: turbo_stream.replace(
+              dom_id(@party, :link_form),
               partial: "party/links/form",
-              locals: { party: @party, link_types: Ref::PartyLinkType.order(:name) }
-            )
-          ]
+              locals: { party: @party, ui: :wide, link: @link }   # pass the invalid record
+            ), status: :unprocessable_entity
+          end
+          format.html do
+            redirect_back fallback_location: party_party_path(@party.public_id),
+                          alert: @link.errors.full_messages.to_sentence
+          end
         end
-        format.html { redirect_to party_party_path(@party.public_id), notice: "Relationship added." }
-      end
-    rescue ActiveRecord::RecordInvalid => e
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "comm_modal_frame",
-            partial: "party/links/form",
-            locals: { party: @party, link_types: Ref::PartyLinkType.order(:name) }
-          ), status: :unprocessable_entity
-        end
-        format.html { redirect_back fallback_location: party_party_path(@party.public_id), alert: e.record.errors.full_messages.to_sentence }
       end
     end
+
 
     def destroy
       link = ::Party::Link.find(params[:id])

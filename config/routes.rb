@@ -14,13 +14,15 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
   root "home#index"
 
+  # --- Party domain ---
   namespace :party do
     resources :parties, param: :public_id do
-      get :lookup, on: :collection   # JSON search for target party picker
-      member do
-        get  :reveal_tax_id
-        post :reveal_tax_id
-        post :create_household
+      collection { get :lookup }
+      member     { post :create_household }
+      member     { get  :reveal_tax_id } # legacy optional
+
+      resources :identifiers, only: [ :show ] do
+        member { get :reveal } # /party/parties/:public_id/identifiers/:id/reveal
       end
 
       resources :emails, only: %i[new create edit update destroy] do
@@ -38,29 +40,23 @@ Rails.application.routes.draw do
         member { patch :primary }
       end
 
-      # Party-scoped "join group" modal + create
       resources :group_memberships, path: :memberships, only: %i[new create]
-
-      # Links + suggestions scoped to a source party
-      resources :links,             only: %i[create destroy]           # Party::LinksController
-      resources :link_suggestions,  only: %i[index update]             # Party::LinkSuggestionsController
-
-      resources :screenings, only: %i[new create index]
+      resources :links,            only: %i[create destroy]
+      resources :link_suggestions, only: %i[index update]
+      resources :screenings,       only: %i[new create index]
     end
 
     resources :screenings, only: %i[show edit update]
 
-    # Groups
     resources :groups, only: %i[index show edit update destroy] do
-      get :lookup, on: :collection
-      # Group-scoped join/leave
+      collection { get :lookup }
       resource :membership, only: %i[create destroy], controller: "groups/memberships"
     end
 
-    # Global group suggestions (not tied to a single party)
     resources :group_suggestions, only: %i[index update]
   end
 
+  # --- Reference data ---
   namespace :ref do
     resources :regions, only: :index
   end

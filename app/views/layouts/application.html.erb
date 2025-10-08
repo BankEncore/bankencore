@@ -190,6 +190,13 @@
       </div>
   </footer>
 
-    <turbo-frame id="comm_modal_frame"></turbo-frame>
+      <!-- Modal host -->
+      <div data-controller="modal" data-modal-id-value="comm-modal">
+        <%= render "shared/modal" %>
+        <turbo-frame id="comm_modal_frame"
+          data-action="turbo:frame-load->modal#open turbo:submit-end->modal#maybeClose">
+        </turbo-frame>
+      </div>
+      <%= render "shared/modal" %>
   </body>
 </html>

@@ -178,25 +178,25 @@
   default: false;
   prefersdark: false;
   color-scheme: light;
-  --color-base-100: #F6F2EA;
-  --color-base-200: #E8D4B3;
-  --color-base-300: #DFD0B1;
-  --color-base-content: #1A1D21;
-  --color-primary: #16324E;
-  --color-primary-content: #F9FAFB;
-  --color-secondary: #71816D;
-  --color-secondary-content: #0E1216;
-  --color-accent: #C9B79C;
-  --color-accent-content: #14110C;
-  --color-neutral: #3A4146;
-  --color-neutral-content: #EDEFF2;
-  --color-info: #2D5E8A;
-  --color-info-content: #F6F2EA;
-  --color-success: #5F7A59;
-  --color-success-content: #F6F2EA;
-  --color-warning: #B89252;
-  --color-warning-content: #16324E;
-  --color-error: #7B0D1E;
+  --color-base-100: #ffffff;
+  --color-base-200: #f9fafb;
+  --color-base-300: #f0f5fa;
+  --color-base-content: #072247;
+  --color-primary: #1d3557;
+  --color-primary-content: #f9fafb;
+  --color-secondary: #1e304a;
+  --color-secondary-content: #f0f5fa;
+  --color-accent: #b2cff7;
+  --color-accent-content: #1d3557;
+  --color-neutral: #072247;
+  --color-neutral-content: #f9fafb;
+  --color-info: #1d3557;
+  --color-info-content: #f0f5fa;
+  --color-success: #22c55e;
+  --color-success-content: #072247;
+  --color-warning: #f59e0b;
+  --color-warning-content: #1d3557;
+  --color-error: #cf0314;
   --color-error-content: #FFF5F5;
   --radius-selector: 2rem;
   --radius-field: 0.25rem;
@@ -206,4 +206,52 @@
   --border: 1px;
   --depth: 1;
   --noise: 1;
+}
+
+/* Encore Blue */
+@plugin "daisyui/theme" {
+  name: "encoreBlue";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: #F9FAFB;
+  --color-base-200: #E5E7EB;
+  --color-base-300: #D1D5DB;
+  --color-base-content: #072247;
+  --color-primary: #1E3A8A;
+  --color-primary-focus: #1D4ED8;
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #64748B;
+  --color-secondary-focus: #475569;
+  --color-secondary-content: #FFFFFF;
+  --color-accent: #6B7280;
+  --color-accent-focus: #4B5563;
+  --color-accent-content: #FFFFFF;
+  --color-neutral: #374151;
+  --color-neutral-focus: #1F2937;
+  --color-neutral-content: #FFFFFF;
+  --color-info: #2563EB;
+  --color-info-content: #FFFFFF;
+  --color-success: #059669;
+  --color-success-content: #FFFFFF;
+  --color-warning: #F59E0B;
+  --color-warning-content: #000000;
+  --color-error: #DC2626;
+  --color-error-content: #FFFFFF;
+  --radius-selector: 2rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 1;
+}
+
+
+
+@layer utilities {
+  .surface     { @apply bg-base-100 border border-base-300 rounded-box shadow-sm; }
+  .surface-sub { @apply bg-base-100 border border-base-300 rounded-box; } /* no shadow */
+  .elev-0 { @apply shadow-none; } .elev-1 { @apply shadow-sm; } .elev-2 { @apply shadow; }
 }

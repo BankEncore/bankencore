@@ -1,15 +1,34 @@
-<!-- app/views/party/links/_list_by_type.html.erb -->
-<%# locals: party:, links:, editable: %>
-<% links.group_by(&:party_link_type_code).each do |code, group| %>
-  <% t = group.first.party_link_type %>
+<%# locals: party:, links:, editable:, tag_variant: :ghost %>
 
-  <% group.each do |link| %>
-    <% if t&.symmetric == 1 %>
-      <% next unless [link.source_party_id, link.target_party_id].min == party.id %>
-    <% else %>
-      <% next unless link.source_party_id == party.id %>
+<% variant = (local_assigns[:tag_variant] || :ghost).to_sym %>
+<% tag_class =
+  case variant
+  when :neutral then "badge badge-neutral badge-sm"
+  when :outline then "badge badge-outline badge-sm"
+  else              "badge badge-ghost badge-sm"
+  end %>
+
+<% rendered_any = false %>
+<ul class="mt-2 divide-y divide-base-300">
+  <% links.group_by(&:party_link_type_code).each do |code, group| %>
+    <% t = group.first.party_link_type %>
+
+    <% group.each do |link| %>
+      <% keep =
+        if t&.symmetric == 1
+          [link.source_party_id, link.target_party_id].min == party.id
+        else
+          link.source_party_id == party.id
+        end %>
+      <% next unless keep %>
+
+      <% rendered_any = true %>
+      <%= render "party/links/row",
+            link: link, party: party, editable: editable, tag_class: tag_class %>
     <% end %>
-
-    <%= render "party/links/row", link: link, party: party, editable: editable %>
   <% end %>
-<% end %>
+
+  <% unless rendered_any %>
+    <li class="py-3 text-sm opacity-60">No relationships.</li>
+  <% end %>
+</ul>
