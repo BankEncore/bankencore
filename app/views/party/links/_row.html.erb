@@ -7,6 +7,7 @@
     <%= link_to other.display_name,
           party_party_path(other.public_id),
           class: "link truncate sm:whitespace-normal",
+          data: { turbo_frame: "_top" },
           title: other.display_name %>
   </div>
 
