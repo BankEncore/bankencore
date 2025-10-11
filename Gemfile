@@ -73,3 +73,5 @@ group :test do
 end
 
 gem "blind_index"
+gem "faraday", "~> 2.10"
+gem "faraday-retry", "~> 2.2"
