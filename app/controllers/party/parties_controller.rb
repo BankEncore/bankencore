@@ -123,6 +123,7 @@ module Party
       @party.addresses.build(country_code: "US") if @party.addresses.empty?
       @party.emails.build                         if @party.emails.empty?
       @party.phones.build(country_alpha2: "US")   if @party.phones.empty?
+      @countries = Ref::Country.order(:name)
     end
 
     def edit
@@ -131,6 +132,7 @@ module Party
       @party.addresses.build(country_code: "US") if @party.addresses.empty?
       @party.emails.build                         if @party.emails.empty?
       @party.phones.build(country_alpha2: "US")   if @party.phones.empty?
+      @countries = Ref::Country.order(:name)
     end
 
     def create
@@ -216,7 +218,7 @@ module Party
     def party_params
       params.require(:party_party).permit(
         :party_type,
-        person_attributes: [ :id, :first_name, :middle_name, :last_name, :name_suffix, :courtesy_title, :date_of_birth, :_destroy ],
+        person_attributes: [ :id, :first_name, :middle_name, :last_name, :name_suffix, :courtesy_title, :date_of_birth, :citizenship, :nationality_country_code, :residence_country_code, :_destroy ],
         organization_attributes: [ :id, :legal_name, :operating_name, :organization_type_code, :formation_date, :_destroy ],
         addresses_attributes: [ :id, :address_type_code, :line1, :line2, :line3, :locality, :region_code, :postal_code, :country_code, :is_primary, :_destroy ],
         emails_attributes: [ :id, :email, :email_type_code, :is_primary, :_destroy ],
@@ -228,7 +230,7 @@ module Party
     def load_ref_options
       @address_types    = Ref::AddressType.order(:name)
       @countries        = Ref::Country.order(:name)
-      @org_types        = Ref::OrganizationType.order(:name)
+      @org_types        = Ref::OrganizationType.order(:name).to_a
       @email_types      = Ref::EmailType.order(:name)
       @phone_types      = Ref::PhoneType.order(:name)
       @identifier_types = Ref::IdentifierType.order(:sort_order, :name)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_08_204117) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_11_203635) do
   create_table "customer_number_counters", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "current_value", null: false
     t.integer "min_value", default: 1001, null: false
@@ -202,7 +202,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_08_204117) do
     t.string "middle_name"
     t.string "name_suffix"
     t.string "courtesy_title"
+    t.integer "citizenship", default: 0, null: false
+    t.string "nationality_country_code", limit: 2
+    t.string "residence_country_code", limit: 2, default: "US", null: false
+    t.index ["citizenship"], name: "index_party_people_on_citizenship"
+    t.index ["nationality_country_code"], name: "index_party_people_on_nationality_country_code"
     t.index ["party_id"], name: "index_party_people_on_party_id"
+    t.index ["residence_country_code"], name: "index_party_people_on_residence_country_code"
+    t.check_constraint "`citizenship` = 0 and (`nationality_country_code` is null or `nationality_country_code` = 'US') or `citizenship` = 1 and `nationality_country_code` is not null and `nationality_country_code` <> 'US'", name: "chk_people_citizenship_nationality"
+    t.check_constraint "`residence_country_code` is not null", name: "chk_people_residence_present"
   end
 
   create_table "party_phones", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
@@ -379,6 +387,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_08_204117) do
   add_foreign_key "party_organizations", "parties", on_delete: :cascade
   add_foreign_key "party_organizations", "ref_organization_types", column: "organization_type_code", primary_key: "code"
   add_foreign_key "party_people", "parties", on_delete: :cascade
+  add_foreign_key "party_people", "ref_countries", column: "nationality_country_code", primary_key: "code"
+  add_foreign_key "party_people", "ref_countries", column: "residence_country_code", primary_key: "code"
   add_foreign_key "party_phones", "parties", on_delete: :cascade
   add_foreign_key "party_phones", "ref_phone_types", column: "phone_type_code", primary_key: "code"
   add_foreign_key "party_screenings", "parties", on_delete: :cascade

@@ -31,3 +31,6 @@ application.register("party-target-picker", PartyTargetPickerController)
 
 import IdentifierRowController from "./identifier_row_controller"
 application.register("identifier-row", IdentifierRowController)
+
+import ToggleController from "./toggle_controller.js";
+application.register("toggle", ToggleController);
