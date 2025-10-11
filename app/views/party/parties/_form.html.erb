@@ -80,29 +80,32 @@
         <fieldset class="col-span-12 <%= @party.party_type=='person' ? 'hidden' : '' %>"
                   data-party-type-target="orgSection">
           <h3 class="text-sm font-semibold tracking-wide uppercase text-base-content/70 mb-2">Organization</h3>
-          <%= f.fields_for :organization do |of| %>
-            <%= of.hidden_field :_destroy,
-                  value: (@party.party_type=='person' ? "1" : "0"),
-                  data: { party_type_target: "orgDestroy" } %>
-            <div class="grid grid-cols-12 gap-4">
-              <div class="col-span-12">
-                <label class="label-text mb-1 block">Legal name</label>
-                <%= of.text_field :legal_name, class:"input input-bordered w-full", autocapitalize:"words" %>
+            <%= f.fields_for :organization do |of| %>
+              <div class="grid gap-3">
+                <div>
+                  <label class="label">Entity type</label>
+                  <%= of.collection_select :organization_type_code,
+                        @org_types, :code, :name,
+                        { include_blank: true },
+                        class: "select select-bordered w-full" %>
+                </div>
+
+                <div>
+                  <label class="label">Legal name</label>
+                  <%= of.text_field :legal_name, class: "input input-bordered w-full", required: true %>
+                </div>
+
+                <div>
+                  <label class="label">Operating name (d/b/a)</label>
+                  <%= of.text_field :operating_name, class: "input input-bordered w-full" %>
+                </div>
+
+                <div>
+                  <label class="label">Formation date</label>
+                  <%= of.date_field :formation_date, class: "input input-bordered w-full" %>
+                </div>
               </div>
-              <div class="col-span-12">
-                <label class="label-text mb-1 block">DBA</label>
-                <%= of.text_field :operating_name, class:"input input-bordered w-full", autocapitalize:"words" %>
-              </div>
-              <div class="col-span-12 md:col-span-6">
-                <label class="label-text mb-1 block">Type</label>
-                <%= of.text_field :organization_type_code, class:"input input-bordered w-full" %>
-              </div>
-              <div class="col-span-12 md:col-span-6">
-                <label class="label-text mb-1 block">Formation date</label>
-                <%= of.date_field :formation_date, class:"input input-bordered w-full" %>
-              </div>
-            </div>
-          <% end %>
+            <% end %>
         </fieldset>
 
         <%# -------- Identifiers -------- %>
