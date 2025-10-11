@@ -57,6 +57,10 @@ module Party
           %w[value id_type_code country_code issuing_authority issued_on expires_on is_primary].all? { |k| h[k].to_s.strip.blank? }
       }
 
+    after_initialize do
+      build_person if new_record? && person.nil?
+    end
+
     # Virtuals for simple form binding
     attr_accessor :tax_id_input, :tax_id_type  # "ssn","ein","itin","foreign_tin"
     before_save :sync_tax_identifier_from_virtual

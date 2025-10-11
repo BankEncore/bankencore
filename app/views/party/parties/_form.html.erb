@@ -47,6 +47,7 @@
             <%= pf.hidden_field :_destroy,
                   value: (@party.party_type=='person' ? "0" : "1"),
                   data: { party_type_target: "personDestroy" } %>
+
             <div class="grid grid-cols-12 gap-4">
               <div class="col-span-12 md:col-span-3">
                 <label class="label-text mb-1 block">Title</label>
@@ -71,6 +72,32 @@
               <div class="col-span-12 md:col-span-3">
                 <label class="label-text mb-1 block">Date of birth</label>
                 <%= pf.date_field :date_of_birth, class:"input input-bordered w-full", autocomplete:"bday" %>
+              </div>
+
+              <%# ---- Citizenship / Nationality / Residence ---- %>
+              <div class="col-span-12 md:col-span-6">
+                <label class="label-text mb-1 block">Citizenship</label>
+                <div class="join">
+                  <label class="btn">
+                    <%= pf.radio_button :citizenship, :domestic, data: { action: "change->toggle#refresh" } %> Domestic
+                  </label>
+                  <label class="btn">
+                    <%= pf.radio_button :citizenship, :foreign,  data: { action: "change->toggle#refresh" } %> Foreign
+                  </label>
+                </div>
+              </div>
+
+              <div class="col-span-12 md:col-span-6 <%= 'hidden' if pf.object.domestic? %>"
+                  data-controller="toggle">
+                <label class="label-text mb-1 block">Nationality</label>
+                <%= pf.collection_select :nationality_country_code, @countries, :code, :name,
+                      { include_blank: true }, class: "select select-bordered w-full" %>
+              </div>
+
+              <div class="col-span-12 md:col-span-6">
+                <label class="label-text mb-1 block">Country of residence</label>
+                <%= pf.collection_select :residence_country_code, @countries, :code, :name,
+                      {}, class: "select select-bordered w-full" %>
               </div>
             </div>
           <% end %>
@@ -120,7 +147,6 @@
             </summary>
 
             <div class="pt-3">
-
               <ul role="list" class="space-y-3">
                 <%= f.fields_for :identifiers do |idf| %>
                   <%= render "party/identifiers/fields",
