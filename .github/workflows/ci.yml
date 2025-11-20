@@ -9,7 +9,7 @@ jobs:
   scan_ruby:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
         with: { ruby-version: .ruby-version, bundler-cache: true }
       - run: bin/brakeman --no-pager
@@ -17,7 +17,7 @@ jobs:
   scan_js:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
         with: { ruby-version: .ruby-version, bundler-cache: true }
       - run: bin/importmap audit
@@ -25,7 +25,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
         with: { ruby-version: .ruby-version, bundler-cache: true }
       - run: bin/rubocop -f github
@@ -48,7 +48,7 @@ jobs:
       DISABLE_SPRING: 1
       SKIP_SEEDS: 1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
         with: { ruby-version: .ruby-version, bundler-cache: true }
       - uses: actions/setup-node@v5
